@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>14hills 운영 통합 시스템</title>
+<!-- JS 꺼져 있어도 0.5초 뒤 이동 (접근 게이트 없음) -->
+<meta http-equiv="refresh" content="0.5; url=./app/">
+<link rel="canonical" href="./app/">
+<style>
+  :root{ --accent:#647548; --accent2:#4F5E38; --text:#262F26; --text2:#525B50;
+         --bg:#F4F6F2; --surface:#fff; --border:#D2D8CC; --accentSoft:#EDF0E2; }
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{
+    font-family:-apple-system,BlinkMacSystemFont,'Segoe UI','Apple SD Gothic Neo','Malgun Gothic',sans-serif;
+    background:linear-gradient(180deg,#f2f5ec 0%,var(--bg) 300px),var(--bg);
+    color:var(--text);min-height:100vh;display:flex;align-items:center;justify-content:center;
+  }
+  .box{
+    text-align:center;background:var(--surface);border:1px solid var(--border);
+    border-top:4px solid var(--accent);border-radius:14px;padding:38px 44px;
+    box-shadow:0 4px 18px rgba(44,61,25,.08);
+  }
+  h1{font-size:24px;font-weight:800;color:var(--accent);letter-spacing:-.02em}
+  .sub{font-size:13px;color:var(--text2);font-weight:600;margin-top:4px}
+  .msg{font-size:13px;color:var(--text2);margin-top:18px}
+  .spin{
+    margin:16px auto 0;width:26px;height:26px;border:3px solid var(--accentSoft);
+    border-top-color:var(--accent);border-radius:50%;animation:r .8s linear infinite;
+  }
+  @keyframes r{to{transform:rotate(360deg)}}
+  a.go{
+    display:inline-block;margin-top:18px;font-size:13px;font-weight:700;text-decoration:none;
+    color:#fff;background:var(--accent);border-radius:8px;padding:9px 20px;
+  }
+  a.go:hover{background:var(--accent2)}
+</style>
+</head>
+<body>
+  <div class="box">
+    <h1>14hills</h1>
+    <div class="sub">フォーティーンヒルズ 運営統合システム · 운영 통합 시스템</div>
+    <div class="spin"></div>
+    <div class="msg">운영 시스템으로 이동합니다…</div>
+    <a class="go" href="./app/">바로 이동</a>
+  </div>
+  <script>
+    location.replace('./app/');
+  </script>
+</body>
+</html>

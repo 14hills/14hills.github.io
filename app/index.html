@@ -1,0 +1,518 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>14hills 운영 통합 시스템</title>
+<!-- 읽기=SheetJS / 쓰기=ExcelJS 4.3.0 (루트 CLAUDE.md §5 규칙) -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/exceljs/4.3.0/exceljs.min.js"></script>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+/* ── 14hills 팔레트 ──────────────────────────────────────────
+   §6.6 결정 전 임시: SaiZen 올리브 #647548 재사용.
+   14hills 전용 브랜드 컬러 확정 시 --accent / --accent2 만 교체. */
+:root{
+  --bg:#F4F6F2;--surface:#FFFFFF;--surface2:#F7F9F5;--surface3:#EFF2EC;--surface4:#E6EBE1;
+  --border:#D2D8CC;--border2:#9AA48C;
+  --accent:#647548;--accent2:#4F5E38;--accent3:#3A4628;--accent-dim:#EDF0E2;
+  --green:#4F6B30;--green2:#3D5526;--green-dim:#E6EEDA;
+  --amber:#8A5E16;--amber2:#7A5414;--amber-dim:#F4EDD9;
+  --red:#B0432E;--red2:#8A3322;--red-dim:#F6E2DC;
+  --text:#262F26;--text2:#525B50;--text3:#5C655B;
+  --mono:'JetBrains Mono',monospace;
+  --sans:'Noto Sans KR',sans-serif;
+}
+body,body *{transition:background-color .25s,border-color .25s,color .15s}
+body{background:var(--bg);color:var(--text);font-family:var(--sans);min-height:100vh;font-size:13px}
+
+/* HEADER */
+.header{background:var(--surface);border-bottom:1px solid var(--border);padding:0 1.5rem;display:flex;align-items:center;justify-content:space-between;height:52px;position:sticky;top:0;z-index:200}
+.logo{display:flex;align-items:center;gap:10px}
+.logo-mark{width:32px;height:32px;background:linear-gradient(135deg,var(--accent),var(--accent2));border-radius:8px;display:flex;align-items:center;justify-content:center;color:#fff;font-weight:700;font-size:13px;font-family:var(--mono);flex-shrink:0}
+.logo-text{font-size:14px;font-weight:700;letter-spacing:.01em}
+.logo-sub{font-size:12px;color:var(--text2);font-weight:500}
+.header-right{display:flex;align-items:center;gap:6px}
+.badge{font-size:10px;padding:2px 7px;border-radius:20px;font-family:var(--mono);background:var(--accent-dim);color:var(--accent2);border:1px solid var(--accent)}
+.ghost-btn{background:transparent;border:1px solid var(--border2);border-radius:6px;padding:6px 12px;color:var(--text2);font-size:11px;cursor:pointer;font-family:var(--sans);transition:all .2s}
+.ghost-btn:hover{border-color:var(--accent);color:var(--accent2)}
+.lang-toggle{display:flex;gap:0;border:1px solid var(--border2);border-radius:6px;overflow:hidden}
+.lang-toggle button{background:transparent;border:none;padding:5px 9px;font-size:10px;font-family:var(--mono);color:var(--text3);cursor:pointer}
+.lang-toggle button.active{background:var(--accent);color:#fff}
+
+/* NAV */
+.nav{background:var(--surface2);border-bottom:1px solid var(--border);padding:0 1.5rem;display:flex;gap:0;position:sticky;top:52px;z-index:190;overflow-x:auto}
+.nav-tab{box-sizing:border-box;padding:0 18px;height:44px;display:flex;align-items:center;gap:7px;font-size:12px;font-weight:500;line-height:1;color:var(--text3);cursor:pointer;border-bottom:2px solid transparent;transition:all .2s;white-space:nowrap}
+.nav-tab:hover{color:var(--text2)}
+.nav-tab.active{color:var(--accent2);border-bottom-color:var(--accent)}
+.nav-tab .nav-dot{flex-shrink:0;width:6px;height:6px;border-radius:50%;background:var(--text3);transition:background .2s}
+.nav-tab.active .nav-dot{background:var(--accent)}
+.nav-tab.locked{opacity:.4;cursor:not-allowed}
+
+/* MAIN */
+.main{max-width:1200px;margin:0 auto;padding:1.5rem}
+.section{display:none}
+.section.active{display:block}
+.card{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:1.25rem 1.5rem;margin-bottom:1.25rem}
+.card-title{font-size:14px;font-weight:700;margin-bottom:.25rem;display:flex;align-items:center;gap:8px}
+.card-sub{font-size:11px;color:var(--text3);margin-bottom:1rem;line-height:1.6}
+
+/* UPLOAD */
+.upload-grid{display:grid;grid-template-columns:1fr 1fr;gap:1.25rem;margin-bottom:1.25rem}
+.upload-area{border:1.5px dashed var(--border2);border-radius:12px;padding:2rem 1.5rem;text-align:center;cursor:pointer;transition:all .2s;background:var(--surface2)}
+.upload-area:hover{border-color:var(--accent);background:var(--accent-dim)}
+.upload-area.loaded{border-style:solid;border-color:var(--green);background:var(--green-dim)}
+.upload-title{font-size:13px;font-weight:700;margin-bottom:.35rem}
+.upload-sub{font-size:10px;color:var(--text3);line-height:1.5}
+.upload-stat{margin-top:.5rem;font-size:11px;font-family:var(--mono);color:var(--green2);font-weight:700}
+
+/* BUTTONS */
+.btn-primary{background:var(--accent);color:#fff;border:none;border-radius:8px;padding:11px 18px;font-size:13px;font-weight:700;cursor:pointer;font-family:var(--sans);transition:all .2s}
+.btn-primary:hover:not(:disabled){background:var(--accent2)}
+.btn-primary:disabled{opacity:.4;cursor:not-allowed}
+.btn-dl{background:var(--surface);border:1px solid var(--accent);border-radius:7px;padding:8px 14px;font-size:12px;font-weight:600;color:var(--accent2);cursor:pointer;font-family:var(--sans);transition:all .2s}
+.btn-dl:hover{background:var(--accent-dim)}
+.btn-row{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:1rem}
+
+/* TABLE */
+.tbl-wrap{overflow-x:auto;border:1px solid var(--border);border-radius:8px}
+table{border-collapse:collapse;width:100%;font-size:11px}
+th{background:var(--surface3);color:var(--text2);font-weight:700;padding:7px 10px;text-align:left;white-space:nowrap;border-bottom:1px solid var(--border)}
+td{padding:6px 10px;border-bottom:1px solid var(--border);white-space:nowrap}
+tr:hover td{background:var(--accent-dim)}
+.empty-note{padding:1.5rem;text-align:center;color:var(--text3);font-size:12px}
+
+/* NOTICE */
+.notice{padding:10px 14px;border-radius:8px;font-size:11px;line-height:1.6;margin-bottom:1rem;border:1px solid var(--amber);background:var(--amber-dim);color:var(--amber2)}
+.pill{display:inline-block;font-size:10px;font-family:var(--mono);padding:2px 8px;border-radius:20px;background:var(--accent-dim);color:var(--accent2);border:1px solid var(--accent)}
+</style>
+</head>
+<body class="light">
+
+<!-- ── HEADER ─────────────────────────────────────────────── -->
+<div class="header">
+  <div class="logo">
+    <div class="logo-mark">14</div>
+    <div>
+      <div class="logo-text">14hills</div>
+      <div class="logo-sub" data-i18n="app_logoSub">運営統合システム</div>
+    </div>
+  </div>
+  <div class="header-right">
+    <span class="badge" id="ver-badge">v0.1 skeleton</span>
+    <div class="lang-toggle" id="lang-toggle">
+      <button data-lang="ja" onclick="setLang('ja')">JA</button>
+      <button data-lang="ko" onclick="setLang('ko')">KO</button>
+      <button data-lang="en" onclick="setLang('en')">EN</button>
+    </div>
+    <button class="ghost-btn" onclick="resetApp()" data-i18n="app_reset">초기화</button>
+  </div>
+</div>
+
+<!-- ── NAV ────────────────────────────────────────────────── -->
+<div class="nav" id="nav">
+  <div class="nav-tab active" id="nav-upload" onclick="gotoSection('upload')">
+    <div class="nav-dot"></div> <span data-i18n="nav_upload">ファイルアップロード</span>
+  </div>
+  <div class="nav-tab locked" id="nav-nametag" onclick="gotoSection('nametag')">
+    <div class="nav-dot"></div> ① <span data-i18n="nav_nametag">ネームタグ</span>
+  </div>
+  <div class="nav-tab locked" id="nav-dispatch" onclick="gotoSection('dispatch')">
+    <div class="nav-dot"></div> ② <span data-i18n="nav_dispatch">現地手配書</span>
+  </div>
+  <div class="nav-tab locked" id="nav-dinner" onclick="gotoSection('dinner')">
+    <div class="nav-dot"></div> ③ <span data-i18n="nav_dinner">夕食名簿</span>
+  </div>
+  <div class="nav-tab locked" id="nav-settle" onclick="gotoSection('settle')">
+    <div class="nav-dot"></div> ④ <span data-i18n="nav_settle">現地精算表</span>
+  </div>
+</div>
+
+<div class="main">
+
+  <!-- ── UPLOAD ──────────────────────────────────────────── -->
+  <div class="section active" id="sec-upload">
+    <div class="card">
+      <div class="card-title">📂 <span data-i18n="up_cardTitle">ファイルアップロード</span></div>
+      <div class="card-sub" data-i18n="up_cardSub">엠클릭 엑셀 2종을 업로드한 뒤 분석을 시작합니다. (입력 양식 §6.5 확정 전 — 엠클릭 포맷 재사용)</div>
+      <div class="upload-grid">
+        <label class="upload-area" id="up-res">
+          <input type="file" accept=".xlsx,.xls" style="display:none" onchange="onFile(event,'res')">
+          <div class="upload-title" data-i18n="up_resTitle">예약 리스트</div>
+          <div class="upload-sub" data-i18n="up_resSub">행사(팀) 마스터 — 엠클릭 예약현황 탭</div>
+          <div class="upload-stat" id="stat-res"></div>
+        </label>
+        <label class="upload-area" id="up-ilh">
+          <input type="file" accept=".xlsx,.xls" style="display:none" onchange="onFile(event,'ilh')">
+          <div class="upload-title" data-i18n="up_ilhTitle">일행별 예약</div>
+          <div class="upload-sub" data-i18n="up_ilhSub">개인 명단 — 엠클릭 탑승자정보 탭</div>
+          <div class="upload-stat" id="stat-ilh"></div>
+        </label>
+      </div>
+      <button class="btn-primary" id="btn-analyze" onclick="analyze()" disabled style="width:100%" data-i18n="up_analyze">데이터 분석 시작 →</button>
+    </div>
+    <div class="card">
+      <div class="card-title">🏌️ 14hills <span data-i18n="up_constTitle">현장 상수</span></div>
+      <div class="card-sub" data-i18n="up_constSub">포틴힐즈 특화 상수 (코드 = 정답). 실제 코스명·티오프·요금은 §6.4 확정 후 채웁니다.</div>
+      <div class="btn-row" id="const-pills"></div>
+    </div>
+  </div>
+
+  <!-- ── ① NAMETAG ───────────────────────────────────────── -->
+  <div class="section" id="sec-nametag">
+    <div class="card">
+      <div class="card-title">① <span data-i18n="nav_nametag">ネームタグ</span></div>
+      <div class="card-sub" data-i18n="nt_sub">참가자 네임택 (그룹/출발지 기준). 태그코드 = Y-MMDD-팀알파-번호.</div>
+      <div class="btn-row">
+        <button class="btn-dl" onclick="downloadNametag()">⬇ xlsx</button>
+      </div>
+      <div id="out-nametag"></div>
+    </div>
+  </div>
+
+  <!-- ── ② DISPATCH ──────────────────────────────────────── -->
+  <div class="section" id="sec-dispatch">
+    <div class="card">
+      <div class="card-title">② <span data-i18n="nav_dispatch">現地手配書</span></div>
+      <div class="card-sub" data-i18n="dp_sub">라운딩·카트·식사·송영을 한 장으로 통합한 현지 벤더 전달용 수배서.</div>
+      <div class="btn-row">
+        <button class="btn-dl" onclick="downloadDispatch()">⬇ xlsx</button>
+      </div>
+      <div id="out-dispatch"></div>
+    </div>
+  </div>
+
+  <!-- ── ③ DINNER ────────────────────────────────────────── -->
+  <div class="section" id="sec-dinner">
+    <div class="card">
+      <div class="card-title">③ <span data-i18n="nav_dinner">夕食名簿</span></div>
+      <div class="card-sub" data-i18n="dn_sub">저녁 식사 명단·배정표.</div>
+      <div class="btn-row">
+        <button class="btn-dl" onclick="downloadDinner()">⬇ xlsx</button>
+      </div>
+      <div id="out-dinner"></div>
+    </div>
+  </div>
+
+  <!-- ── ④ SETTLE ────────────────────────────────────────── -->
+  <div class="section" id="sec-settle">
+    <div class="card">
+      <div class="card-title">④ <span data-i18n="nav_settle">現地精算表</span></div>
+      <div class="card-sub" data-i18n="st_sub">현지 비용 정산 (JPY 기준).</div>
+      <div class="btn-row">
+        <button class="btn-dl" onclick="downloadSettle()">⬇ xlsx</button>
+      </div>
+      <div id="out-settle"></div>
+    </div>
+  </div>
+
+</div>
+
+<script>
+/* ════════════════════════════════════════════════════════════
+   14hills 운영 통합 시스템 — 골격 (v0.1)
+   SaiZen /app/index.html v14.6 패턴 차용. 단일 HTML + localStorage.
+   ════════════════════════════════════════════════════════════ */
+
+/* ── 14hills 특화 상수 (SaiZen 코스 상수 교체) ──────────────── */
+const HILLS = {
+  name: '포틴힐즈 컨트리클럽',
+  nameJa: 'フォーティーンヒルズCC',
+  city: '名古屋 (나고야)',
+  holes: 18,                          // 27홀 야마나미 → 18홀 단일코스
+  course: 'OUT / IN',                 // §6.4 확정 전 placeholder (실제 코스명 입력 필요)
+  origins: ['ICN', 'PUS', 'TAE'],     // 출발지 코드 (SaiZen 표준 재사용)
+  currency: 'JPY'
+};
+
+/* ── localStorage 네임스페이스 (SaiZen와 충돌 방지: 14h_ 접두) ── */
+const LS = {
+  lang:  '14h_lang',
+  manual:'14h_manualData',
+  sbUrl: '14h_sb_url',   // Supabase는 후속(현재 골격은 localStorage 출력 전용)
+  sbKey: '14h_sb_key'
+};
+
+/* ── 전역 상태 ──────────────────────────────────────────────── */
+let state = {
+  reservations: [],   // 예약리스트 행
+  guests: [],         // 일행별예약 행 (개인)
+  processed: [],      // 결합 결과 (골격에서는 guests fallback)
+  ready: false
+};
+
+/* ════════════════ i18n (ja 기본 / ko / en) ════════════════ */
+let LANG = 'ja';
+const I18N = {
+  ja:{
+    app_logoSub:'運営統合システム', app_reset:'リセット',
+    nav_upload:'ファイルアップロード', nav_nametag:'ネームタグ',
+    nav_dispatch:'現地手配書', nav_dinner:'夕食名簿', nav_settle:'現地精算表',
+    up_cardTitle:'ファイルアップロード',
+    up_cardSub:'엠클릭エクセル2種をアップロードして分析を開始します。',
+    up_resTitle:'予約リスト', up_resSub:'行事(チーム)マスター',
+    up_ilhTitle:'同行者別予約', up_ilhSub:'個人名簿',
+    up_analyze:'データ分析開始 →',
+    up_constTitle:'現場定数', up_constSub:'フォーティーンヒルズ特化定数。',
+    nt_sub:'参加者ネームタグ (グループ/出発地基準)。',
+    dp_sub:'ラウンド・カート・食事・送迎を一枚に統合した手配書。',
+    dn_sub:'夕食名簿・配席表。', st_sub:'現地費用精算 (JPY基準)。'
+  },
+  ko:{
+    app_logoSub:'운영 통합 시스템', app_reset:'초기화',
+    nav_upload:'파일 업로드', nav_nametag:'네임택',
+    nav_dispatch:'현지 수배서', nav_dinner:'저녁 명단', nav_settle:'현지 정산표',
+    up_cardTitle:'파일 업로드',
+    up_cardSub:'엠클릭 엑셀 2종을 업로드한 뒤 분석을 시작합니다.',
+    up_resTitle:'예약 리스트', up_resSub:'행사(팀) 마스터',
+    up_ilhTitle:'일행별 예약', up_ilhSub:'개인 명단',
+    up_analyze:'데이터 분석 시작 →',
+    up_constTitle:'현장 상수', up_constSub:'포틴힐즈 특화 상수.',
+    nt_sub:'참가자 네임택 (그룹/출발지 기준).',
+    dp_sub:'라운딩·카트·식사·송영을 한 장으로 통합한 수배서.',
+    dn_sub:'저녁 식사 명단·배정표.', st_sub:'현지 비용 정산 (JPY 기준).'
+  },
+  en:{
+    app_logoSub:'Operations System', app_reset:'Reset',
+    nav_upload:'Upload', nav_nametag:'Name Tags',
+    nav_dispatch:'Arrangements', nav_dinner:'Dinner List', nav_settle:'Settlement',
+    up_cardTitle:'File Upload',
+    up_cardSub:'Upload the two Excel files, then start analysis.',
+    up_resTitle:'Reservation List', up_resSub:'Group (team) master',
+    up_ilhTitle:'Passenger List', up_ilhSub:'Individual roster',
+    up_analyze:'Start analysis →',
+    up_constTitle:'Site Constants', up_constSub:'Fourteen Hills constants.',
+    nt_sub:'Participant name tags (by group/origin).',
+    dp_sub:'Single-sheet arrangement (round/cart/meal/transfer).',
+    dn_sub:'Dinner roster & seating.', st_sub:'On-site settlement (JPY).'
+  }
+};
+// ⚠ t()는 미존재 키를 키 문자열 그대로 반환 (루트 CLAUDE.md §10). 키 존재 확인 필수.
+function t(key){
+  const d = I18N[LANG] || I18N.ja;
+  return (key in d) ? d[key] : key;
+}
+function applyI18n(){
+  document.querySelectorAll('[data-i18n]').forEach(el=>{
+    const k = el.getAttribute('data-i18n');
+    if(k in (I18N[LANG]||{})) el.textContent = t(k);
+  });
+  document.querySelectorAll('#lang-toggle button').forEach(b=>{
+    b.classList.toggle('active', b.getAttribute('data-lang')===LANG);
+  });
+}
+function setLang(lang){
+  if(!I18N[lang]) return;
+  LANG = lang;
+  try{ localStorage.setItem(LS.lang, lang); }catch(e){}
+  applyI18n();
+}
+
+/* ════════════════ 태그코드 (브리프 Y-MMDD-팀알파-번호) ════════
+   §6.3 확정 전 기본값. SaiZen numToTeamCode4 체계로 합칠 수도 있어
+   두 헬퍼를 모두 유지한다. */
+function teamIdxToAlpha(n){            // 0→A, 25→Z, 26→AA ...
+  let s = '';
+  n = Math.max(0, n|0);
+  do { s = String.fromCharCode(65 + (n % 26)) + s; n = Math.floor(n/26) - 1; } while(n >= 0);
+  return s;
+}
+function numToTeamCode4(n){            // SaiZen 현행 체계 (AA01~ZZ99) — 호환 보존
+  const total = n % 67600, num = total % 100, letters = Math.floor(total/100);
+  const a = String.fromCharCode(65 + Math.floor(letters/26));
+  const b = String.fromCharCode(65 + (letters % 26));
+  return a + b + String(num+1).padStart(2,'0');
+}
+function makeTagCode(year, mmdd, teamIdx, paxIdx){
+  const y = String(year).slice(-1);                 // 2026 → 6
+  const md = String(mmdd||'0000').padStart(4,'0');
+  return y + '-' + md + '-' + teamIdxToAlpha(teamIdx) + '-' + String(paxIdx+1).padStart(2,'0');
+}
+
+/* ════════════════ ExcelJS xlsx 헬퍼 (SaiZen에서 이식) ════════ */
+const XL = {
+  BG_TITLE:'FF1E3A5F', BG_HDR:'FFD6E4F7', BG_SUBHDR:'FFDDEEFF',
+  BG_TOTAL:'FFD6F5E3', BG_ALT:'FFF5F8FF', BG_WHITE:'FFFFFFFF',
+  FG_TITLE:'FFFFFFFF', FG_HDR:'FF1E3A5F', FG_SUBHDR:'FF1E3A5F',
+  FG_TOTAL:'FF14532D', FG_NORMAL:'FF1A2540', FG_NUM:'FF1D4ED8',
+  BORDER_THIN:{ style:'thin', color:{argb:'FFBFCFE8'} },
+  BORDER_MED: { style:'medium', color:{argb:'FF8BA8D4'} }
+};
+function xlTitle(ws, rowIdx, text, colCount){
+  ws.mergeCells(rowIdx,1,rowIdx,colCount);
+  const c = ws.getCell(rowIdx,1);
+  c.value=text; c.font={bold:true,size:11,color:{argb:XL.FG_TITLE},name:'Meiryo'};
+  c.fill={type:'pattern',pattern:'solid',fgColor:{argb:XL.BG_TITLE}};
+  c.alignment={horizontal:'left',vertical:'middle',indent:1};
+  c.border={top:XL.BORDER_MED,left:XL.BORDER_MED,bottom:XL.BORDER_MED,right:XL.BORDER_MED};
+  ws.getRow(rowIdx).height=18;
+}
+function xlHeader(ws, rowIdx, headers){
+  ws.getRow(rowIdx).height=18;
+  headers.forEach((h,i)=>{
+    const c=ws.getCell(rowIdx,i+1);
+    c.value=h; c.font={bold:true,size:9,color:{argb:XL.FG_HDR},name:'Meiryo'};
+    c.fill={type:'pattern',pattern:'solid',fgColor:{argb:XL.BG_HDR}};
+    c.alignment={horizontal:'center',vertical:'middle'};
+    c.border={top:XL.BORDER_MED,left:XL.BORDER_THIN,bottom:XL.BORDER_MED,right:XL.BORDER_THIN};
+  });
+}
+function xlDataRow(ws, rowIdx, values, isAlt){
+  ws.getRow(rowIdx).height=15;
+  const bg = isAlt ? XL.BG_ALT : XL.BG_WHITE;
+  values.forEach((v,i)=>{
+    const c=ws.getCell(rowIdx,i+1);
+    c.value=(v===null||v===undefined)?null:v;
+    c.font={size:9,color:{argb:XL.FG_NORMAL},name:'Meiryo'};
+    c.fill={type:'pattern',pattern:'solid',fgColor:{argb:bg}};
+    c.alignment={vertical:'middle'};
+    c.border={top:XL.BORDER_THIN,left:XL.BORDER_THIN,bottom:XL.BORDER_THIN,right:XL.BORDER_THIN};
+  });
+}
+function xlColWidths(ws, widths){ widths.forEach((w,i)=>{ ws.getColumn(i+1).width=w; }); }
+async function xlSave(wb, filename){
+  const buf = await wb.xlsx.writeBuffer();
+  const blob = new Blob([buf],{type:'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a'); a.href=url; a.download=filename;
+  document.body.appendChild(a); a.click();
+  setTimeout(()=>{ document.body.removeChild(a); URL.revokeObjectURL(url); }, 500);
+}
+// 공통: 행 배열 → 단일 시트 xlsx (골격 출력 파이프라인 검증용)
+async function exportRows(sheetName, title, headers, rows, filename){
+  if(typeof ExcelJS === 'undefined'){ alert('ExcelJS 로드 실패 (네트워크 확인)'); return; }
+  const wb = new ExcelJS.Workbook();
+  const ws = wb.addWorksheet(sheetName);
+  xlTitle(ws, 1, title, headers.length);
+  xlHeader(ws, 2, headers);
+  rows.forEach((r,i)=> xlDataRow(ws, 3+i, r, i%2===1));
+  xlColWidths(ws, headers.map(()=>16));
+  await xlSave(wb, filename);
+}
+
+/* ════════════════ 업로드 / 분석 ════════════════ */
+function onFile(ev, kind){
+  const file = ev.target.files && ev.target.files[0];
+  if(!file) return;
+  const reader = new FileReader();
+  reader.onload = e=>{
+    try{
+      const wb = XLSX.read(e.target.result, { type:'array' });
+      const ws = wb.Sheets[wb.SheetNames[0]];
+      const rows = XLSX.utils.sheet_to_json(ws, { defval:'' });
+      if(kind==='res'){ state.reservations = rows; markLoaded('res', rows.length); }
+      else           { state.guests = rows;       markLoaded('ilh', rows.length); }
+    }catch(err){
+      alert('엑셀 읽기 실패: ' + err.message);
+    }
+  };
+  reader.readAsArrayBuffer(file);
+}
+function markLoaded(kind, n){
+  const area = document.getElementById(kind==='res'?'up-res':'up-ilh');
+  const stat = document.getElementById(kind==='res'?'stat-res':'stat-ilh');
+  if(area) area.classList.add('loaded');
+  if(stat) stat.textContent = '✓ ' + n + ' 행';
+  // 분석 버튼: 일행별예약(개인 명단) 1개만 있어도 골격 동작 허용
+  const btn = document.getElementById('btn-analyze');
+  if(btn) btn.disabled = !(state.reservations.length || state.guests.length);
+}
+function analyze(){
+  // 골격: 결합 로직은 후속. 개인 명단을 processed로 사용(없으면 예약리스트).
+  state.processed = state.guests.length ? state.guests : state.reservations;
+  state.ready = true;
+  // 탭 잠금 해제
+  ['nametag','dispatch','dinner','settle'].forEach(id=>{
+    const el = document.getElementById('nav-'+id);
+    if(el) el.classList.remove('locked');
+  });
+  renderAll();
+  gotoSection('nametag');
+}
+
+/* ════════════════ 렌더 (골격: 로드 데이터 미리보기) ════════════ */
+function previewTable(rows){
+  if(!rows || !rows.length) return '<div class="empty-note">먼저 업로드 후 분석을 실행해 주세요.</div>';
+  const cols = Object.keys(rows[0]).slice(0, 8);
+  const head = cols.map(c=>'<th>'+esc(c)+'</th>').join('');
+  const body = rows.slice(0, 30).map(r=>
+    '<tr>'+cols.map(c=>'<td>'+esc(r[c])+'</td>').join('')+'</tr>'
+  ).join('');
+  const more = rows.length>30 ? '<div class="card-sub" style="margin-top:.5rem">… 외 '+(rows.length-30)+'행</div>' : '';
+  return '<div class="tbl-wrap"><table><thead><tr>'+head+'</tr></thead><tbody>'+body+'</tbody></table></div>'+more;
+}
+function esc(v){ return String(v==null?'':v).replace(/[&<>]/g, m=>({'&':'&amp;','<':'&lt;','>':'&gt;'}[m])); }
+function renderAll(){
+  const html = previewTable(state.processed);
+  ['out-nametag','out-dispatch','out-dinner','out-settle'].forEach(id=>{
+    const el = document.getElementById(id);
+    if(el) el.innerHTML =
+      '<div class="notice">🚧 모듈 로직은 후속 구현 예정입니다. 아래는 로드된 데이터 미리보기입니다.</div>' + html;
+  });
+}
+
+/* ════════════════ 다운로드 (골격 파이프라인 검증) ════════════ */
+function rowsForExport(){
+  const rows = state.processed || [];
+  if(!rows.length) return { headers:[], data:[] };
+  const headers = Object.keys(rows[0]).slice(0, 8);
+  const data = rows.map(r=> headers.map(h=> r[h]));
+  return { headers, data };
+}
+function guardReady(){
+  if(!state.ready){ alert('먼저 데이터 분석을 실행해 주세요.'); return false; }
+  return true;
+}
+function downloadNametag(){ if(!guardReady())return; const {headers,data}=rowsForExport(); exportRows('Nametag','14hills ネームタグ',headers,data,'14hills_nametag.xlsx'); }
+function downloadDispatch(){ if(!guardReady())return; const {headers,data}=rowsForExport(); exportRows('Dispatch','14hills 現地手配書',headers,data,'14hills_dispatch.xlsx'); }
+function downloadDinner(){ if(!guardReady())return; const {headers,data}=rowsForExport(); exportRows('Dinner','14hills 夕食名簿',headers,data,'14hills_dinner.xlsx'); }
+function downloadSettle(){ if(!guardReady())return; const {headers,data}=rowsForExport(); exportRows('Settle','14hills 現地精算表',headers,data,'14hills_settle.xlsx'); }
+
+/* ════════════════ 네비게이션 / 리셋 ════════════════ */
+function gotoSection(id){
+  const nav = document.getElementById('nav-'+id);
+  if(nav && nav.classList.contains('locked')) return;
+  document.querySelectorAll('.section').forEach(s=>s.classList.remove('active'));
+  document.querySelectorAll('.nav-tab').forEach(n=>n.classList.remove('active'));
+  const sec = document.getElementById('sec-'+id);
+  if(sec) sec.classList.add('active');
+  if(nav) nav.classList.add('active');
+}
+function resetApp(){
+  if(!confirm('업로드 데이터를 초기화할까요?')) return;
+  state = { reservations:[], guests:[], processed:[], ready:false };
+  ['res','ilh'].forEach(k=>{
+    const a=document.getElementById(k==='res'?'up-res':'up-ilh');
+    const s=document.getElementById(k==='res'?'stat-res':'stat-ilh');
+    if(a)a.classList.remove('loaded'); if(s)s.textContent='';
+  });
+  ['nametag','dispatch','dinner','settle'].forEach(id=>{
+    const el=document.getElementById('nav-'+id); if(el)el.classList.add('locked');
+  });
+  const btn=document.getElementById('btn-analyze'); if(btn)btn.disabled=true;
+  gotoSection('upload');
+}
+
+/* ════════════════ 상수 칩 렌더 ════════════════ */
+function renderConstPills(){
+  const el = document.getElementById('const-pills');
+  if(!el) return;
+  const pills = [
+    HILLS.name, HILLS.city, HILLS.holes+'홀', '코스: '+HILLS.course,
+    '출발지: '+HILLS.origins.join('/'), '통화: '+HILLS.currency
+  ];
+  el.innerHTML = pills.map(p=>'<span class="pill">'+esc(p)+'</span>').join('');
+}
+
+/* ════════════════ INIT ════════════════ */
+function init(){
+  try{ const saved = localStorage.getItem(LS.lang); if(saved && I18N[saved]) LANG = saved; }catch(e){}
+  applyI18n();
+  renderConstPills();
+}
+if(document.readyState === 'loading') document.addEventListener('DOMContentLoaded', init);
+else init();
+</script>
+</body>
+</html>
