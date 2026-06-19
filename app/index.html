@@ -683,12 +683,10 @@ tr.draggable-row td:first-child::before{content:'⠿';color:var(--text3);margin-
 <div class="section" id="sec-accom">
   <div class="wip-banner" data-i18n="wip_banner">🚧 準備中 — この機能は調整中です（クリックして編集できます）</div>
   <div class="rule-box">
-    <strong>🏨 숙박 단가 안내:</strong>
-    야마나미리조트 <span style="color:var(--accent2)">¥14,000/인/박</span> (호텔트윈·소형트윈·돔하우스·관내별장·소보별장·아소별장·별장전용) &nbsp;·&nbsp;
-    쿠주힐즈 <span style="color:var(--purple2)">¥14,000/인/박</span> (장기숙박전용) &nbsp;·&nbsp;
-    간지호텔 <span style="color:var(--green2)">¥16,000/인/박</span> &nbsp;·&nbsp;
-    시즈노야도 료칸 <span style="color:var(--amber2)">¥16,000/인/박</span> &nbsp;·&nbsp;
-    항공조인·구마모토 시내호텔 정산 제외
+    <strong>🏨 숙박 단가 안내 (14hills):</strong>
+    윈저호텔 (WINDSOR) <span style="color:var(--accent2)">¥15,000/인/박</span> (트윈룸 13실 · 패밀리룸 19실, 스위트트윈 포함) &nbsp;·&nbsp;
+    카라반 (CARAVAN) <span style="color:var(--purple2)">¥15,000/인/박</span> (9실) &nbsp;·&nbsp;
+    <span style="color:var(--text3)">총 116명 규모 · 왕복 송영 ¥12,000/인 · 메리트투어 수익 ¥500/인/박(별도) · 항공조인·미해당 상품 정산 제외</span>
   </div>
   <div class="card">
     <div class="card-title">Accommodation Sheet — 宿泊配置表</div>
@@ -1247,8 +1245,9 @@ function renderDeductions(){
 }
 
 // ── 14hills 정산 요율 ──────────────────────────────────────────
-const STAY_RATE     = 15000;   // 체재비/인/박
+const STAY_RATE     = 15000;   // 체재비/인/박 (현지 정산 단가)
 const TRANSPORT_FEE = 12000;   // 왕복 송영비/인 (그린피·카트·식사는 현지정산 없음)
+const MERIT_MARGIN  = 500;     // 메리트투어 수익/인/박 (현지정산과 별개의 내부 마진)
 
 // ── 상품명 파서 (14hills: 14hillsCC 단일 골프장 · 숙박 2유형) ──────
 // 체재비 15,000엔/박/인. 그린피·카트·식사는 현지 정산 항목 아님.
@@ -1875,8 +1874,10 @@ function buildSettle(){
   document.getElementById('settle-total').textContent = '¥'+total.toLocaleString();
   const filterLabel = settleFilter.size === 0 ? '전체 리조트'
     : [...settleFilter].map(a=>accomEngName(a)).join(' + ');
+  const personNights = settl.reduce((s,r)=>s+r.pax*(parseInt(r.nights)||0),0);
+  const meritProfit = personNights*MERIT_MARGIN;
   document.getElementById('settle-sub').textContent =
-    `[${filterLabel}] 숙박 ¥${stayT.toLocaleString()} + 송영 ¥${transT.toLocaleString()} | ${settl.length}건 ${paxT}명`;
+    `[${filterLabel}] 숙박 ¥${stayT.toLocaleString()} + 송영 ¥${transT.toLocaleString()} | ${settl.length}건 ${paxT}명 · 메리트투어 수익 ¥${meritProfit.toLocaleString()} (${personNights}인박 × ¥${MERIT_MARGIN})`;
 
   const types = [
     {key:'호텔',  cls:'yama',rate:STAY_RATE},
@@ -2329,10 +2330,8 @@ function openTransferAddModal(date, tabKey){
                 <label style="color:var(--text2);display:block;margin-bottom:4px">숙박지</label>
                 <select id="ta-accom" style="width:100%;padding:6px 10px;background:var(--surface);border:1px solid var(--border);border-radius:4px;color:var(--text);font-size:12px">
                   <option value="">— 미지정 (独立) —</option>
-                  <option value="간지호텔">간지호텔</option>
-                  <option value="시즈노야도 료칸">시즈노야도 료칸</option>
-                  <option value="쿠주힐즈">쿠주힐즈</option>
-                  <option value="야마나미리조트">야마나미리조트</option>
+                  <option value="호텔">윈저호텔 (WINDSOR)</option>
+                  <option value="카라반">카라반 (CARAVAN)</option>
                 </select>
               </div>
               <div style="flex:1">
@@ -2696,10 +2695,8 @@ function openDinnerAddModal(date){
                 <label style="color:var(--text2);display:block;margin-bottom:4px">숙박지</label>
                 <select id="da-accom" style="width:100%;padding:6px 10px;background:var(--surface);border:1px solid var(--border);border-radius:4px;color:var(--text);font-size:12px">
                   <option value="">— 미지정 (独立) —</option>
-                  <option value="간지호텔">간지호텔</option>
-                  <option value="시즈노야도 료칸">시즈노야도 료칸</option>
-                  <option value="쿠주힐즈">쿠주힐즈</option>
-                  <option value="야마나미리조트">야마나미리조트</option>
+                  <option value="호텔">윈저호텔 (WINDSOR)</option>
+                  <option value="카라반">카라반 (CARAVAN)</option>
                 </select>
               </div>
               <div style="flex:1">
@@ -3463,10 +3460,8 @@ function openGolfAddModal(date){
                 <label style="color:var(--text2);display:block;margin-bottom:4px">숙박지</label>
                 <select id="ga-accom" style="width:100%;padding:6px 10px;background:var(--surface);border:1px solid var(--border);border-radius:4px;color:var(--text);font-size:12px">
                   <option value="">— 미지정 (独立) —</option>
-                  <option value="간지호텔">간지호텔</option>
-                  <option value="시즈노야도 료칸">시즈노야도 료칸</option>
-                  <option value="쿠주힐즈">쿠주힐즈</option>
-                  <option value="야마나미리조트">야마나미리조트</option>
+                  <option value="호텔">윈저호텔 (WINDSOR)</option>
+                  <option value="카라반">카라반 (CARAVAN)</option>
                 </select>
               </div>
               <div style="flex:1">
@@ -3810,10 +3805,8 @@ function openAccomAddModal(date){
                 <label style="color:var(--text2);display:block;margin-bottom:4px">숙박지</label>
                 <select id="aa-accom" style="width:100%;padding:6px 10px;background:var(--surface);border:1px solid var(--border);border-radius:4px;color:var(--text);font-size:12px">
                   <option value="">— 미지정 (独立) —</option>
-                  <option value="간지호텔">간지호텔</option>
-                  <option value="시즈노야도 료칸">시즈노야도 료칸</option>
-                  <option value="쿠주힐즈">쿠주힐즈</option>
-                  <option value="야마나미리조트">야마나미리조트</option>
+                  <option value="호텔">윈저호텔 (WINDSOR)</option>
+                  <option value="카라반">카라반 (CARAVAN)</option>
                 </select>
               </div>
               <div style="flex:1">
@@ -4070,11 +4063,8 @@ function xlColWidths(ws, widths){
 
 // 숙소별 섹션 색상 반환
 function xlAccomColor(accom){
-  // 야마나미리조트: 가장 비중 큰 숙소 → 흑백 처리 (잉크 절약)
-  if(accom==='야마나미리조트') return { fg:'FF000000', bg:'FFFFFFFF' };  // 검정/흰색
-  if(accom==='쿠주힐즈')      return { fg:'FF4C1D95', bg:'FFEDE9FE' };  // 진한보라/연보라
-  if(accom==='간지호텔')      return { fg:'FF14532D', bg:'FFD1FAE5' };  // 진한초록/연초록
-  if(accom==='시즈노야도 료칸') return { fg:'FF78350F', bg:'FFFEF3C7' };  // 진한주황/연노랑
+  if(accom==='호텔')   return { fg:'FF1C443F', bg:'FFE2EEEC' };  // 윈저호텔: 틸
+  if(accom==='카라반') return { fg:'FF4C1D95', bg:'FFEDE9FE' };  // 카라반: 보라
   return { fg:XL.FG_SUBHDR, bg:XL.BG_SUBHDR };
 }
 
@@ -4115,7 +4105,7 @@ function showDatePickerModal(title, dates, onConfirm, confirmLabel, options){
   if(_accomFilter){
     const accomSet = new Set();
     (processed).forEach(r => { if(r.accom) accomSet.add(r.accom); });
-    const order = ['야마나미리조트','쿠주힐즈','간지호텔','시즈노야도 료칸'];
+    const order = ['호텔','카라반'];
     _accomList = order.filter(a => accomSet.has(a));
   }
 
@@ -4238,7 +4228,7 @@ function printInvoice(){
 
   // 숙소별 집계
   const accomOrder = ['호텔','카라반'];
-  const accomJa = {'야마나미리조트':'やまなみリゾート','쿠주힐즈':'久住ヒルズ','간지호텔':'ガンジーホテル','시즈노야도 료칸':'志津の宿'};
+  const accomJa = {'호텔':'ウィンザーホテル','카라반':'カラバン'};
   const rows = [];
   let grandTotal = 0;
 
@@ -7102,7 +7092,7 @@ function openLabelPrintModal(){
           ${(()=>{
             const accomSet = new Set();
             (processed).forEach(r => { if(r.accom) accomSet.add(r.accom); });
-            const order = ['야마나미리조트','쿠주힐즈','간지호텔','시즈노야도 료칸'];
+            const order = ['호텔','카라반'];
             return order.filter(a=>accomSet.has(a)).map(a => `
               <label class="dl-date-item selected">
                 <input type="checkbox" value="${a}" checked>
@@ -7882,7 +7872,7 @@ function openAircoverPrintModal(){
           ${(()=>{
             const accomSet = new Set();
             (processed).forEach(r => { if(r.accom) accomSet.add(r.accom); });
-            const order = ['야마나미리조트','쿠주힐즈','간지호텔','시즈노야도 료칸'];
+            const order = ['호텔','카라반'];
             return order.filter(a=>accomSet.has(a)).map(a => `
               <label class="dl-date-item selected">
                 <input type="checkbox" value="${a}" checked>
@@ -8396,7 +8386,7 @@ function parseLocalDate(s){
 }
 function getWD(d){ const w=['(月)','(火)','(水)','(木)','(金)','(土)','(日)']; try{ const day=new Date(d).getDay(); return w[day===0?6:day-1]; }catch(e){ return ''; } }
 function today(){ return new Date().toISOString().slice(0,10); }
-function accomTag(a){ return a==='야마나미리조트'?'tag-yama':a==='간지호텔'?'tag-ganji':a==='시즈노야도 료칸'?'tag-shiz':a==='쿠주힐즈'?'tag-kuzu':'tag-excl'; }
+function accomTag(a){ return a==='호텔'?'tag-yama':a==='카라반'?'tag-kuzu':'tag-excl'; }
 function getEngName(seq){
   const s = String(seq||'').trim();
   const members = passengers.filter(x => String(x.eventSeq||'').trim() === s);
@@ -8537,10 +8527,8 @@ function dispatchCourseSummary(d){
 
 // 숙박시설 일본어 표기
 function dispatchAccomJp(accom){
-  if(accom === '야마나미리조트')  return '阿蘇やまなみリゾート';
-  if(accom === '쿠주힐즈')        return '久住ヒルズ';
-  if(accom === '간지호텔')        return '間地ホテル';
-  if(accom === '시즈노야도 료칸') return 'シズノヤド旅館';
+  if(accom === '호텔')   return 'ウィンザーホテル';
+  if(accom === '카라반') return 'カラバン';
   return accom || '';
 }
 function dispatchRoomTypeJp(rt){
