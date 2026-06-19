@@ -226,7 +226,7 @@ tr:hover td{background:var(--surface2)}
 #dinner-content table td:nth-child(12)   /* 操作 */
 { text-align: center; }
 
-/* ⑥ 골프 [No, イベント番号, タグコード, 予約者, 英文名, 人数, ゴルフ場, コース, チーム, ティーオフ, 9H無料, 9H追加, EVカート, 台数, 備考, 操作] */
+/* ⑥ 골프 [No, イベント番号, タグコード, 予約者, 英文名, 人数, ゴルフ場, コース, チーム, ティーオフ, 9H無料, 9H追加, 備考, 操作] */
 #golf-content table td:nth-child(1),    /* No */
 #golf-content table td:nth-child(2),    /* イベント番号 */
 #golf-content table td:nth-child(3),    /* タグコード */
@@ -237,9 +237,7 @@ tr:hover td{background:var(--surface2)}
 #golf-content table td:nth-child(10),   /* ティーオフ */
 #golf-content table td:nth-child(11),   /* 9H無料 */
 #golf-content table td:nth-child(12),   /* 9H追加 */
-#golf-content table td:nth-child(13),   /* EVカート */
-#golf-content table td:nth-child(14),   /* 台数 */
-#golf-content table td:nth-child(16)    /* 操作 */
+#golf-content table td:nth-child(14)    /* 操作 */
 { text-align: center; }
 
 /* ⑦ 정산표 [No, イベント番号, 区分, 会員権区分, 代表者名, 英文名, 出発日, 到着日, 泊数, 人数, 施設, 部屋タイプ, 料金, 宿泊費, 送迎費, 合計, 備考] */
@@ -819,7 +817,7 @@ const HDRS = {
   TRANSFER_IN:  ['No','イベント番号','タグコード','予約者(チーム)','氏名','英文名','人数','出発地','途中立寄り','到着地','操作'],
   TRANSFER_OUT: ['No','イベント番号','タグコード','予約者(チーム)','氏名','英文名','人数','出発地','途中立寄り','到着地','操作'],
   DINNER: ['No','イベント番号','タグコード','予約者(チーム)','滞在日次','英文名','人数','テーブルNo','参考事項','予約備考','現地備考','操作'],
-  GOLF: ['No','イベント番号','タグコード','予約者(チーム)','英文名','人数','ゴルフ場','コース','チーム','ティーオフ','9H無料','9H追加¥4,400','EVカート(有料)','台数','備考','操作'],
+  GOLF: ['No','イベント番号','タグコード','予約者(チーム)','英文名','人数','ゴルフ場','コース','チーム','ティーオフ','9H無料','9H追加¥4,400','備考','操作'],
   ACCOM: ['No','イベント番号','タグコード','予約者(チーム)','氏名','英文名','チェックイン','チェックアウト','泊数','施設','部屋タイプ','部屋番号','備考','操作'],
   NAMETAG: ['No','タグコード','名前','英文名','入国便','帰国便','泊数','人数','施設'],
   LOCAL: ['No','区分','イベント番号','代表者名','商品名','出発日','到着日','泊数','人数','取消','備考','販売金額(¥)'],
@@ -831,11 +829,11 @@ function hdrHtml(keys){
     let style='';
     if(['料金(¥/人/泊)','宿泊費(¥)','送迎費(¥)','合計(¥)','販売金額(¥)'].includes(h))
       style=' style="text-align:right"';
-    else if(['No','泊数','人数','台数','イベント番号','タグコード','入国便','帰国便',
+    else if(['No','泊数','人数','イベント番号','タグコード','入国便','帰国便',
              '出発日','到着日','チェックイン','チェックアウト','ティーオフ',
              '区分','会員権区分','取消','施設','部屋番号','操作',
              'ゴルフ場','コース','チーム','テーブルNo','外食',
-             '9H無料','9H追加¥4,400','EVカート(有料)'].includes(h))
+             '9H無料','9H追加¥4,400'].includes(h))
       style=' style="text-align:center"';
     return `<th${style}>${h}</th>`;
   }).join('')+'</tr>';
@@ -3045,21 +3043,7 @@ function renderGolf(date){
   else if(isHoliday) dayLabel = '<span style="color:var(--amber2);font-size:10px">⚠ 祝日 — 9H無料サービスなし (原則) · 間地ホテル → フォーティーンヒルズCC</span>';
   else dayLabel = '<span style="color:var(--green2);font-size:10px">✓ 平日 — 9H無料サービス対象 · 間地ホテル → フォーティーンヒルズCC</span>';
 
-  // EV카트 20대 캡: 팀 단위 키 기준 유지
-  const EV_CAP = 20;
-  const totalOrderedCarts = playingTeams.reduce((s,r) => {
-    const k = `golf_${date}_${r.eventSeq}`;
-    const md = manualData[k]||{};
-    if(!md.cart) return s;
-    const num = md.cartNum ? parseInt(md.cartNum)||Math.ceil(r.pax/4) : Math.ceil(r.pax/4);
-    return s + num;
-  }, 0);
-  const cartOverCap = totalOrderedCarts > EV_CAP;
-  const cartWarning = cartOverCap
-    ? `<span style="color:var(--red2);font-size:10px;font-weight:700;background:var(--red-dim);padding:2px 8px;border-radius:4px;border:1px solid var(--red);margin-left:8px">⚠ EVカート 신청 합계 ${totalOrderedCarts}대 — 보유 20대 초과!</span>`
-    : totalOrderedCarts > 0
-      ? `<span style="color:var(--green2);font-size:10px;margin-left:8px">✓ EVカート 신청 ${totalOrderedCarts}대 / 20대</span>`
-      : `<span style="color:var(--text3);font-size:10px;margin-left:8px">EVカート 미신청</span>`;
+  // EV카트: 14hills 미운영 — 관련 로직 제거됨
 
   // 야마나미 코스별 배정 팀수
   // 조건 확장: accom='야마나미리조트' 뿐 아니라 실제 14hillsCC에서 라운딩하는 모든 팀
@@ -3117,7 +3101,7 @@ function renderGolf(date){
   let html = `<div style="margin-bottom:1rem;padding:10px 14px;background:var(--surface3);border-radius:7px;font-size:12px;color:var(--text2)">
     <strong style="color:var(--text)">${date}${getWD(date)} 골프</strong>
     &nbsp;&nbsp;|&nbsp;&nbsp; ${playingTeams.length}팀 · <strong style="color:var(--accent2)">${activeCount}명</strong>
-    &nbsp;&nbsp;${dayLabel}${cartWarning}${courseWarning}
+    &nbsp;&nbsp;${dayLabel}${courseWarning}
   </div>${mgmtBar}`;
 
   const golfTableIds = [];
@@ -3181,8 +3165,6 @@ function renderGolf(date){
       const otherCourseBadge = (golfInfo.playing && golfInfo.course && golfInfo.course !== '14hillsCC')
         ? `<span class="tag" style="background:rgba(245,158,11,.12);color:var(--amber2);margin-left:4px;font-size:9px">⛳ ${golfInfo.course}</span>`
         : '';
-      const defaultCarts = Math.ceil((teamRec.pax||1)/4);
-      const rowCartWarn = cartOverCap && teamMd.cart ? 'style="background:rgba(239,68,68,.06)"' : '';
       const isNewTeam = p.repName !== prevRepNameRef.name;
       prevRepNameRef.name = p.repName;
       const indent = !isNewTeam ? `<span style="color:var(--text3);margin-right:4px">↳</span>` : '';
@@ -3225,7 +3207,7 @@ function renderGolf(date){
           ? `<button onclick="toggleExclude('golf','${date}','${p._excludeKey}');renderGolf('${date}')" style="background:var(--green-dim);color:var(--green2);border:none;padding:3px 7px;border-radius:3px;cursor:pointer;font-size:10px" title="복구">↩</button>`
           : `<button onclick="if(confirm('이 명단을 제외할까요?\\n(나중에 복구 가능)')){toggleExclude('golf','${date}','${p._excludeKey}');renderGolf('${date}')}" style="background:transparent;color:var(--text3);border:1px solid var(--border);padding:3px 7px;border-radius:3px;cursor:pointer;font-size:10px" title="제외">✕</button>`);
       // 9H 추가(¥4,400): 수동 체크박스 유지 (비용 발생 항목이므로)
-      return `<tr class="draggable-row" data-eventseq="${p.eventSeq||''}" data-grpcode="${pTagCode}" ${rowCartWarn}${trStyle}>
+      return `<tr class="draggable-row" data-eventseq="${p.eventSeq||''}" data-grpcode="${pTagCode}"${trStyle}>
         <td style="font-family:var(--mono);text-align:center">${globalNo}</td>
         <td style="font-family:var(--mono);font-size:10px">${p.isExtra?'—':(teamRec.eventNo||"-")}</td>
         <td style="font-family:var(--mono);font-size:10px">${pTagCode}${repBadge}${extraBadge}</td>
@@ -3242,8 +3224,6 @@ function renderGolf(date){
         <td>${golfInfo.playing ? `<input class="editable narrow" value="${md.teeoff||''}" onchange="saveField('${k}','teeoff',this.value)" placeholder="07:30">` : '—'}</td>
         <td>${free9hLabel}</td>
         <td>${golfInfo.playing ? `<label class="check-cell"><input type="checkbox" ${md.extra9h?'checked':''} onchange="saveField('${k}','extra9h',this.checked)"> +9H</label>` : '—'}</td>
-        <td>${(p.isRep&&golfInfo.playing)?`<label class="check-cell"><input type="checkbox" ${teamMd.cart?'checked':''} onchange="saveField('${teamKey}','cart',this.checked);renderGolf('${date}')"> EV</label>`:'—'}</td>
-        <td>${(p.isRep&&golfInfo.playing)?`<input class="editable narrow" value="${teamMd.cartNum||''}" onchange="saveField('${teamKey}','cartNum',this.value);renderGolf('${date}')" placeholder="${defaultCarts}">`:''}</td>
         <td><input class="editable wide" value="${md.remarks||''}" onchange="saveField('${k}','remarks',this.value)" placeholder="備考"></td>
         <td style="text-align:center">${actionCell}</td>
       </tr>`;
@@ -5152,7 +5132,6 @@ async function _downloadGolf(selectedDates){
       const golfInfo=getGolfInfo(p.accom,origin,d,teamRec);
       const course=golfInfo.playing?golfInfo.label:'ラウンドなし';
       const yamaCourse = (p.accom==='야마나미리조트') ? (teamMd.yamaCourse||'') : '';
-      const defaultCarts=Math.ceil((teamRec.pax||1)/4);
       const originLabel = (String(origin||'').includes('부산')||String(origin||'').startsWith('ZE')||origin==='PUS')?'PUS':'ICN';
       // 대표자만 출력 (일행은 건너뜀)
       if(!p.isRep) return;
@@ -5163,8 +5142,6 @@ async function _downloadGolf(selectedDates){
         course,yamaCourse,md.team||'',md.teeoff||'',
         golfInfo.playing?(golfInfo.free9h?'Free':'—'):'',
         golfInfo.playing?(md.extra9h?'☑':'☐'):'',
-        golfInfo.playing?(teamMd.cart?'☑':'☐'):'',
-        golfInfo.playing?(teamMd.cartNum||String(defaultCarts)):'',
         md.remarks||'',''],COL,altRow);
       // 라운딩 없는 행: 흐리게
       if(!golfInfo.playing){
@@ -8844,7 +8821,7 @@ function dispatchBackHTML(d){
       </div>
     </div>
 
-    <div class="hp-legend"><b>区分:</b> ① ラウンド追加 &nbsp; ② EVカート &nbsp; ③ 飲食 &nbsp; ④ 延泊 &nbsp; ⑤ 送迎 &nbsp; ⑥ その他 &nbsp;—&nbsp; 該当番号に○を付けてください</div>
+    <div class="hp-legend"><b>区分:</b> ① ラウンド追加 &nbsp; ② 飲食 &nbsp; ③ 延泊 &nbsp; ④ 送迎 &nbsp; ⑤ その他 &nbsp;—&nbsp; 該当番号に○を付けてください</div>
 
     <table class="hp-t hp-form">
       <tr><th style="width:11%">日付</th><th style="width:16%">区分</th><th>内容</th><th style="width:8%">数量</th><th style="width:12%">単価(¥)</th><th style="width:13%">金額(¥)</th><th style="width:9%">担当</th></tr>
@@ -9182,7 +9159,7 @@ async function downloadDispatchXlsx(){
     r++;
     ws.getRow(r).height = 16; borderRow(ws, r, 1, 10);
     ws.mergeCells(r,1,r,10);
-    put(ws, r, 1, '区分: ① ラウンド追加  ② EVカート  ③ 飲食  ④ 延泊  ⑤ 送迎  ⑥ その他 — 該当番号に○', {th:true, h:'left', sz:9});
+    put(ws, r, 1, '区分: ① ラウンド追加  ② 飲食  ③ 延泊  ④ 送迎  ⑤ その他 — 該当番号に○', {th:true, h:'left', sz:9});
     r++;
 
     // 기입표 헤더: 日付 A:B / 区分 C / 内容 D:F / 数量 G / 単価 H / 金額 I / 担当 J
