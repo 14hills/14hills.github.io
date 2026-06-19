@@ -63,6 +63,7 @@ body{background:var(--bg);color:var(--text);font-family:var(--sans);min-height:1
 .upload-area{border:1.5px dashed var(--border2);border-radius:12px;padding:2rem 1.5rem;text-align:center;cursor:pointer;transition:all .2s;background:var(--surface2)}
 .upload-area:hover{border-color:var(--accent);background:var(--accent-dim)}
 .upload-area.loaded{border-style:solid;border-color:var(--green);background:var(--green-dim)}
+.upload-area.dragover{border-style:solid;border-color:var(--accent);background:var(--accent-dim);box-shadow:0 0 0 3px var(--accent-dim)}
 .upload-title{font-size:13px;font-weight:700;margin-bottom:.35rem}
 .upload-sub{font-size:10px;color:var(--text3);line-height:1.5}
 .upload-stat{margin-top:.5rem;font-size:11px;font-family:var(--mono);color:var(--green2);font-weight:700}
@@ -422,9 +423,13 @@ function readSheetRows(file){
     reader.readAsArrayBuffer(file);
   });
 }
-async function onFile(ev, defaultKind){
+function onFile(ev, defaultKind){
   const files = ev.target.files ? Array.from(ev.target.files) : [];
   ev.target.value = '';                         // 같은 파일 재선택 허용
+  ingestFiles(files, defaultKind);
+}
+async function ingestFiles(files, defaultKind){
+  files = Array.from(files || []);
   if(!files.length) return;
   const skipped = [];
   for(const file of files){
@@ -762,11 +767,28 @@ function renderConstPills(){
   el.innerHTML = pills.map(p=>'<span class="pill">'+esc(p)+'</span>').join('');
 }
 
+/* ════════════════ 드래그 앤 드롭 (숨김 input은 drop 미작동 → 직접 처리) ════ */
+function setupDropZones(){
+  [['up-res','res'],['up-ilh','ilh']].forEach(([id,kind])=>{
+    const zone = document.getElementById(id);
+    if(!zone) return;
+    const stop = e=>{ e.preventDefault(); e.stopPropagation(); };
+    ['dragenter','dragover'].forEach(ev=> zone.addEventListener(ev, e=>{ stop(e); zone.classList.add('dragover'); }));
+    ['dragleave','dragend'].forEach(ev=> zone.addEventListener(ev, e=>{ stop(e); zone.classList.remove('dragover'); }));
+    zone.addEventListener('drop', e=>{
+      stop(e); zone.classList.remove('dragover');
+      const files = e.dataTransfer && e.dataTransfer.files;
+      if(files && files.length) ingestFiles(files, kind);   // 파일명 자동 분류는 ingestFiles 내부에서
+    });
+  });
+}
+
 /* ════════════════ INIT ════════════════ */
 function init(){
   try{ const saved = localStorage.getItem(LS.lang); if(saved && I18N[saved]) LANG = saved; }catch(e){}
   applyI18n();
   renderConstPills();
+  setupDropZones();
 }
 if(document.readyState === 'loading') document.addEventListener('DOMContentLoaded', init);
 else init();
