@@ -138,13 +138,13 @@ tr:hover td{background:var(--accent-dim)}
       <div class="card-sub" data-i18n="up_cardSub">엠클릭 엑셀 2종을 업로드한 뒤 분석을 시작합니다. (입력 양식 §6.5 확정 전 — 엠클릭 포맷 재사용)</div>
       <div class="upload-grid">
         <label class="upload-area" id="up-res">
-          <input type="file" accept=".xlsx,.xls" style="display:none" onchange="onFile(event,'res')">
+          <input type="file" accept=".xlsx,.xls" multiple style="display:none" onchange="onFile(event,'res')">
           <div class="upload-title" data-i18n="up_resTitle">예약 리스트</div>
           <div class="upload-sub" data-i18n="up_resSub">행사(팀) 마스터 — 엠클릭 예약현황 탭 (기존대로 500행씩 표시)</div>
           <div class="upload-stat" id="stat-res"></div>
         </label>
         <label class="upload-area" id="up-ilh">
-          <input type="file" accept=".xlsx,.xls" style="display:none" onchange="onFile(event,'ilh')">
+          <input type="file" accept=".xlsx,.xls" multiple style="display:none" onchange="onFile(event,'ilh')">
           <div class="upload-title" data-i18n="up_ilhTitle">일행별 예약</div>
           <div class="upload-sub" data-i18n="up_ilhSub">개인 명단 — 엠클릭 탑승자정보 탭 (1개월 단위 일괄 다운로드 · 인원수 무관)</div>
           <div class="upload-stat" id="stat-ilh"></div>
@@ -258,8 +258,10 @@ const LS = {
 
 /* ── 전역 상태 ──────────────────────────────────────────────── */
 let state = {
-  reservations: [],   // 예약리스트(A) 원본 행
-  guests: [],         // 일행별예약(B) 원본 행 (개인)
+  reservations: [],   // 예약리스트(A) 원본 행 (복수 파일 누적)
+  guests: [],         // 일행별예약(B) 원본 행 (개인, 복수 파일 누적)
+  resFiles: [],       // 등록된 예약리스트 파일명 (중복 방지)
+  ilhFiles: [],       // 등록된 일행별예약 파일명
   teams: [],          // 결합 결과: 운영대상 팀 (취소·합계 제외)
   processed: [],      // 결합 결과: 개인 명단 (태그코드 부여)
   stats: null,        // 분석 요약 통계
@@ -274,7 +276,7 @@ const I18N = {
     nav_upload:'ファイルアップロード', nav_nametag:'ネームタグ',
     nav_dispatch:'現地手配書', nav_dinner:'夕食名簿', nav_settle:'現地精算表',
     up_cardTitle:'ファイルアップロード',
-    up_cardSub:'엠클릭エクセル2種をアップロードして分析を開始します。',
+    up_cardSub:'엠클릭エクセル2種をアップロード（複数ファイル可・ファイル名で自動振り分け）して分析を開始します。',
     up_resTitle:'予約リスト', up_resSub:'行事(チーム)マスター · 従来通り500行ずつ表示',
     up_ilhTitle:'同行者別予約', up_ilhSub:'個人名簿 · 1ヶ月単位で一括ダウンロード(人数無関係)',
     up_analyze:'データ分析開始 →',
@@ -288,7 +290,7 @@ const I18N = {
     nav_upload:'파일 업로드', nav_nametag:'네임택',
     nav_dispatch:'현지 수배서', nav_dinner:'저녁 명단', nav_settle:'현지 정산표',
     up_cardTitle:'파일 업로드',
-    up_cardSub:'엠클릭 엑셀 2종을 업로드한 뒤 분석을 시작합니다.',
+    up_cardSub:'엠클릭 엑셀 2종을 업로드(복수 파일 가능 · 파일명으로 자동 분류)한 뒤 분석을 시작합니다.',
     up_resTitle:'예약 리스트', up_resSub:'행사(팀) 마스터 · 기존대로 500행씩 표시',
     up_ilhTitle:'일행별 예약', up_ilhSub:'개인 명단 · 1개월 단위 일괄 다운로드(인원수 무관)',
     up_analyze:'데이터 분석 시작 →',
@@ -302,7 +304,7 @@ const I18N = {
     nav_upload:'Upload', nav_nametag:'Name Tags',
     nav_dispatch:'Arrangements', nav_dinner:'Dinner List', nav_settle:'Settlement',
     up_cardTitle:'File Upload',
-    up_cardSub:'Upload the two Excel files, then start analysis.',
+    up_cardSub:'Upload the two Excel files (multiple files OK · auto-sorted by filename), then start analysis.',
     up_resTitle:'Reservation List', up_resSub:'Group (team) master · 500 rows per page as before',
     up_ilhTitle:'Passenger List', up_ilhSub:'Individual roster · one-month batch download (any headcount)',
     up_analyze:'Start analysis →',
@@ -398,29 +400,56 @@ async function exportRows(sheetName, title, headers, rows, filename){
 }
 
 /* ════════════════ 업로드 / 분석 ════════════════ */
-function onFile(ev, kind){
-  const file = ev.target.files && ev.target.files[0];
-  if(!file) return;
-  const reader = new FileReader();
-  reader.onload = e=>{
-    try{
-      const wb = XLSX.read(e.target.result, { type:'array' });
-      const ws = wb.Sheets[wb.SheetNames[0]];
-      const rows = XLSX.utils.sheet_to_json(ws, { defval:'' });
-      if(kind==='res'){ state.reservations = rows; markLoaded('res', rows.length); }
-      else           { state.guests = rows;       markLoaded('ilh', rows.length); }
-    }catch(err){
-      alert('엑셀 읽기 실패: ' + err.message);
-    }
-  };
-  reader.readAsArrayBuffer(file);
+/* 파일명 자동 분류: "예약 리스트"/"일행별 예약" 포함 시(뒤 숫자·괄호 무관) 해당 슬롯으로.
+   못 찾으면 사용자가 올린 입력칸(defaultKind) 기준. */
+function detectKind(filename){
+  const n = String(filename||'');
+  if(/일행별\s*예약/.test(n)) return 'ilh';   // 더 구체적인 패턴 먼저
+  if(/예약\s*리스트/.test(n))  return 'res';
+  return null;
 }
-function markLoaded(kind, n){
-  const area = document.getElementById(kind==='res'?'up-res':'up-ilh');
-  const stat = document.getElementById(kind==='res'?'stat-res':'stat-ilh');
-  if(area) area.classList.add('loaded');
-  if(stat) stat.textContent = '✓ ' + n + ' 행';
-  // 분석 버튼: 예약 리스트(A) + 일행별 예약(B) 두 파일 모두 있어야 결합 가능
+function readSheetRows(file){
+  return new Promise((resolve, reject)=>{
+    const reader = new FileReader();
+    reader.onload = e=>{
+      try{
+        const wb = XLSX.read(e.target.result, { type:'array' });
+        const ws = wb.Sheets[wb.SheetNames[0]];
+        resolve(XLSX.utils.sheet_to_json(ws, { defval:'' }));
+      }catch(err){ reject(err); }
+    };
+    reader.onerror = ()=> reject(new Error('파일 읽기 오류'));
+    reader.readAsArrayBuffer(file);
+  });
+}
+async function onFile(ev, defaultKind){
+  const files = ev.target.files ? Array.from(ev.target.files) : [];
+  ev.target.value = '';                         // 같은 파일 재선택 허용
+  if(!files.length) return;
+  const skipped = [];
+  for(const file of files){
+    const kind    = detectKind(file.name) || defaultKind;
+    const listKey = kind==='res' ? 'resFiles' : 'ilhFiles';
+    if(state[listKey].indexOf(file.name) >= 0){ skipped.push(file.name); continue; }  // 중복 파일 방지
+    try{
+      const rows = await readSheetRows(file);
+      if(kind==='res') state.reservations = state.reservations.concat(rows);
+      else             state.guests       = state.guests.concat(rows);
+      state[listKey].push(file.name);
+    }catch(err){ alert('엑셀 읽기 실패 ('+file.name+'): ' + err.message); }
+  }
+  markLoaded('res'); markLoaded('ilh');
+  if(skipped.length) alert('이미 등록된 파일은 건너뛰었습니다:\n· ' + skipped.join('\n· '));
+}
+function markLoaded(kind){
+  const isRes = kind==='res';
+  const area  = document.getElementById(isRes?'up-res':'up-ilh');
+  const stat  = document.getElementById(isRes?'stat-res':'stat-ilh');
+  const files = isRes ? state.resFiles : state.ilhFiles;
+  const rows  = isRes ? state.reservations.length : state.guests.length;
+  if(area) area.classList.toggle('loaded', files.length>0);
+  if(stat) stat.textContent = files.length ? ('✓ '+files.length+'개 파일 · '+rows+'행') : '';
+  // 분석 버튼: 예약 리스트(A) + 일행별 예약(B) 두 종류 모두 있어야 결합 가능
   const btn = document.getElementById('btn-analyze');
   if(btn) btn.disabled = !(state.reservations.length && state.guests.length);
 }
@@ -453,10 +482,12 @@ function pad2(n){ return String(n).padStart(2,'0'); }
 
 function buildTeams(){
   const teams = [];
+  const seenEv = {};                                      // 복수 파일 겹침 시 행사번호 중복 제거
   state.reservations.forEach(r=>{
     const gubun = txt(r['구분']);
     const ev    = txt(r['행사번호']);
     if(!ev || EXCLUDE_GUBUN.indexOf(gubun) >= 0) return;   // 취소·합계·빈 행사번호 제외
+    if(seenEv[ev]) return;  seenEv[ev] = 1;                // 같은 행사번호 1팀만
     const product = txt(r['상품명']);
     teams.push({
       ev, gubun,
@@ -490,9 +521,17 @@ function buildTeams(){
 }
 
 function buildGuests(teams){
-  // 행사번호 → 일행(B) 행 모음
-  const byEv = {};
-  state.guests.forEach(r=>{ const ev=txt(r['행사번호']); if(ev)(byEv[ev]=byEv[ev]||[]).push(r); });
+  // 행사번호 → 일행(B) 행 모음 (복수 파일 겹침 시 동일 인물 중복 제거)
+  const byEv = {}, seen = {};
+  state.guests.forEach(r=>{
+    const ev = txt(r['행사번호']); if(!ev) return;
+    const nm = txt(r['고객명']);
+    if(nm){   // 이름 있는 행만 중복 제거 (무명 placeholder 좌석은 그대로 유지)
+      const sig = ev+'|'+nm+'|'+txt(r['영문성'])+'|'+txt(r['영문이름'])+'|'+txt(r['생년월일']);
+      if(seen[sig]) return;  seen[sig] = 1;
+    }
+    (byEv[ev]=byEv[ev]||[]).push(r);
+  });
   const guests = [];
   teams.forEach(t=>{
     const rows = byEv[t.ev] || [];
@@ -699,7 +738,7 @@ function gotoSection(id){
 }
 function resetApp(){
   if(!confirm('업로드 데이터를 초기화할까요?')) return;
-  state = { reservations:[], guests:[], teams:[], processed:[], stats:null, ready:false };
+  state = { reservations:[], guests:[], resFiles:[], ilhFiles:[], teams:[], processed:[], stats:null, ready:false };
   ['res','ilh'].forEach(k=>{
     const a=document.getElementById(k==='res'?'up-res':'up-ilh');
     const s=document.getElementById(k==='res'?'stat-res':'stat-ilh');
