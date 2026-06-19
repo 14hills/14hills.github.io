@@ -363,75 +363,11 @@ tr.drag-source{opacity:.35}
 tr.draggable-row td:first-child{position:relative}
 tr.draggable-row td:first-child::before{content:'⠿';color:var(--text3);margin-right:5px;font-size:12px;vertical-align:middle;opacity:.6}
 
-/* ── ⑨ 志津の宿 予約表 + 준비중(WIP) ───────────────────── */
+/* ── 준비중(WIP) 탭 공통 스타일 ───────────────────── */
 .nav-tab.wip{opacity:.5}
 .nav-tab.wip.active{opacity:1}
 .wip-badge{margin-left:6px;font-size:9px;font-weight:700;color:var(--amber2);background:var(--amber-dim);border:1px solid var(--amber);border-radius:8px;padding:1px 5px;line-height:1.4;letter-spacing:0}
 .wip-banner{display:flex;align-items:center;gap:8px;background:var(--amber-dim);border:1px solid var(--amber);color:var(--amber2);border-radius:8px;padding:8px 12px;font-size:12px;font-weight:600;margin-bottom:1rem}
-.shz-toolbar{display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin-bottom:1rem}
-.shz-toolbar label{font-size:12px;color:var(--text2);display:flex;align-items:center;gap:6px}
-.shz-toolbar input[type=date]{font-family:var(--mono);font-size:11px;padding:5px 8px;border:1px solid var(--border2);border-radius:6px;background:var(--surface);color:var(--text)}
-.shz-board{display:grid;grid-template-columns:200px 1fr;gap:12px;margin-top:.5rem}
-.shz-pool{border:1px solid var(--border2);border-radius:10px;background:var(--surface2);padding:8px;min-height:120px}
-.shz-pool-h{font-size:11px;font-weight:700;color:var(--text2);margin-bottom:4px;display:flex;justify-content:space-between}
-.shz-pool-h span{color:var(--accent2)}
-.shz-rooms{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:8px}
-.shz-room{border:1px solid var(--border);border-radius:10px;background:var(--surface);padding:6px;min-height:120px;transition:.15s}
-.shz-room.over{border-color:var(--red);background:var(--red-dim)}
-.shz-room-h{font-size:14px;font-weight:700;color:var(--accent2);text-align:center;padding:2px 0 7px;border-bottom:1px solid var(--border)}
-.shz-room-body,.shz-pool-body{display:flex;flex-direction:column;gap:5px;margin-top:6px}
-.shz-chip{background:var(--surface);border:1px solid var(--border2);border-radius:7px;padding:5px 7px;cursor:grab;font-size:11px;line-height:1.4;box-shadow:0 1px 2px rgba(0,0,0,.04)}
-.shz-chip:active{cursor:grabbing}
-.shz-chip.local{background:var(--amber-dim);border-color:var(--amber)}
-.shz-chip.mixed{border-color:var(--red)}
-.shz-cname{display:inline-block;font-weight:700;color:var(--text);outline:none;border-bottom:1px dashed transparent}
-.shz-cname:focus{border-bottom-color:var(--accent)}
-.shz-g{color:var(--teal2);font-size:11px;margin-left:4px;font-weight:700}
-.shz-g-f{color:var(--purple2);font-size:11px;margin-left:4px;font-weight:700}
-.shz-gset{margin-left:4px;display:inline-flex;gap:2px}
-.shz-gset button{font-size:9px;padding:0 4px;border:1px solid var(--border2);background:var(--surface2);color:var(--text3);border-radius:4px;cursor:pointer}
-.shz-gset button.on{background:var(--accent);color:#fff;border-color:var(--accent)}
-.shz-meta{display:block;color:var(--text3);font-family:var(--mono);font-size:9px;margin-top:2px}
-.shz-warn{color:var(--red2);font-weight:700}
-.shz-empty{color:var(--text3);font-size:11px;text-align:center;padding:14px 0}
-.shz-pv-wrap{overflow-x:auto}
-.shz-pv-title{font-size:16px;font-weight:700;text-align:center;margin:6px 0 12px;letter-spacing:.05em}
-.shz-pv{border-collapse:collapse;margin-bottom:14px;width:100%;min-width:900px;font-size:11px}
-.shz-pv th,.shz-pv td{border:1px solid var(--border2);padding:3px 6px;text-align:center;vertical-align:middle}
-.shz-pv-hd th{background:var(--accent-dim);font-weight:700;color:var(--accent3)}
-.shz-pv-dt{background:var(--surface3)!important;font-size:13px;font-weight:700}
-.shz-pv-dt span{font-size:10px;color:var(--text3)}
-.shz-pv-lb{background:var(--surface3);font-weight:700;color:var(--text2);width:78px}
-.shz-pv-nm{text-align:right;background:#EAF2FB}
-.shz-pv td:not(.shz-pv-lb):not(.shz-pv-k):not(.shz-pv-note):not(.shz-pv-nm){background:#F2F8FE}
-.shz-pv-k{background:var(--surface3);font-weight:700}
-.shz-pv-note{text-align:left;background:var(--surface);outline:none;min-height:22px;font-weight:600}
-.shz-pv-note:focus{background:var(--accent-dim)}
-/* ⑥ 志津の宿 — UX 개선 (가이드·클릭배정·시인성) */
-.shz-guide{display:flex;gap:10px;flex-wrap:wrap;margin:2px 0 12px}
-.shz-step{flex:1;min-width:210px;display:flex;gap:10px;align-items:flex-start;background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:11px 13px}
-.shz-step .n{flex:none;width:26px;height:26px;border-radius:50%;background:var(--accent);color:#fff;font-weight:800;font-size:13px;display:flex;align-items:center;justify-content:center}
-.shz-step .tx{font-size:12px;line-height:1.5;color:var(--text2)}
-.shz-step .tx b{color:var(--text);font-size:13px;display:block;margin-bottom:1px}
-.shz-tip{font-size:11.5px;color:var(--text2);margin:0 0 12px;padding:8px 12px;background:var(--accent-dim);border:1px solid var(--accent);border-radius:8px}
-.shz-tip b{color:var(--accent3)}
-.shz-chip{font-size:12px;padding:7px 9px}
-.shz-cname{font-size:13px}
-.shz-chip.sel{outline:2px solid var(--accent);outline-offset:1px;background:var(--accent-dim)}
-.shz-chip.needgender{border-color:var(--red);background:var(--red-dim)}
-.shz-needlbl{display:inline-block;font-size:9px;font-weight:700;color:var(--red2);margin-left:4px}
-.shz-board{grid-template-columns:230px 1fr}
-.shz-pool{background:var(--accent-dim);border-color:var(--accent)}
-.shz-pool.pickmode{box-shadow:0 0 0 2px var(--accent)}
-.shz-pool-h{font-size:12px}
-.shz-room{cursor:pointer;transition:.12s}
-.shz-room.pickmode{border-color:var(--accent);box-shadow:0 0 0 2px var(--accent-dim)}
-.shz-room.pickmode:hover{box-shadow:0 0 0 2px var(--accent);background:var(--accent-dim)}
-.shz-room.full .shz-room-h{color:var(--text3)}
-.shz-cap{font-size:10px;font-weight:700;color:var(--accent2);float:right}
-.shz-cap.over{color:var(--red2)}
-.btn-shz{background:var(--accent);color:#fff;border:1px solid var(--accent);border-radius:8px;padding:8px 16px;font-weight:700;font-size:13px;cursor:pointer}
-.btn-shz:hover{background:var(--accent2)}
 </style>
 </head>
 <body class="light">
@@ -473,7 +409,6 @@ tr.draggable-row td:first-child::before{content:'⠿';color:var(--text3);margin-
   <div class="nav-tab wip" id="nav-accom" onclick="gotoSection('accom')"><div class="nav-dot"></div> 宿泊 <span class="wip-chip">준비중</span></div>
   <div class="nav-tab wip" id="nav-golf" onclick="gotoSection('golf')"><div class="nav-dot"></div> ゴルフ <span class="wip-chip">준비중</span></div>
   <div class="nav-tab wip" id="nav-aircover" onclick="gotoSection('aircover')"><div class="nav-dot"></div> 航空カバー <span class="wip-chip">준비중</span></div>
-  <div class="nav-tab wip" id="nav-shizu" onclick="gotoSection('shizu')"><div class="nav-dot"></div> 志津の宿 <span class="wip-chip">준비중</span></div>
 </div>
 
 <!-- ── SESSION BAR ───────────────────────────────────────── -->
@@ -700,32 +635,6 @@ tr.draggable-row td:first-child::before{content:'⠿';color:var(--text3);margin-
       <button class="btn-dl" onclick="downloadAccom()">⬇ 宿泊配置表 다운로드</button>
       <button class="btn-undo" id="undo-btn-accom" onclick="undoLastTable('accom')" title="되돌릴 내용 없음">↩ 되돌리기</button>
     </div>
-  </div>
-</div>
-
-<!-- ── ⑨ 志津の宿 予約表 ─────────────────────────────── -->
-<div class="section" id="sec-shizu">
-  <div class="card">
-    <div class="card-title">🏯 <span data-i18n="shz_title">志津の宿 予約表</span></div>
-    <div class="shz-guide">
-      <div class="shz-step"><div class="n">1</div><div class="tx" data-i18n="shz_step1"><b>自動収集</b>統合データから志津の宿の宿泊客を自動で集めます。</div></div>
-      <div class="shz-step"><div class="n">2</div><div class="tx" data-i18n="shz_step2"><b>客室へ割当</b>お客様をクリック→客室をクリックで配置（ドラッグでもOK）。⚡自動割当も可。</div></div>
-      <div class="shz-step"><div class="n">3</div><div class="tx" data-i18n="shz_step3"><b>ダウンロード</b>予約表をテンプレート書式そのまま出力します。</div></div>
-    </div>
-    <div class="shz-tip" data-i18n="shz_tip">💡 <b>クリック割当</b>：お客様カードをクリック→客室をクリックで配置（ドラッグでもOK）。現地予約は性別ボタン（男/女）を押してください。</div>
-    <div class="shz-toolbar">
-      <label>期間 <input type="date" id="shz-from" onchange="shzSetPeriod()"> ~ <input type="date" id="shz-to" onchange="shzSetPeriod()"></label>
-      <button class="btn-dl" onclick="shzAutoAssign()">⚡ 自動割当</button>
-      <button class="btn-dl" onclick="shzClearAll()">✕ 全解除</button>
-      <button class="btn-shz" onclick="shzDownload()">⬇ <span data-i18n="shz_dl">予約表 ダウンロード</span></button>
-    </div>
-    <div id="shz-stats" class="stats-grid"></div>
-    <div id="shz-board"></div>
-  </div>
-  <div class="card">
-    <div class="card-title" data-i18n="shz_preview">プレビュー — 予約表</div>
-    <div id="shz-preview" class="shz-pv-wrap"></div>
-    <div class="btn-row" style="margin-top:.75rem"><button class="btn-shz" onclick="shzDownload()">⬇ <span data-i18n="shz_dl">予約表 ダウンロード</span></button></div>
   </div>
 </div>
 
@@ -9558,462 +9467,6 @@ function resetApp(){
   </div>
 </div>
 
-<script>
-/* ═══════════════════════════════════════════════════════════════
-   ⑨ 志津の宿 予約表 — 통합 모듈
-   - 데이터: 기존 passengers(개인·성별·날짜) 중 시즈노야도 + localBookings(현지예약)
-   - 객실 7실 드래그 배정 → 連泊·男女·합계·날짜 자동
-   - 출력: 予約表.xlsx (템플릿 서식 복제)
-   - 영속: manualData._shizu + saveManual() (월 세션)
-   ═══════════════════════════════════════════════════════════════ */
-const SHZ_ROOMS = ['志津','合歓','北條','山法師','吉祥','瑞雲','馬酔木'];
-const SHZ_DOW   = ['日','月','火','水','木','金','土'];
-const SHZ = { guests: [], from: '', to: '' };
-let SHZ_SEL = null;  // 클릭 배정용: 선택된 손님 id
-
-/* ── 상태(영속) ───────────────────────────────────────── */
-function shzState(){
-  if(typeof manualData === 'undefined') return { assign:{}, note:{}, name:{}, gender:{} };
-  if(!manualData._shizu) manualData._shizu = { assign:{}, note:{}, name:{}, gender:{} };
-  const s = manualData._shizu;
-  s.assign = s.assign || {};
-  s.note   = s.note   || {};
-  s.name   = s.name   || {};
-  s.gender = s.gender || {};
-  return s;
-}
-function shzPersist(){ shzState(); if(typeof saveManual === 'function') saveManual(); }
-
-/* ── 유틸 ─────────────────────────────────────────────── */
-function shzParseISO(s){
-  const m = String(s||'').match(/(\d{4})-(\d{2})-(\d{2})/);
-  return m ? new Date(+m[1], +m[2]-1, +m[3]) : null;
-}
-function shzISO(d){
-  return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
-}
-function shzMD(s){ const d = shzParseISO(s); return d ? `${d.getMonth()+1}/${d.getDate()}` : ''; }
-function shzTitle(s){
-  s = String(s||'').toLowerCase();
-  return s.replace(/\b[a-z]/g, c => c.toUpperCase());
-}
-function shzNormGender(g){
-  g = String(g||'').trim();
-  if(/여|女/.test(g) || /^f/i.test(g)) return '女';
-  if(/남|男/.test(g) || /^m/i.test(g)) return '男';
-  return '';
-}
-/* 半角数字 → 全角(志津の宿 予約表 서식: 숫자는 전각 표기) */
-function shzZen(v){ return String(v).replace(/[0-9]/g, d => '０１２３４５６７８９'[+d]); }
-
-/* ── 데이터 수집 ──────────────────────────────────────── */
-function shzProductMap(){
-  const m = {};
-  (typeof processed !== 'undefined' ? processed : []).forEach(r => {
-    const seq = String(r.eventSeq||'').trim();
-    if(seq) m[seq] = String((r.raw && r.raw['상품명']) || '').trim();
-  });
-  return m;
-}
-function shzCollect(){
-  const prodMap = shzProductMap();
-  const guests = [];
-  const seqIdx = {};
-  (typeof passengers !== 'undefined' ? passengers : []).forEach(p => {
-    if(p.accom !== '시즈노야도 료칸') return;
-    const seq = String(p.eventSeq||'').trim();
-    seqIdx[seq] = (seqIdx[seq] || 0);
-    const id = `P:${seq}#${seqIdx[seq]++}`;
-    const prod = prodMap[seq] || '';
-    const mixed = /시즈노/.test(prod) && /(별장|간지|야마나미리조트|쿠주|久住|リゾート|ガンジー)/.test(prod);
-    guests.push({
-      id, seq, kind:'P',
-      defName: shzTitle(p.engFull) || (p.name || ''),
-      gender: shzNormGender(p.gender),
-      ci: p.depDate || p.dep || '',
-      co: p.arrDate || p.arr || '',
-      rep: p.repName || '', mixed, local:false
-    });
-  });
-  (typeof localBookings !== 'undefined' ? localBookings : []).forEach(b => {
-    if(!/시즈노/.test(String(b.prodName||''))) return;
-    const seq = String(b.eventSeq||'').trim();
-    const pax = Math.max(1, Number(b.pax)||0);
-    for(let i=0;i<pax;i++){
-      guests.push({
-        id: `L:${seq}#${i}`, seq, kind:'L',
-        defName: (b.repName||'') + (pax>1 ? ` (${i+1})` : ''),
-        gender:'', ci: b.dep||'', co: b.arr||'',
-        rep: b.repName||'', mixed:false, local:true
-      });
-    }
-  });
-  return guests;
-}
-
-/* ── 박/날짜 계산 ─────────────────────────────────────── */
-function shzNights(g){
-  const a = shzParseISO(g.ci), b = shzParseISO(g.co);
-  if(!a) return [];
-  if(!b || b <= a) return [shzISO(a)];
-  const out = []; const d = new Date(a);
-  while(d < b){ out.push(shzISO(d)); d.setDate(d.getDate()+1); }
-  return out;
-}
-function shzName(g){ const s = shzState(); return s.name[g.id] || g.defName || g.rep || ''; }
-function shzGender(g){ const s = shzState(); return g.gender || s.gender[g.id] || ''; }
-
-function shzAxis(){
-  let min=null, max=null;
-  SHZ.guests.forEach(g => shzNights(g).forEach(d => {
-    if(!min || d<min) min=d;
-    if(!max || d>max) max=d;
-  }));
-  const from = SHZ.from || min, to = SHZ.to || max;
-  if(!from || !to) return [];
-  const d = shzParseISO(from), e = shzParseISO(to);
-  if(!d || !e) return [];
-  const out=[];
-  for(let x=new Date(d); x<=e; x.setDate(x.getDate()+1)) out.push(shzISO(x));
-  return out;
-}
-function shzCellOcc(room, date){
-  const s = shzState();
-  return SHZ.guests
-    .filter(g => s.assign[g.id] === room && shzNights(g).includes(date))
-    .sort((a,b) => (a.ci||'').localeCompare(b.ci||''));
-}
-function shzMF(occ){
-  let m=0,f=0,u=0;
-  occ.forEach(g => { const x=shzGender(g); if(x==='男')m++; else if(x==='女')f++; else u++; });
-  const parts=[];
-  if(m) parts.push('男　'+shzZen(m));
-  if(f) parts.push('女　'+shzZen(f));
-  if(u) parts.push('（未）'+shzZen(u));
-  return parts.join('　　');
-}
-function shzRoomOver(room){
-  // 어느 날짜든 3명 이상이면 초과
-  const s = shzState();
-  const nightCount = {};
-  SHZ.guests.filter(g => s.assign[g.id]===room).forEach(g => {
-    shzNights(g).forEach(d => { nightCount[d]=(nightCount[d]||0)+1; });
-  });
-  return Object.values(nightCount).some(c => c > 2);
-}
-
-/* ── 액션 ─────────────────────────────────────────────── */
-function shzAssign(id, room){
-  const s = shzState();
-  if(room) s.assign[id] = room; else delete s.assign[id];
-  shzPersist();
-}
-function shzRename(id, text){
-  const s = shzState();
-  const v = String(text||'').trim();
-  const g = SHZ.guests.find(x=>x.id===id);
-  if(g && v && v !== g.defName) s.name[id] = v;
-  else delete s.name[id];
-  shzPersist();
-}
-function shzSetGender(id, val){
-  const s = shzState();
-  if(s.gender[id] === val) delete s.gender[id]; else s.gender[id] = val;
-  shzPersist();
-  if(typeof document !== 'undefined') shzRender();
-}
-function shzSetNote(date, text){
-  const s = shzState();
-  s.note[date] = String(text||'');
-  shzPersist();
-}
-function shzSetPeriod(){
-  if(typeof document === 'undefined') return;
-  SHZ.from = document.getElementById('shz-from').value || '';
-  SHZ.to   = document.getElementById('shz-to').value || '';
-  shzRender();
-}
-function shzClearAll(){
-  if(typeof confirm === 'function' && !confirm('배정을 모두 해제할까요?')) return;
-  shzState().assign = {};
-  shzPersist();
-  shzRender();
-}
-function shzAutoAssign(){
-  const s = shzState();
-  const un = SHZ.guests.filter(g => !s.assign[g.id]);
-  const byEv = {};
-  un.forEach(g => { (byEv[g.seq] = byEv[g.seq] || []).push(g); });
-  const parties = Object.values(byEv).sort((a,b)=>(a[0].ci||'').localeCompare(b[0].ci||''));
-  const roomLoad = (room, nights) => {
-    const cnt = {};
-    SHZ.guests.filter(g => s.assign[g.id]===room).forEach(g =>
-      shzNights(g).forEach(d => { cnt[d]=(cnt[d]||0)+1; }));
-    let mx = 0; nights.forEach(d => { if((cnt[d]||0) > mx) mx = cnt[d]||0; });
-    return mx;
-  };
-  const placePair = (pair) => {
-    const nights = [...new Set(pair.flatMap(shzNights))];
-    for(const R of SHZ_ROOMS){
-      if(roomLoad(R, nights) + pair.length <= 2){
-        pair.forEach(g => s.assign[g.id] = R);
-        return true;
-      }
-    }
-    return false;
-  };
-  parties.forEach(party => {
-    let bucket = [];
-    party.forEach(g => { bucket.push(g); if(bucket.length===2){ placePair(bucket); bucket=[]; } });
-    if(bucket.length) placePair(bucket);
-  });
-  shzPersist();
-  shzRender();
-}
-
-/* ── 렌더: 보드 ───────────────────────────────────────── */
-function shzChipHTML(g){
-  const gen = shzGender(g);
-  const nm  = shzName(g);
-  const nights = shzNights(g).length;
-  const need = g.local && !gen;
-  let genHTML;
-  if(g.local && !gen){
-    genHTML = `<span class="shz-gset"><button onclick="shzSetGender('${g.id}','男')">男</button><button onclick="shzSetGender('${g.id}','女')">女</button></span>`;
-  } else if(g.local){
-    genHTML = `<span class="shz-gset"><button class="${gen==='男'?'on':''}" onclick="shzSetGender('${g.id}','男')">男</button><button class="${gen==='女'?'on':''}" onclick="shzSetGender('${g.id}','女')">女</button></span>`;
-  } else {
-    genHTML = `<b class="shz-g${gen==='女'?'-f':''}">${gen||'?'}</b>`;
-  }
-  return `<div class="shz-chip${g.local?' local':''}${g.mixed?' mixed':''}${g.id===SHZ_SEL?' sel':''}${need?' needgender':''}" draggable="true" data-id="${g.id}" ondragstart="shzDragStart(event)" onclick="shzPick(event,'${g.id}')">
-    <span class="shz-cname" contenteditable="true" spellcheck="false" onblur="shzRename('${g.id}',this.textContent)">${nm}</span>
-    ${genHTML}${need?'<span class="shz-needlbl">性別未入力</span>':''}
-    <span class="shz-meta">${shzMD(g.ci)}~${shzMD(g.co)} · ${nights}泊${g.mixed?' · <span class="shz-warn">混在要確認</span>':''}</span>
-  </div>`;
-}
-function shzRender(){
-  if(typeof document === 'undefined') return;
-  SHZ.guests = shzCollect();
-  const s = shzState();
-  // 期間 입력 기본값
-  let min=null,max=null;
-  SHZ.guests.forEach(g => shzNights(g).forEach(d => { if(!min||d<min)min=d; if(!max||d>max)max=d; }));
-  const fromEl = document.getElementById('shz-from'), toEl = document.getElementById('shz-to');
-  if(fromEl && !fromEl.value && (SHZ.from||min)) fromEl.value = SHZ.from || min;
-  if(toEl && !toEl.value && (SHZ.to||max)) toEl.value = SHZ.to || max;
-
-  // 통계
-  const total = SHZ.guests.length;
-  const assigned = SHZ.guests.filter(g => s.assign[g.id]).length;
-  const localN = SHZ.guests.filter(g => g.local).length;
-  const stats = document.getElementById('shz-stats');
-  if(stats) stats.innerHTML = `
-    <div class="stat"><div class="stat-label">宿泊者</div><div class="stat-value">${total}</div><div class="stat-sub">名</div></div>
-    <div class="stat"><div class="stat-label">配置済</div><div class="stat-value">${assigned}</div><div class="stat-sub">/ ${total}</div></div>
-    <div class="stat"><div class="stat-label">未配置</div><div class="stat-value">${total-assigned}</div><div class="stat-sub">名</div></div>
-    <div class="stat"><div class="stat-label">現地予約</div><div class="stat-value">${localN}</div><div class="stat-sub">性別要入力</div></div>
-    <div class="stat"><div class="stat-label">期間</div><div class="stat-value" style="font-size:13px">${shzMD(SHZ.from||min)}~${shzMD(SHZ.to||max)}</div><div class="stat-sub">予約表</div></div>`;
-
-  // 보드: 미배치 풀 + 7객실
-  const unassigned = SHZ.guests.filter(g => !s.assign[g.id]);
-  let html = `<div class="shz-board">
-    <div class="shz-pool${SHZ_SEL?' pickmode':''}" ondragover="event.preventDefault()" ondrop="shzDrop(event,'')" onclick="shzPlaceTo('')">
-      <div class="shz-pool-h">未配置 <span>${unassigned.length}</span></div>
-      <div class="shz-pool-body">${unassigned.map(shzChipHTML).join('') || '<div class="shz-empty">全員配置済み</div>'}</div>
-    </div>
-    <div class="shz-rooms">`;
-  SHZ_ROOMS.forEach(room => {
-    const chips = SHZ.guests.filter(g => s.assign[g.id]===room);
-    const over = shzRoomOver(room);
-    html += `<div class="shz-room${over?' over':''}${chips.length>=2&&!over?' full':''}${SHZ_SEL?' pickmode':''}" ondragover="event.preventDefault()" ondrop="shzDrop(event,'${room}')" onclick="shzPlaceTo('${room}')">
-      <div class="shz-room-h">${room} <span class="shz-cap${over?' over':''}">${chips.length}/2名</span>${over?' <span class="shz-warn">3名以上</span>':''}</div>
-      <div class="shz-room-body">${chips.map(shzChipHTML).join('')}</div>
-    </div>`;
-  });
-  html += `</div></div>`;
-  const board = document.getElementById('shz-board');
-  if(board) board.innerHTML = html;
-
-  shzRenderPreview();
-}
-function shzDragStart(e){ e.dataTransfer.setData('text', e.target.closest('.shz-chip').dataset.id); SHZ_SEL=null; }
-function shzDrop(e, room){
-  e.preventDefault();
-  const id = e.dataTransfer.getData('text');
-  if(id){ shzAssign(id, room); SHZ_SEL=null; shzRender(); }
-}
-/* 클릭 배정: 손님 카드 클릭 → 선택, 객실/풀 클릭 → 배치 */
-function shzPick(ev, id){
-  if(ev){ ev.stopPropagation();
-    if(ev.target.closest('.shz-cname') || ev.target.closest('.shz-gset')) return; }
-  SHZ_SEL = (SHZ_SEL===id) ? null : id;
-  if(typeof document !== 'undefined') shzRender();
-}
-function shzPlaceTo(room){
-  if(!SHZ_SEL) return;
-  shzAssign(SHZ_SEL, room);
-  SHZ_SEL = null;
-  if(typeof document !== 'undefined') shzRender();
-}
-
-/* ── 렌더: 미리보기(予約表) ───────────────────────────── */
-function shzRenderPreview(){
-  if(typeof document === 'undefined') return;
-  const wrap = document.getElementById('shz-preview');
-  if(!wrap) return;
-  SHZ.guests = shzCollect();
-  const s = shzState();
-  const axis = shzAxis();
-  if(!axis.length){ wrap.innerHTML = '<div class="shz-empty">表示する予約がありません。</div>'; return; }
-  let html = `<div class="shz-pv-title">ー志津の宿　${(shzParseISO(axis[0])||new Date()).getFullYear()}年　予約表ー</div>`;
-  axis.forEach(date => {
-    const d = shzParseISO(date);
-    let tot=0,tm=0,tf=0; const notes={};
-    const cells = SHZ_ROOMS.map(room => {
-      const occ = shzCellOcc(room, date);
-      if(!occ.length) return { name:'', mf:'', stay:'', cnt:'' };
-      const rep = occ[0];
-      const rn = shzNights(rep);
-      tot += occ.length;
-      occ.forEach(g => { const x=shzGender(g); if(x==='男')tm++; else if(x==='女')tf++; });
-      const sq = {}; occ.forEach(g => sq[g.seq]=(sq[g.seq]||0)+1);
-      Object.keys(sq).forEach(k => { notes[k] = { nm: shzName(rep), c:(notes[k]?notes[k].c:0)+sq[k] }; });
-      return {
-        name: shzName(rep)+'様',
-        mf: shzMF(occ),
-        stay: `${shzZen(rn.length)}連泊 ${shzZen(rn.indexOf(date)+1)}`,
-        cnt: shzZen(occ.length)
-      };
-    });
-    let note = s.note[date];
-    if(note==null) note = Object.values(notes).filter(x=>x.c>0).map(x=>`${x.nm}様${shzZen(x.c)}名`).join('　');
-    html += `<table class="shz-pv">
-      <tr class="shz-pv-hd"><th class="shz-pv-dt">${shzZen(d.getMonth()+1)}／${shzZen(d.getDate())}<br><span>${SHZ_DOW[d.getDay()]}</span></th>${SHZ_ROOMS.map(r=>`<th>${r}</th>`).join('')}<th class="shz-pv-k">合計</th></tr>
-      <tr><td class="shz-pv-lb">お名前</td>${cells.map(c=>`<td class="shz-pv-nm">${c.name}</td>`).join('')}<td></td></tr>
-      <tr><td class="shz-pv-lb">大人</td>${cells.map(c=>`<td>${c.mf}</td>`).join('')}<td class="shz-pv-k">大 ${shzZen(tot)} 名</td></tr>
-      <tr><td class="shz-pv-lb">合計人数</td>${cells.map(c=>`<td>${c.cnt}</td>`).join('')}<td class="shz-pv-k">計 ${shzZen(tot)} 名</td></tr>
-      <tr><td class="shz-pv-lb">連泊</td>${cells.map(c=>`<td>${c.stay}</td>`).join('')}<td class="shz-pv-k">男${shzZen(tm)} 女${shzZen(tf)}</td></tr>
-      <tr><td class="shz-pv-lb">到着/メモ</td><td colspan="8" class="shz-pv-note" contenteditable="true" spellcheck="false" onblur="shzSetNote('${date}',this.textContent)">${note}</td></tr>
-    </table>`;
-  });
-  wrap.innerHTML = html;
-}
-
-/* ── 출력: 予約表.xlsx (템플릿 서식 복제) ─────────────── */
-async function shzDownload(){
-  SHZ.guests = shzCollect();
-  const axis = shzAxis();
-  if(!axis.length){ if(typeof alert==='function') alert('표시할 시즈노야도 예약이 없습니다.'); return; }
-  const s = shzState();
-  const wb = new ExcelJS.Workbook();
-  const ws = wb.addWorksheet('予約表', { views:[{ showGridLines:false }] });
-  // 인쇄 여백·용지(A4 세로, 가로 1페이지 맞춤) — 회사 PC 인쇄 서식 일치
-  ws.pageSetup = {
-    paperSize: 9, orientation: 'portrait',
-    fitToPage: true, fitToWidth: 1, fitToHeight: 0,
-    horizontalCentered: true,
-    margins: { left:0.39, right:0.39, top:0.55, bottom:0.55, header:0.31, footer:0.31 }
-  };
-  const FONT = '游ゴシック';
-  const FILL = { type:'pattern', pattern:'solid', fgColor:{ argb:'FFDDEBF7' } };
-  const thin = { style:'thin' }, med = { style:'medium' };
-  const W = { A:9, B:6, C:10, D:21.9, E:21, F:22.2, G:21.1, H:19.4, I:21.2, J:18.6, K:10.2 };
-  Object.entries(W).forEach(([c,w]) => { ws.getColumn(c).width = w; });
-
-  const yr = (shzParseISO(axis[0]) || new Date()).getFullYear();
-  ws.mergeCells('A1:J1');
-  const t = ws.getCell('A1');
-  t.value = `ー志津の宿　　${yr}年　　予約表ー`;
-  t.font = { name:FONT, size:26, bold:true };
-  t.alignment = { horizontal:'center', vertical:'middle' };
-  t.border = { bottom: thin };
-  ws.getRow(1).height = 41.4;
-
-  let row = 2;
-  axis.forEach(date => {
-    const d = shzParseISO(date);
-    const r0 = row;
-    ws.getRow(r0).height = 29.4;
-    for(let k=1;k<=5;k++) ws.getRow(r0+k).height = 18;
-    ws.getRow(r0+6).height = 20.4;
-
-    // off0: 日付/曜日 라벨 + 객실명
-    const hd = ws.getCell(r0,1); hd.value='日付'; hd.font={name:FONT,size:11}; hd.alignment={horizontal:'center',vertical:'middle'};
-    const hw = ws.getCell(r0,2); hw.value='曜日'; hw.font={name:FONT,size:11}; hw.alignment={horizontal:'center',vertical:'middle'};
-    SHZ_ROOMS.forEach((nm,i)=>{ const c=ws.getCell(r0,4+i); c.value=nm; c.font={name:FONT,size:18,bold:true}; c.alignment={horizontal:'center',vertical:'middle'}; });
-
-    // 날짜/요일 (off1~off5 병합)
-    ws.mergeCells(r0+1,1,r0+5,1);
-    ws.mergeCells(r0+1,2,r0+5,2);
-    const dc=ws.getCell(r0+1,1); dc.value=`${shzZen(d.getMonth()+1)}／${shzZen(d.getDate())}`; dc.font={name:FONT,size:14,bold:true}; dc.alignment={horizontal:'center',vertical:'middle'};
-    const wc=ws.getCell(r0+1,2); wc.value=SHZ_DOW[d.getDay()]; wc.font={name:FONT,size:12,bold:true}; wc.alignment={horizontal:'center',vertical:'middle'};
-
-    // C열 라벨
-    ['お名前','大人','子供','合計人数','電話番号'].forEach((lb,i)=>{
-      const c=ws.getCell(r0+1+i,3); c.value=lb; c.font={name:FONT,size:11,bold:true}; c.alignment={vertical:'middle'};
-    });
-
-    let tot=0,tm=0,tf=0; const notes={};
-    SHZ_ROOMS.forEach((room,ri)=>{
-      const col=4+ri;
-      for(let k=1;k<=5;k++) ws.getCell(r0+k,col).fill = FILL;
-      const occ = shzCellOcc(room, date);
-      // 子供 행은 항상 빈 '才' 표기
-      const kc=ws.getCell(r0+3,col); kc.value='　　　　　　才'; kc.font={name:FONT,size:11};
-      if(!occ.length) return;
-      const rep=occ[0];
-      const nc=ws.getCell(r0+1,col); nc.value=shzName(rep)+'様'; nc.font={name:FONT,size:11}; nc.alignment={horizontal:'right',vertical:'middle'};
-      const ac=ws.getCell(r0+2,col); ac.value=shzMF(occ); ac.font={name:FONT,size:11}; ac.alignment={vertical:'middle'};
-      const sc=ws.getCell(r0+4,col); sc.value=shzZen(occ.length); sc.font={name:FONT,size:11}; sc.alignment={horizontal:'center',vertical:'middle'};
-      const rn=shzNights(rep);
-      const pc=ws.getCell(r0+5,col); pc.value=`${shzZen(rn.length)}連泊　${shzZen(rn.indexOf(date)+1)}`; pc.font={name:FONT,size:11}; pc.alignment={horizontal:'center',vertical:'middle'};
-      tot+=occ.length;
-      occ.forEach(g=>{ const x=shzGender(g); if(x==='男')tm++; else if(x==='女')tf++; });
-      const sq={}; occ.forEach(g=>sq[g.seq]=(sq[g.seq]||0)+1);
-      Object.keys(sq).forEach(k=>{ notes[k]={ nm:shzName(rep), c:(notes[k]?notes[k].c:0)+sq[k] }; });
-    });
-
-    // K열 합계
-    const kN=ws.getCell(r0+1,11); kN.value='合計'; kN.font={name:FONT,size:11,bold:true}; kN.alignment={horizontal:'center',vertical:'middle'};
-    const kA=ws.getCell(r0+2,11); kA.value=`大　${shzZen(tot)}　名`; kA.font={name:FONT,size:11}; kA.alignment={horizontal:'right',vertical:'middle'};
-    const kC=ws.getCell(r0+3,11); kC.value='子　　　名'; kC.font={name:FONT,size:11};
-    const kS=ws.getCell(r0+4,11); kS.value=`計　${shzZen(tot)}　名`; kS.font={name:FONT,size:11,bold:true}; kS.alignment={horizontal:'center',vertical:'middle'};
-    const kM=ws.getCell(r0+5,11); kM.value=`男${shzZen(tm)}　女${shzZen(tf)}`; kM.font={name:FONT,size:11}; kM.alignment={horizontal:'center',vertical:'middle'};
-
-    // off6: 到着予定時刻 + 메모
-    ws.mergeCells(r0+6,1,r0+6,2);
-    const ar=ws.getCell(r0+6,1); ar.value='到着予定時刻'; ar.font={name:FONT,size:12}; ar.alignment={horizontal:'center',vertical:'middle'};
-    ws.mergeCells(r0+6,3,r0+6,11);
-    let note=s.note[date];
-    if(note==null) note=Object.values(notes).filter(x=>x.c>0).map(x=>`${x.nm}様${shzZen(x.c)}名`).join('　');
-    const nt=ws.getCell(r0+6,3); nt.value=note; nt.font={name:FONT,size:11,bold:true}; nt.alignment={horizontal:'left',vertical:'middle',indent:1};
-
-    // 테두리: 블록 전체 thin + 외곽 medium
-    for(let rr=r0; rr<=r0+6; rr++){
-      for(let cc=1; cc<=11; cc++){
-        const c=ws.getCell(rr,cc);
-        const b={ top:thin, bottom:thin, left:thin, right:thin };
-        if(rr===r0) b.top=med;
-        if(rr===r0+6) b.bottom=med;
-        if(cc===1) b.left=med;
-        if(cc===11) b.right=med;
-        c.border=b;
-      }
-    }
-    row += 7;
-  });
-
-  const ses = (typeof currentSession!=='undefined' && currentSession) ? ('_'+currentSession) : '';
-  if(typeof xlSave === 'function') await xlSave(wb, `志津の宿_予約表${ses}.xlsx`);
-  else return wb; // Node 테스트용
-}
-
-/* Node 테스트 export */
-if(typeof module !== 'undefined' && module.exports){
-  module.exports = { shzCollect, shzNights, shzAxis, shzDownload, shzCellOcc, SHZ, SHZ_ROOMS };
-}
-
-</script>
 
 <style>
 .app-lang{display:inline-flex;gap:2px;background:var(--surface3);border:1px solid var(--border);border-radius:8px;padding:2px;margin-right:8px}
@@ -10037,7 +9490,6 @@ if(typeof module !== 'undefined' && module.exports){
       nav_dispatch: '現地手配書',
       nav_dinner: '夕食名前版',
       nav_settle: '現地精算表',
-      nav_shizu: '志津の宿 予約表',
       nav_transfer: '送迎配車表',
       nav_accom: '宿泊配置表',
       nav_golf: 'ゴルフ組合せ表',
@@ -10051,12 +9503,6 @@ if(typeof module !== 'undefined' && module.exports){
       up_monthSwitch: '💡 月の切り替え方法',
       up_analyze: 'データ分析開始 →',
       up_grpTitle: '(旧)グループコード マスター',
-      shz_title: '志津の宿 予約表',
-      shz_step1: '<b>自動収集</b>統合データから志津の宿の宿泊客を自動で集めます。',
-      shz_step2: '<b>客室へ割当</b>お客様をクリック→客室をクリックで配置（ドラッグでもOK）。⚡自動割当も可。',
-      shz_step3: '<b>ダウンロード</b>予約表をテンプレート書式そのまま出力します。',
-      shz_tip: '💡 <b>クリック割当</b>：お客様カードをクリック→客室をクリックで配置（ドラッグでもOK）。現地予約は性別ボタン（男/女）を押してください。',
-      shz_dl: '予約表 ダウンロード',
       shz_preview: 'プレビュー — 予約表'
     },
     ko: {
@@ -10068,7 +9514,6 @@ if(typeof module !== 'undefined' && module.exports){
       nav_dispatch: '현지 수배서',
       nav_dinner: '저녁 명단표',
       nav_settle: '현지 정산표',
-      nav_shizu: '시즈노야도 예약표',
       nav_transfer: '송영 배차표',
       nav_accom: '숙박 배치표',
       nav_golf: '골프 조합표',
@@ -10082,12 +9527,6 @@ if(typeof module !== 'undefined' && module.exports){
       up_monthSwitch: '💡 월 전환 방법',
       up_analyze: '데이터 분석 시작 →',
       up_grpTitle: '(구)그룹코드 마스터',
-      shz_title: '시즈노야도 예약표',
-      shz_step1: '<b>자동 수집</b>통합 데이터에서 시즈노야도 숙박객을 자동으로 모읍니다.',
-      shz_step2: '<b>객실 배정</b>손님을 클릭→객실을 클릭하면 배정(드래그도 가능). ⚡자동배정도 가능.',
-      shz_step3: '<b>다운로드</b>예약표를 담당자 양식 그대로 출력합니다.',
-      shz_tip: '💡 <b>클릭 배정</b>: 손님 카드를 클릭→객실을 클릭하면 배정(드래그도 가능). 현지예약은 성별 버튼(男/女)을 눌러주세요.',
-      shz_dl: '예약표 다운로드',
       shz_preview: '미리보기 — 예약표'
     },
     en: {
@@ -10099,7 +9538,6 @@ if(typeof module !== 'undefined' && module.exports){
       nav_dispatch: 'Dispatch Sheet',
       nav_dinner: 'Dinner Board',
       nav_settle: 'Settlement',
-      nav_shizu: 'Shizunoyado Booking',
       nav_transfer: 'Transfer',
       nav_accom: 'Lodging',
       nav_golf: 'Golf Pairing',
@@ -10113,12 +9551,6 @@ if(typeof module !== 'undefined' && module.exports){
       up_monthSwitch: '💡 How to switch months',
       up_analyze: 'Start analysis →',
       up_grpTitle: '(Legacy) Group Code Master',
-      shz_title: 'Shizunoyado Booking Sheet',
-      shz_step1: '<b>Auto-collect</b>Shizunoyado guests are gathered automatically from the integrated data.',
-      shz_step2: '<b>Assign to rooms</b>Click a guest, then click a room (drag also works). ⚡Auto-assign is available too.',
-      shz_step3: '<b>Download</b>Outputs the booking sheet in the staff template format.',
-      shz_tip: '💡 <b>Click to assign</b>: click a guest card, then click a room (drag also works). For local bookings, press the gender button (M/F).',
-      shz_dl: 'Download booking sheet',
       shz_preview: 'Preview — Booking sheet'
     }
   };
