@@ -140,13 +140,13 @@ tr:hover td{background:var(--accent-dim)}
         <label class="upload-area" id="up-res">
           <input type="file" accept=".xlsx,.xls" style="display:none" onchange="onFile(event,'res')">
           <div class="upload-title" data-i18n="up_resTitle">예약 리스트</div>
-          <div class="upload-sub" data-i18n="up_resSub">행사(팀) 마스터 — 엠클릭 예약현황 탭</div>
+          <div class="upload-sub" data-i18n="up_resSub">행사(팀) 마스터 — 엠클릭 예약현황 탭 (기존대로 500행씩 표시)</div>
           <div class="upload-stat" id="stat-res"></div>
         </label>
         <label class="upload-area" id="up-ilh">
           <input type="file" accept=".xlsx,.xls" style="display:none" onchange="onFile(event,'ilh')">
           <div class="upload-title" data-i18n="up_ilhTitle">일행별 예약</div>
-          <div class="upload-sub" data-i18n="up_ilhSub">개인 명단 — 엠클릭 탑승자정보 탭</div>
+          <div class="upload-sub" data-i18n="up_ilhSub">개인 명단 — 엠클릭 탑승자정보 탭 (1개월 단위 일괄 다운로드 · 인원수 무관)</div>
           <div class="upload-stat" id="stat-ilh"></div>
         </label>
       </div>
@@ -251,8 +251,8 @@ const I18N = {
     nav_dispatch:'現地手配書', nav_dinner:'夕食名簿', nav_settle:'現地精算表',
     up_cardTitle:'ファイルアップロード',
     up_cardSub:'엠클릭エクセル2種をアップロードして分析を開始します。',
-    up_resTitle:'予約リスト', up_resSub:'行事(チーム)マスター',
-    up_ilhTitle:'同行者別予約', up_ilhSub:'個人名簿',
+    up_resTitle:'予約リスト', up_resSub:'行事(チーム)マスター · 従来通り500行ずつ表示',
+    up_ilhTitle:'同行者別予約', up_ilhSub:'個人名簿 · 1ヶ月単位で一括ダウンロード(人数無関係)',
     up_analyze:'データ分析開始 →',
     up_constTitle:'現場定数', up_constSub:'フォーティーンヒルズ特化定数。',
     nt_sub:'参加者ネームタグ (グループ/出発地基準)。',
@@ -265,8 +265,8 @@ const I18N = {
     nav_dispatch:'현지 수배서', nav_dinner:'저녁 명단', nav_settle:'현지 정산표',
     up_cardTitle:'파일 업로드',
     up_cardSub:'엠클릭 엑셀 2종을 업로드한 뒤 분석을 시작합니다.',
-    up_resTitle:'예약 리스트', up_resSub:'행사(팀) 마스터',
-    up_ilhTitle:'일행별 예약', up_ilhSub:'개인 명단',
+    up_resTitle:'예약 리스트', up_resSub:'행사(팀) 마스터 · 기존대로 500행씩 표시',
+    up_ilhTitle:'일행별 예약', up_ilhSub:'개인 명단 · 1개월 단위 일괄 다운로드(인원수 무관)',
     up_analyze:'데이터 분석 시작 →',
     up_constTitle:'현장 상수', up_constSub:'포틴힐즈 특화 상수.',
     nt_sub:'참가자 네임택 (그룹/출발지 기준).',
@@ -279,8 +279,8 @@ const I18N = {
     nav_dispatch:'Arrangements', nav_dinner:'Dinner List', nav_settle:'Settlement',
     up_cardTitle:'File Upload',
     up_cardSub:'Upload the two Excel files, then start analysis.',
-    up_resTitle:'Reservation List', up_resSub:'Group (team) master',
-    up_ilhTitle:'Passenger List', up_ilhSub:'Individual roster',
+    up_resTitle:'Reservation List', up_resSub:'Group (team) master · 500 rows per page as before',
+    up_ilhTitle:'Passenger List', up_ilhSub:'Individual roster · one-month batch download (any headcount)',
     up_analyze:'Start analysis →',
     up_constTitle:'Site Constants', up_constSub:'Fourteen Hills constants.',
     nt_sub:'Participant name tags (by group/origin).',
