@@ -493,16 +493,16 @@ tr.draggable-row td:first-child::before{content:'⠿';color:var(--text3);margin-
           <div class="upload-title" data-i18n="up_resTitle">예약 리스트</div>
           <div class="upload-sub" data-i18n="up_resSub">엠클릭 「출발일별·예약일별 → 예약현황」 탭에서 다운로드 · 500행 분할 시 여러 파일 선택 가능</div>
         </div>
-        <div class="file-status"><div class="file-dot empty" id="dot1"></div><div class="file-name" id="fname1">파일을 선택해주세요</div><div class="file-size" id="fsize1"></div></div>
+        <div class="file-status"><div class="file-dot empty" id="dot1"></div><div class="file-name" id="fname1">미선택</div><div class="file-size" id="fsize1"></div></div>
       </div>
       <div style="display:flex;flex-direction:column">
         <div class="upload-area" id="drop2" onclick="document.getElementById('inp2').click()" ondragover="onDrag(event,'drop2')" ondragleave="offDrag('drop2')" ondrop="onDrop(event,'ilhaeng')" style="flex:1">
           <input type="file" id="inp2" accept=".xlsx,.xls" style="display:none" multiple onchange="loadFile(event,'ilhaeng')">
           <div class="upload-icon"><svg viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87"/><path d="M16 3.13a4 4 0 010 7.75"/></svg></div>
           <div class="upload-title" data-i18n="up_ilhTitle">일행별 예약</div>
-          <div class="upload-sub" data-i18n="up_ilhSub">엠클릭 「출발일별·예약일별 → 탑승자정보」 탭에서 다운로드 · 500행 분할 시 여러 파일 선택 가능</div>
+          <div class="upload-sub" data-i18n="up_ilhSub">엠클릭 출발일별 / 예약일별 → 탑승자정보 탭에서 다운로드 · 개인 명단 + 항공·PNR·여권 통합 · 1개월 단위로 명단 인원수 관계없이 한 번에 다운로드(여러 달이면 월별 파일 여러 개 등록)</div>
         </div>
-        <div class="file-status"><div class="file-dot empty" id="dot2"></div><div class="file-name" id="fname2">파일을 선택해주세요</div><div class="file-size" id="fsize2"></div></div>
+        <div class="file-status"><div class="file-dot empty" id="dot2"></div><div class="file-name" id="fname2">미선택</div><div class="file-size" id="fsize2"></div></div>
       </div>
     </div>
 
@@ -6470,17 +6470,24 @@ function renderNametag(date){
   };
   const isPUS = (seq) => {
     const o = getSeqOrigin(seq);
-    return o.includes('부산') || o === 'PUS';
+    return o.includes('부산') || o.includes('김해') || o === 'PUS';
   };
-
-  const originGroups = [
-    { label:'서울 — 인천(ICN)', key:'ICN',
-      seqs: seqOrder.filter(seq => !isPUS(seq))
-    },
-    { label:'부산(PUS)', key:'PUS',
-      seqs: seqOrder.filter(seq => isPUS(seq))
-    },
-  ].filter(g=>g.seqs.length>0);
+  // 14hills 출발지 3분류: 인천(ICN) / 김해(PUS) / 청주(CJJ)
+  const originKey3 = (seq) => {
+    const o = getSeqOrigin(seq);
+    if(o.includes('부산') || o.includes('김해') || o === 'PUS') return 'PUS';
+    if(o.includes('청주') || o === 'CJJ') return 'CJJ';
+    return 'ICN';
+  };
+  const ORIGIN_DEFS = [
+    { key:'ICN', label:'서울 — 인천(ICN)' },
+    { key:'PUS', label:'부산 — 김해(PUS)' },
+    { key:'CJJ', label:'청주(CJJ)' }
+  ];
+  const originGroups = ORIGIN_DEFS.map(d=>({
+    label:d.label, key:d.key,
+    seqs: seqOrder.filter(seq => originKey3(seq) === d.key)
+  })).filter(g=>g.seqs.length>0);
 
   // 숙박지 그룹별 집계 (요약 배너용)
   const accomOrder = ['호텔','카라반'];
@@ -6632,7 +6639,7 @@ async function _downloadNametag(selectedDates, selectedAccoms){
 
   selectedDates.forEach(date => {
     const accomOrder = ['호텔','카라반'];
-    const originKeys = ['ICN','PUS'];
+    const originKeys = ['ICN','PUS','CJJ'];
     // 출발지 × 숙박지 순서로 DOM 탐색 (새 ID 패턴: nametag-tbl-{date}-{key}-{accom})
     originKeys.forEach(key => {
       accomOrder.forEach(ac => {
@@ -6693,14 +6700,18 @@ async function _downloadNametag(selectedDates, selectedAccoms){
     const repPax = paxList.find(p=>p.isRep);
     const rawOrigin = repPax?.depFlight?.startsWith('ZE') ? '부산'
       : repPax?.origin || rec.raw?.['출발지'] || '';
-    const originKey = rawOrigin.includes('부산') ? 'PUS' : 'ICN';
-    const originLabel = originKey === 'ICN' ? '✈ ソウル — 仁川(ICN)' : '✈ 釜山(PUS)';
+    const originKey = (rawOrigin.includes('부산')||rawOrigin.includes('김해')) ? 'PUS'
+                    : rawOrigin.includes('청주') ? 'CJJ' : 'ICN';
+    const originLabel = originKey === 'PUS' ? '✈ 釜山 — 金海(PUS)'
+                      : originKey === 'CJJ' ? '✈ 清州(CJJ)' : '✈ ソウル — 仁川(ICN)';
+    const originDark = originKey==='PUS' ? 'FF92400E' : originKey==='CJJ' ? 'FF155E45' : 'FF1E3A8A';
+    const originLight= originKey==='PUS' ? 'FFFEF3C7' : originKey==='CJJ' ? 'FFD1FAE5' : 'FFD6E4F7';
 
     // 출발지 섹션 헤더
     if(originKey !== prevOriginKey){
       prevOriginKey = originKey;
       prevAccom = '';
-      xlSection(ws0, r, originLabel, COL, originKey==='ICN'?'FF1E3A8A':'FF92400E', originKey==='ICN'?'FFD6E4F7':'FFFEF3C7');
+      xlSection(ws0, r, originLabel, COL, originDark, originLight);
       r++;
     }
     // 숙박지 섹션 헤더
@@ -6731,23 +6742,19 @@ async function _downloadNametag(selectedDates, selectedAccoms){
   const COLS_PER_ROW = 3;
 
   // ICN/PUS 분리
+  const stickerOriginKey = (seq)=>{
+    const rec=procMap[seq]; const paxList=seqPaxMap[seq];
+    if(!rec||!paxList) return null;
+    const rawO = paxList[0]?.depFlight?.startsWith('ZE') ? '부산'
+      : paxList[0]?.origin || rec.raw?.['출발지'] || '';
+    if(rawO.includes('부산')||rawO.includes('김해')) return 'PUS';
+    if(rawO.includes('청주')) return 'CJJ';
+    return 'ICN';
+  };
   const stickerGroups = [
-    { key:'ICN', label:'スティッカー印刷(ICN)', seqs: seqOrder.filter(seq=>{
-        const rec=procMap[seq]; const paxList=seqPaxMap[seq];
-        if(!rec||!paxList) return false;
-        const rawO = paxList[0]?.depFlight?.startsWith('ZE') ? '부산'
-          : paxList[0]?.origin || rec.raw?.['출발지'] || '';
-        return !rawO.includes('부산');
-      })
-    },
-    { key:'PUS', label:'スティッカー印刷(PUS)', seqs: seqOrder.filter(seq=>{
-        const rec=procMap[seq]; const paxList=seqPaxMap[seq];
-        if(!rec||!paxList) return false;
-        const rawO = paxList[0]?.depFlight?.startsWith('ZE') ? '부산'
-          : paxList[0]?.origin || rec.raw?.['출발지'] || '';
-        return rawO.includes('부산');
-      })
-    },
+    { key:'ICN', label:'スティッカー印刷(ICN)', seqs: seqOrder.filter(seq=>stickerOriginKey(seq)==='ICN') },
+    { key:'PUS', label:'スティッカー印刷(PUS)', seqs: seqOrder.filter(seq=>stickerOriginKey(seq)==='PUS') },
+    { key:'CJJ', label:'スティッカー印刷(CJJ)', seqs: seqOrder.filter(seq=>stickerOriginKey(seq)==='CJJ') },
   ].filter(g=>g.seqs.length>0);
 
   stickerGroups.forEach(({key, label, seqs})=>{
@@ -7220,7 +7227,7 @@ function generateAndPrintLabels(selectedDates, originFilter, startSlot, selected
   const seen = new Set();
   selectedDates.forEach(date => {
     const accomOrder = ['호텔','카라반'];
-    const originKeys = ['ICN','PUS'];
+    const originKeys = ['ICN','PUS','CJJ'];
     originKeys.forEach(key => {
       accomOrder.forEach(ac => {
         const tid = `nametag-tbl-${date}-${key}-${ac.replace(/[\s]/g,'')}`;
@@ -9539,8 +9546,8 @@ function resetApp(){
   ['inp1','inp2'].forEach(id=>{const el=document.getElementById(id);if(el)el.value='';});
   ['dot1','dot2'].forEach(id=>{const el=document.getElementById(id);if(el)el.classList.add('empty');});
   ['drop1','drop2'].forEach(id=>{const el=document.getElementById(id);if(el)el.classList.remove('uploaded');});
-  document.getElementById('fname1').textContent='파일을 선택해주세요';
-  document.getElementById('fname2').textContent='파일을 선택해주세요';
+  document.getElementById('fname1').textContent='미선택';
+  document.getElementById('fname2').textContent='미선택';
   document.getElementById('fsize1').textContent='';
   document.getElementById('fsize2').textContent='';
   // 그룹코드 상태 복원
@@ -10054,7 +10061,7 @@ if(typeof module !== 'undefined' && module.exports){
       up_resTitle: '予約リスト',
       up_resSub: 'エムクリック「出発日別・予約日別 → 予約現況」タブからダウンロード · 500行分割時は複数ファイル選択可',
       up_ilhTitle: '同行者別予約',
-      up_ilhSub: 'エムクリック「出発日別・予約日別 → 搭乗者情報」タブからダウンロード · 500行分割時は複数ファイル選択可',
+      up_ilhSub: 'エムクリック 出発日別 / 予約日別 → 搭乗者情報タブからダウンロード · 個人名簿 + 航空・PNR・旅券 統合 · 1ヶ月単位で人数に関係なく一括ダウンロード（複数月は月別ファイルを複数登録）',
       up_monthSwitch: '💡 月の切り替え方法',
       up_analyze: 'データ分析開始 →',
       up_grpTitle: '(旧)グループコード マスター',
@@ -10085,7 +10092,7 @@ if(typeof module !== 'undefined' && module.exports){
       up_resTitle: '예약 리스트',
       up_resSub: '엠클릭 「출발일별·예약일별 → 예약현황」 탭에서 다운로드 · 500행 분할 시 여러 파일 선택 가능',
       up_ilhTitle: '일행별 예약',
-      up_ilhSub: '엠클릭 「출발일별·예약일별 → 탑승자정보」 탭에서 다운로드 · 500행 분할 시 여러 파일 선택 가능',
+      up_ilhSub: '엠클릭 출발일별 / 예약일별 → 탑승자정보 탭에서 다운로드 · 개인 명단 + 항공·PNR·여권 통합 · 1개월 단위로 명단 인원수 관계없이 한 번에 다운로드(여러 달이면 월별 파일 여러 개 등록)',
       up_monthSwitch: '💡 월 전환 방법',
       up_analyze: '데이터 분석 시작 →',
       up_grpTitle: '(구)그룹코드 마스터',
@@ -10116,7 +10123,7 @@ if(typeof module !== 'undefined' && module.exports){
       up_resTitle: 'Reservation List',
       up_resSub: 'Download from the Mclick "By departure/reservation date → Reservation status" tab · multiple files allowed when split at 500 rows',
       up_ilhTitle: 'Per-companion Reservations',
-      up_ilhSub: 'Download from the Mclick "By departure/reservation date → Passenger info" tab · multiple files allowed when split at 500 rows',
+      up_ilhSub: 'Download from Mclick "By departure / reservation date → Passenger info" tab · individual roster + flight·PNR·passport · one-month batch regardless of headcount (register multiple monthly files for multiple months)',
       up_monthSwitch: '💡 How to switch months',
       up_analyze: 'Start analysis →',
       up_grpTitle: '(Legacy) Group Code Master',
