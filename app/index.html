@@ -222,9 +222,15 @@ const HILLS = {
   city: '名古屋 (나고야)',
   holes: 18,                          // 27홀 야마나미 → 18홀 단일코스
   course: 'OUT / IN',                 // §6.4 확정 전 placeholder (실제 코스명 입력 필요)
-  origins: ['ICN', 'PUS', 'TAE'],     // 출발지 코드 (SaiZen 표준 재사용)
+  origins: ['ICN', 'PUS', 'CJJ'],     // 실데이터 출발지: 인천/김해/청주 (대구 TAE 미등장)
   currency: 'JPY'
 };
+
+/* 출발지 한글 → IATA 코드 (엠클릭 '출발지' 컬럼 표준화) */
+const ORIGIN_MAP = { '인천':'ICN', '김해':'PUS', '부산':'PUS', '청주':'CJJ', '대구':'TAE' };
+
+/* 운영 제외 대상 구분값 (취소·합계 총계행). 견적은 포함(취소만 제외) */
+const EXCLUDE_GUBUN = ['취소', '합계'];
 
 /* ── localStorage 네임스페이스 (SaiZen와 충돌 방지: 14h_ 접두) ── */
 const LS = {
@@ -236,9 +242,11 @@ const LS = {
 
 /* ── 전역 상태 ──────────────────────────────────────────────── */
 let state = {
-  reservations: [],   // 예약리스트 행
-  guests: [],         // 일행별예약 행 (개인)
-  processed: [],      // 결합 결과 (골격에서는 guests fallback)
+  reservations: [],   // 예약리스트(A) 원본 행
+  guests: [],         // 일행별예약(B) 원본 행 (개인)
+  teams: [],          // 결합 결과: 운영대상 팀 (취소·합계 제외)
+  processed: [],      // 결합 결과: 개인 명단 (태그코드 부여)
+  stats: null,        // 분석 요약 통계
   ready: false
 };
 
@@ -414,15 +422,124 @@ function markLoaded(kind, n){
   const stat = document.getElementById(kind==='res'?'stat-res':'stat-ilh');
   if(area) area.classList.add('loaded');
   if(stat) stat.textContent = '✓ ' + n + ' 행';
-  // 분석 버튼: 일행별예약(개인 명단) 1개만 있어도 골격 동작 허용
+  // 분석 버튼: 예약 리스트(A) + 일행별 예약(B) 두 파일 모두 있어야 결합 가능
   const btn = document.getElementById('btn-analyze');
-  if(btn) btn.disabled = !(state.reservations.length || state.guests.length);
+  if(btn) btn.disabled = !(state.reservations.length && state.guests.length);
 }
+/* ════════════════ 결합 엔진 (A 예약리스트 × B 일행별) ════════════
+   - 키: 행사번호 (양쪽 공통)
+   - 제외: 구분 취소·합계 (견적은 포함 — 취소만 빠짐)
+   - 태그코드: {박수}-{MMDD출발일}-{팀알파}-{개인번호}  (Y-MMDD-팀알파-번호)
+     · 첫 자리 Y = 박수(泊数). 인계 브리프 예시 6-0312-A-01 = 6박
+     · 팀알파 = 동일 (박수+출발일) 그룹 내 A,B,…,Z,AA… 순차 부여
+     · 개인번호 = 팀 내 일행 순번 01~NN
+   ──────────────────────────────────────────────────────────────── */
+function txt(v){ return v==null ? '' : String(v).trim(); }
+function parseNights(period){            // "3박4일" → 3
+  const m = txt(period).match(/(\d+)\s*박/);
+  return m ? parseInt(m[1],10) : null;
+}
+function parseMMDD(dateStr){             // "2026-07-02" → "0702"
+  const m = txt(dateStr).slice(0,10).match(/^(\d{4})-(\d{2})-(\d{2})/);
+  return m ? (m[2]+m[3]) : '????';
+}
+function originCode(v){ const k = txt(v); return ORIGIN_MAP[k] || k; }
+function alphaCode(i){                   // 0→A, 25→Z, 26→AA …
+  let s=''; i+=1;
+  while(i>0){ const r=(i-1)%26; s=String.fromCharCode(65+r)+s; i=Math.floor((i-1)/26); }
+  return s;
+}
+function pad2(n){ return String(n).padStart(2,'0'); }
+
+function buildTeams(){
+  const teams = [];
+  state.reservations.forEach(r=>{
+    const gubun = txt(r['구분']);
+    const ev    = txt(r['행사번호']);
+    if(!ev || EXCLUDE_GUBUN.indexOf(gubun) >= 0) return;   // 취소·합계·빈 행사번호 제외
+    teams.push({
+      ev, gubun,
+      rep:    txt(r['대표고객']),
+      dep:    txt(r['출발일자']).slice(0,10),
+      ret:    txt(r['도착일자']).slice(0,10),
+      period: txt(r['기간']),
+      nights: parseNights(r['기간']),
+      mmdd:   parseMMDD(r['출발일자']),
+      origin: originCode(r['출발지']),
+      air:    txt(r['항공']),
+      product:txt(r['상품명']),
+      pax:    parseInt(txt(r['예약'])||'0',10) || 0
+    });
+  });
+  // 팀알파: (박수+출발MMDD) 그룹별, 출발일→행사번호 순 정렬
+  const groups = {};
+  teams.slice().sort((a,b)=> (a.dep+a.ev).localeCompare(b.dep+b.ev))
+       .forEach(t=>{
+         const key = t.nights+'|'+t.mmdd;
+         (groups[key] = groups[key] || []).push(t);
+       });
+  Object.values(groups).forEach(arr=>{
+    arr.forEach((t,idx)=>{
+      t.alpha     = alphaCode(idx);
+      t.teamCode  = `${t.nights}-${t.mmdd}-${t.alpha}`;   // 개인번호 제외 팀 코드
+    });
+  });
+  return teams;
+}
+
+function buildGuests(teams){
+  // 행사번호 → 일행(B) 행 모음
+  const byEv = {};
+  state.guests.forEach(r=>{ const ev=txt(r['행사번호']); if(ev)(byEv[ev]=byEv[ev]||[]).push(r); });
+  const guests = [];
+  teams.forEach(t=>{
+    const rows = byEv[t.ev] || [];
+    rows.forEach((r,i)=>{
+      const no = i+1;
+      guests.push({
+        tag:    `${t.teamCode}-${pad2(no)}`,
+        ev:     t.ev,
+        rep:    t.rep,
+        name:   txt(r['고객명']),
+        eng:    (txt(r['영문성'])+' '+txt(r['영문이름'])).trim(),
+        sex:    txt(r['성별']),
+        origin: t.origin,
+        dep:    t.dep,
+        ret:    t.ret,
+        nights: t.nights,
+        depFlight: txt(r['출발편']),
+        retFlight: txt(r['귀국편']),
+        product: t.product
+      });
+    });
+    t.guestCount = rows.length;
+  });
+  return guests;
+}
+
+function computeStats(teams, guests){
+  const by = (arr,f)=>arr.reduce((m,x)=>{const k=f(x)||'(미지정)';m[k]=(m[k]||0)+1;return m;},{});
+  return {
+    teamCount:   teams.length,
+    confirmCount:teams.filter(t=>t.gubun==='확정').length,
+    quoteCount:  teams.filter(t=>t.gubun==='견적').length,
+    guestCount:  guests.length,
+    paxSum:      teams.reduce((s,t)=>s+t.pax,0),
+    noPaxTeams:  teams.filter(t=>!t.guestCount).length,
+    byOrigin:    by(teams, t=>t.origin),
+    byNights:    by(teams, t=>t.nights!=null ? t.nights+'박' : '(미지정)')
+  };
+}
+
 function analyze(){
-  // 골격: 결합 로직은 후속. 개인 명단을 processed로 사용(없으면 예약리스트).
-  state.processed = state.guests.length ? state.guests : state.reservations;
-  state.ready = true;
-  // 탭 잠금 해제
+  if(!state.reservations.length || !state.guests.length){
+    alert('예약 리스트(A)와 일행별 예약(B) 두 파일을 모두 업로드해 주세요.');
+    return;
+  }
+  state.teams     = buildTeams();
+  state.processed = buildGuests(state.teams);
+  state.stats     = computeStats(state.teams, state.processed);
+  state.ready     = true;
   ['nametag','dispatch','dinner','settle'].forEach(id=>{
     const el = document.getElementById('nav-'+id);
     if(el) el.classList.remove('locked');
@@ -431,33 +548,58 @@ function analyze(){
   gotoSection('nametag');
 }
 
-/* ════════════════ 렌더 (골격: 로드 데이터 미리보기) ════════════ */
-function previewTable(rows){
-  if(!rows || !rows.length) return '<div class="empty-note">먼저 업로드 후 분석을 실행해 주세요.</div>';
-  const cols = Object.keys(rows[0]).slice(0, 8);
-  const head = cols.map(c=>'<th>'+esc(c)+'</th>').join('');
-  const body = rows.slice(0, 30).map(r=>
-    '<tr>'+cols.map(c=>'<td>'+esc(r[c])+'</td>').join('')+'</tr>'
-  ).join('');
-  const more = rows.length>30 ? '<div class="card-sub" style="margin-top:.5rem">… 외 '+(rows.length-30)+'행</div>' : '';
+/* ════════════════ 렌더 ════════════════ */
+function esc(v){ return String(v==null?'':v).replace(/[&<>]/g, m=>({'&':'&amp;','<':'&lt;','>':'&gt;'}[m])); }
+
+/* 개인 명단(로스터) 표준 컬럼 — 미리보기·xlsx 공통 */
+const ROSTER_COLS = [
+  ['tag','태그코드'], ['name','이름'], ['eng','영문'], ['sex','성별'],
+  ['origin','출발지'], ['nights','박수'], ['dep','출발일'], ['rep','대표자']
+];
+function rosterTable(rows, limit){
+  if(!rows || !rows.length) return '<div class="empty-note">결합된 개인 명단이 없습니다.</div>';
+  const head = ROSTER_COLS.map(c=>'<th>'+esc(c[1])+'</th>').join('');
+  const body = rows.slice(0, limit||40).map(r=>
+    '<tr>'+ROSTER_COLS.map(c=>'<td>'+esc(r[c[0]])+'</td>').join('')+'</tr>').join('');
+  const more = rows.length>(limit||40)
+    ? '<div class="card-sub" style="margin-top:.5rem">… 외 '+(rows.length-(limit||40))+'명</div>' : '';
   return '<div class="tbl-wrap"><table><thead><tr>'+head+'</tr></thead><tbody>'+body+'</tbody></table></div>'+more;
 }
-function esc(v){ return String(v==null?'':v).replace(/[&<>]/g, m=>({'&':'&amp;','<':'&lt;','>':'&gt;'}[m])); }
+function statsPanel(){
+  const s = state.stats; if(!s) return '';
+  const kv = (label,val)=>'<span class="pill">'+esc(label)+': <b>'+esc(val)+'</b></span>';
+  const dist = obj => Object.keys(obj).sort().map(k=>esc(k)+' '+obj[k]).join(' · ');
+  return '<div class="btn-row" style="flex-wrap:wrap;gap:6px;margin-bottom:.6rem">'
+    + kv('운영팀', s.teamCount+'팀 (확정 '+s.confirmCount+'·견적 '+s.quoteCount+')')
+    + kv('개인 명단', s.guestCount+'명')
+    + kv('예약인원 합', s.paxSum+'명')
+    + kv('탑승객 미등록 팀', s.noPaxTeams+'팀')
+    + '</div>'
+    + '<div class="card-sub">출발지 — '+dist(s.byOrigin)+'</div>'
+    + '<div class="card-sub">박수 — '+dist(s.byNights)+'</div>';
+}
 function renderAll(){
-  const html = previewTable(state.processed);
-  ['out-nametag','out-dispatch','out-dinner','out-settle'].forEach(id=>{
+  const roster = rosterTable(state.processed);
+  // ① 네임택: 결합 통계 + 태그코드 로스터
+  const nt = document.getElementById('out-nametag');
+  if(nt) nt.innerHTML = statsPanel()
+    + '<div class="card-sub" style="margin:.6rem 0 .3rem"><b>개인 명단 (태그코드 부여)</b></div>'
+    + roster;
+  // ②③④: 결합 데이터 기반 미리보기 (최종 레이아웃은 §6.4 확정 후)
+  ['out-dispatch','out-dinner','out-settle'].forEach(id=>{
     const el = document.getElementById(id);
     if(el) el.innerHTML =
-      '<div class="notice">🚧 모듈 로직은 후속 구현 예정입니다. 아래는 로드된 데이터 미리보기입니다.</div>' + html;
+      '<div class="notice">🚧 모듈 전용 레이아웃(요금·코스 상수 §6.4)은 후속입니다. 아래는 결합된 명단입니다.</div>'
+      + statsPanel() + roster;
   });
 }
 
-/* ════════════════ 다운로드 (골격 파이프라인 검증) ════════════ */
+/* ════════════════ 다운로드 (태그코드 로스터 기준) ════════════ */
 function rowsForExport(){
   const rows = state.processed || [];
   if(!rows.length) return { headers:[], data:[] };
-  const headers = Object.keys(rows[0]).slice(0, 8);
-  const data = rows.map(r=> headers.map(h=> r[h]));
+  const headers = ROSTER_COLS.map(c=>c[1]);
+  const data = rows.map(r=> ROSTER_COLS.map(c=> r[c[0]]));
   return { headers, data };
 }
 function guardReady(){
@@ -481,7 +623,7 @@ function gotoSection(id){
 }
 function resetApp(){
   if(!confirm('업로드 데이터를 초기화할까요?')) return;
-  state = { reservations:[], guests:[], processed:[], ready:false };
+  state = { reservations:[], guests:[], teams:[], processed:[], stats:null, ready:false };
   ['res','ilh'].forEach(k=>{
     const a=document.getElementById(k==='res'?'up-res':'up-ilh');
     const s=document.getElementById(k==='res'?'stat-res':'stat-ilh');
