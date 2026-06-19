@@ -572,9 +572,10 @@ tr.draggable-row td:first-child::before{content:'⠿';color:var(--text3);margin-
 <div class="section" id="sec-transfer">
   <div class="wip-banner" data-i18n="wip_banner">🚧 準備中 — この機能は調整中です（クリックして編集できます）</div>
   <div class="rule-box">
-    <strong>🚌 송영 운영 안내:</strong> 입국편 TW287 (09:25 熊本着) · ZE967 (13:25 熊本着) / 출국편 TW288 (10:25 熊本発) · ZE968 (14:30 熊本発) &nbsp;·&nbsp;
-    송영비 <strong>¥6,000/인</strong> (숙박 예약 포함 건에만 적용) &nbsp;·&nbsp;
-    공항↔야마나미 약 1시간 소요 · 버스 좌석 여유분 확인 필수 · 부산편(ZE)은 별도 차량 배차
+    <strong>🚌 송영 운영 안내:</strong> 中部国際空港セントレア(NGO·나고야) ↔ 14hills &nbsp;·&nbsp;
+    이동 <strong>약 2시간</strong>(휴게소 1회 경유) &nbsp;·&nbsp;
+    왕복 송영비 <strong>¥12,000/인</strong> (숙박 예약 포함 건에만 적용) &nbsp;·&nbsp;
+    미팅: 도착 로비 출구에서 「포틴힐즈」 피켓 현지 직원 대기 · 버스 좌석 여유분 확인 필수
   </div>
   <div class="card">
     <div class="card-title">Transfer Assignment Sheet — 送迎配車表</div>
@@ -8763,7 +8764,7 @@ function dispatchFrontHTML(d, masked){
       </div>
       <div style="text-align:right">
         <div class="hp-tag">${d.tagCode}</div>
-        <div class="hp-sub" style="margin-top:1.5mm">発行日 ${today()} ・ SaiZen運営システム</div>
+        <div class="hp-sub" style="margin-top:1.5mm">発行日 ${today()} ・ 14hills運営システム</div>
       </div>
     </div>
 
@@ -8781,8 +8782,8 @@ function dispatchFrontHTML(d, masked){
     <div class="hp-sec">✈ 航空情報</div>
     <table class="hp-t">
       <tr><th style="width:10%">区分</th><th style="width:13%">便名</th><th style="width:17%">日付</th><th style="width:13%">出発時間</th><th style="width:17%">出発地</th><th style="width:17%">到着地</th><th style="width:13%">到着時間</th></tr>
-      <tr><td class="c">往路</td><td class="c mono"><b>${d.depFlight||'-'}</b></td><td class="c mono">${r.dep||''}</td><td class="c mono">${d.depTime}</td><td class="c">${d.portName}</td><td class="c">熊本(KMJ)</td><td class="c mono">${d.locArrTime}</td></tr>
-      <tr><td class="c">復路</td><td class="c mono"><b>${d.retFlight||'-'}</b></td><td class="c mono">${r.arr||''}</td><td class="c mono">${d.retTime}</td><td class="c">熊本(KMJ)</td><td class="c">${d.portName}</td><td class="c mono">${d.korArrTime||''}</td></tr>
+      <tr><td class="c">往路</td><td class="c mono"><b>${d.depFlight||'-'}</b></td><td class="c mono">${r.dep||''}</td><td class="c mono">${d.depTime}</td><td class="c">${d.portName}</td><td class="c">中部(NGO)</td><td class="c mono">${d.locArrTime}</td></tr>
+      <tr><td class="c">復路</td><td class="c mono"><b>${d.retFlight||'-'}</b></td><td class="c mono">${r.arr||''}</td><td class="c mono">${d.retTime}</td><td class="c">中部(NGO)</td><td class="c">${d.portName}</td><td class="c mono">${d.korArrTime||''}</td></tr>
     </table>
 
     <div class="hp-sec">🏨 宿泊情報</div>
@@ -8797,6 +8798,14 @@ function dispatchFrontHTML(d, masked){
     <div class="hp-sec">⛳ ゴルフ情報</div>
     <table class="hp-t">
       <tr><th style="width:24%">ゴルフ場</th><td class="c"><b>${courseStr}</b></td></tr>
+      <tr><th>ラウンド規則</th><td>平日 18H + 9H(無料サービス) / 週末・日本祝日 18H ・ 入国日は昼食後9Hまたは日没ラウンド ・ 9H追加は有料 ¥4,400 ・ EVカートなし</td></tr>
+    </table>
+
+    <div class="hp-sec">🚌 送迎・現地案内</div>
+    <table class="hp-t">
+      <tr><th style="width:24%">到着空港</th><td>中部国際空港セントレア(NGO・名古屋) ↔ 14hills 約2時間(休憩1回経由)</td></tr>
+      <tr><th>ミーティング</th><td>到着ロビー出口にて「포틴힐즈」ピケットの現地スタッフがお出迎え</td></tr>
+      <tr><th>食事</th><td>朝: ホテル食 / 昼(クラブ食): 火・木・日=単品メニュー / 他曜日=ビュッフェ(入国日は軽食) / 夕: 曜日別メニュー</td></tr>
     </table>
 
     <div class="hp-sec">📝 参考事項</div>
@@ -9033,8 +9042,8 @@ async function downloadDispatchXlsx(){
     put(ws, r, 8, '到着地', {th:true});
     ws.mergeCells(r,9,r,10); put(ws, r, 9, '到着時間', {th:true});
     r++;
-    [['往路', d.depFlight||'-', rec.dep||'', d.depTime, d.portName, '熊本(KMJ)', d.locArrTime],
-     ['復路', d.retFlight||'-', rec.arr||'', d.retTime, '熊本(KMJ)', d.portName, d.korArrTime||'']].forEach(row => {
+    [['往路', d.depFlight||'-', rec.dep||'', d.depTime, d.portName, '中部(NGO)', d.locArrTime],
+     ['復路', d.retFlight||'-', rec.arr||'', d.retTime, '中部(NGO)', d.portName, d.korArrTime||'']].forEach(row => {
       ws.getRow(r).height = 17; borderRow(ws, r, 1, 10);
       ws.mergeCells(r,1,r,2); put(ws, r, 1, row[0], {h:'center'});
       put(ws, r, 3, row[1], {h:'center', b:true});
