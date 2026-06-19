@@ -216,14 +216,14 @@ tr:hover td{background:var(--surface2)}
 #accom-content table td:nth-child(14)   /* 操作 */
 { text-align: center; }
 
-/* ④ 저녁 [No, イベント番号, タグコード, 予約者, 滞在日次, 英文名, 人数, テーブルNo, 参考事項, 操作] */
+/* ④ 저녁 [No, イベント番号, タグコード, 予約者, 滞在日次, 英文名, 人数, テーブルNo, 参考事項, 予約備考, 現地備考, 操作] */
 #dinner-content table td:nth-child(1),   /* No */
 #dinner-content table td:nth-child(2),   /* イベント番号 */
 #dinner-content table td:nth-child(3),   /* タグコード */
 #dinner-content table td:nth-child(5),   /* 滞在日次 */
 #dinner-content table td:nth-child(7),   /* 人数 */
 #dinner-content table td:nth-child(8),   /* テーブルNo */
-#dinner-content table td:nth-child(10)   /* 操作 */
+#dinner-content table td:nth-child(12)   /* 操作 */
 { text-align: center; }
 
 /* ⑥ 골프 [No, イベント番号, タグコード, 予約者, 英文名, 人数, ゴルフ場, コース, チーム, ティーオフ, 9H無料, 9H追加, EVカート, 台数, 備考, 操作] */
@@ -641,11 +641,11 @@ tr.draggable-row td:first-child::before{content:'⠿';color:var(--text3);margin-
     <strong>🏌 EVカート 운영 규칙:</strong> 출발 3일 전까지 예약 마감 · 체류 기간 전체 일괄 예약 (부분 선택 불가) · 간지호텔 상품은 야마나미 플레이 기간에만 예약 가능 · 확정 후 부분 취소·변경 불가 (전체 취소만 가능) · 현장 사정 제한 시 실제 사용 일수만 과금 · 미예약 시 가솔린 카트 무료
   </div>
   <div class="rule-box">
-    <strong>⛳ 간지호텔 골프장 배정 규칙:</strong> 평일·비공휴일 → <span style="color:var(--green2)">구주고원CC</span> &nbsp;/&nbsp; 주말·공휴일 → <span style="color:var(--accent2)">야마나미CC</span> &nbsp;(날짜별 자동 표시)<br>
+    <strong>⛳ 간지호텔 골프장 배정 규칙:</strong> 평일·비공휴일 → <span style="color:var(--green2)">14hillsCC</span> &nbsp;/&nbsp; 주말·공휴일 → <span style="color:var(--accent2)">14hillsCC</span> &nbsp;(날짜별 자동 표시)<br>
     <strong>9H 무료 서비스:</strong> 평일만 적용 · 주말·공휴일 해당 없음
   </div>
   <div class="rule-box">
-    <strong>📅 2026년 일본 공휴일 참고</strong> &nbsp;<span style="color:var(--text3);font-size:10px">(이 기간은 골프장·호텔·항공 혼잡 / 구주고원CC → 야마나미CC 자동 전환)</span><br>
+    <strong>📅 2026년 일본 공휴일 참고</strong> &nbsp;<span style="color:var(--text3);font-size:10px">(이 기간은 골프장·호텔·항공 혼잡 / 14hillsCC → 14hillsCC 자동 전환)</span><br>
     3/20(금) 춘분의 날 · 4/29(수) 쇼와의 날 &nbsp;|&nbsp;
     <span style="color:var(--amber2)">【골든위크】</span> 5/3(일) 헌법기념일 · 5/4(월) 녹색의 날 · 5/5(화) 어린이날 · 5/6(수) 대체휴일 &nbsp;|&nbsp;
     7/20(월) 바다의 날 · 8/11(화) 산의 날 &nbsp;|&nbsp;
@@ -813,10 +813,10 @@ tr.draggable-row td:first-child::before{content:'⠿';color:var(--text3);margin-
 // 수정은 여기 한 곳만 하면 양쪽이 자동으로 동일해짐
 // ════════════════════════════════════════════════════════════════
 const HDRS = {
-  SETTLE: ['No','イベント番号','区分','会員権区分','代表者名','英文名','出発日','到着日','泊数','人数','施設','部屋タイプ','料金(¥/人/泊)','宿泊費(¥)','送迎費(¥)','合計(¥)','備考'],
+  SETTLE: ['No','イベント番号','区分','会員権区分','代表者名','英文名','出発日','到着日','泊数','人数','施設','部屋タイプ','料金(¥/人/泊)','宿泊費(¥)','送迎費(¥)','合計(¥)','備考','予約備考','現地備考'],
   TRANSFER_IN:  ['No','イベント番号','タグコード','予約者(チーム)','氏名','英文名','人数','出発地','途中立寄り','到着地','操作'],
   TRANSFER_OUT: ['No','イベント番号','タグコード','予約者(チーム)','氏名','英文名','人数','出発地','途中立寄り','到着地','操作'],
-  DINNER: ['No','イベント番号','タグコード','予約者(チーム)','滞在日次','英文名','人数','テーブルNo','参考事項','操作'],
+  DINNER: ['No','イベント番号','タグコード','予約者(チーム)','滞在日次','英文名','人数','テーブルNo','参考事項','予約備考','現地備考','操作'],
   GOLF: ['No','イベント番号','タグコード','予約者(チーム)','英文名','人数','ゴルフ場','コース','チーム','ティーオフ','9H無料','9H追加¥4,400','EVカート(有料)','台数','備考','操作'],
   ACCOM: ['No','イベント番号','タグコード','予約者(チーム)','氏名','英文名','チェックイン','チェックアウト','泊数','施設','部屋タイプ','部屋番号','備考','操作'],
   NAMETAG: ['No','タグコード','名前','英文名','入国便','帰国便','泊数','人数','施設'],
@@ -1241,11 +1241,11 @@ function renderDeductions(){
 const STAY_RATE     = 15000;   // 체재비/인/박
 const TRANSPORT_FEE = 12000;   // 왕복 송영비/인 (그린피·카트·식사는 현지정산 없음)
 
-// ── 상품명 파서 (14hills: 포틴힐즈CC 단일 골프장 · 숙박 2유형) ──────
+// ── 상품명 파서 (14hills: 14hillsCC 단일 골프장 · 숙박 2유형) ──────
 // 체재비 15,000엔/박/인. 그린피·카트·식사는 현지 정산 항목 아님.
 function parseProduct(name){
   name = String(name||'');
-  let accom='', roomType='', course='포틴힐즈CC', nights=0, rate=STAY_RATE;
+  let accom='', roomType='', course='14hillsCC', nights=0, rate=STAY_RATE;
 
   // 카라반 (먼저 판정 — '호텔' 키워드와 겹치지 않게)
   if(name.includes('카라반') || name.toLowerCase().includes('caravan')){
@@ -1897,7 +1897,7 @@ function buildSettle(){
       prevAccom=r.accom;
       const grpRows=sorted.filter(x=>x.accom===r.accom);
       const tot=grpRows.reduce((a,x)=>a+x.total,0);
-      header=`<tr class="tr-section"><td colspan="17">◎ ${r.accom} — ${grpRows.length}건 · ${grpRows.reduce((a,x)=>a+x.pax,0)}명 · ¥${tot.toLocaleString()}</td></tr>`;
+      header=`<tr class="tr-section"><td colspan="19">◎ ${r.accom} — ${grpRows.length}건 · ${grpRows.reduce((a,x)=>a+x.pax,0)}명 · ¥${tot.toLocaleString()}</td></tr>`;
     }
     const k=`settle_${r.eventSeq}`;
     const rem = (manualData[k]||{}).remarks||'';
@@ -1927,12 +1927,14 @@ function buildSettle(){
       <td class="num">${r.transport?'¥'+r.transport.toLocaleString():'-'}</td>
       <td class="num" style="font-weight:700;color:var(--accent2)">${r.total?'¥'+r.total.toLocaleString():'-'}</td>
       <td><input class="editable wide" value="${rem}" onchange="saveField('${k}','remarks',this.value)" placeholder="비고"></td>
+      <td style="font-size:10px;color:var(--text2)">${(r.raw&&r.raw['비고'])||''}</td>
+      <td style="font-size:10px;color:var(--text2)">${(r.raw&&r.raw['현지 비고'])||''}</td>
     </tr>`;
   }).join('');
   document.getElementById('settle-tbody').innerHTML = rows +
     `<tr class="tr-total"><td colspan="13" style="text-align:right">合計 Total</td>
      <td class="num">¥${stayT.toLocaleString()}</td><td class="num">¥${transT.toLocaleString()}</td>
-     <td class="num" style="font-size:13px">¥${total.toLocaleString()}</td><td></td></tr>`;
+     <td class="num" style="font-size:13px">¥${total.toLocaleString()}</td><td></td><td></td><td></td></tr>`;
 
   initDrag('settle-table');
   // 차감 섹션 렌더링
@@ -2612,6 +2614,8 @@ function renderDinner(date){
         <td class="num-center"><strong>${p.isExtra?(p.pax||1):(teamRec.pax||'')}</strong></td>
         <td><input class="editable narrow" value="${md.table||''}" onchange="saveField('${k}','table',this.value)" placeholder="T-1"></td>
         <td><input class="editable wide" value="${md.remarks||''}" onchange="saveField('${k}','remarks',this.value)" placeholder="参考事項 · メモ"></td>
+        <td style="font-size:10px;color:var(--text2)">${p.isExtra?'':((teamRec.raw&&teamRec.raw['비고'])||'')}</td>
+        <td style="font-size:10px;color:var(--text2)">${p.isExtra?'':((teamRec.raw&&teamRec.raw['현지 비고'])||'')}</td>
         <td style="text-align:center">${actionCell}</td>
       </tr>`;
     });
@@ -2960,16 +2964,16 @@ function getGolfInfo(accom, origin, date, rec){
 
   // ── 간지호텔 ──────────────────────────────────────────
   if(accom === '간지호텔'){
-    const course = nonWork ? '야마나미CC' : '구주고원CC';
+    const course = nonWork ? '14hillsCC' : '14hillsCC';
     if(isICN){
       // 인천: 첫날 야마나미18홀, 중간날 구주고원/야마나미, 귀국날 없음
-      if(dayType === 'arrival')   return { playing:true,  course:'야마나미CC', free9h:false, label:'やまなみCC 18H (入国日)' };
+      if(dayType === 'arrival')   return { playing:true,  course:'14hillsCC', free9h:false, label:'フォーティーンヒルズCC 18H (入国日)' };
       if(dayType === 'departure') return { playing:false, course:'', free9h:false, label:'ラウンドなし (帰国日)' };
       return { playing:true, course, free9h:!nonWork, label:`${course} 18H${!nonWork?' +9Hサービス':''}` };
     } else {
       // 부산: 첫날 없음, 중간날 구주고원/야마나미, 귀국날 야마나미9홀
       if(dayType === 'arrival')   return { playing:false, course:'', free9h:false, label:'ラウンドなし (入国日)' };
-      if(dayType === 'departure') return { playing:true,  course:'야마나미CC', free9h:false, label:'やまなみCC 9H (帰国日・釜山便)' };
+      if(dayType === 'departure') return { playing:true,  course:'14hillsCC', free9h:false, label:'フォーティーンヒルズCC 9H (帰国日・釜山便)' };
       return { playing:true, course, free9h:!nonWork, label:`${course} 18H${!nonWork?' +9Hサービス':''}` };
     }
   }
@@ -2977,21 +2981,21 @@ function getGolfInfo(accom, origin, date, rec){
   // ── 야마나미리조트 / 쿠주힐즈 / 시즈노야도 료칸 ──────
   if(isICN){
     // 인천: 입국일 18H, 중간 18H+9H서비스, 귀국일 없음
-    if(dayType === 'arrival')   return { playing:true,  course:'야마나미CC', free9h:false, label:'やまなみCC 18H (入国日)' };
+    if(dayType === 'arrival')   return { playing:true,  course:'14hillsCC', free9h:false, label:'フォーティーンヒルズCC 18H (入国日)' };
     if(dayType === 'departure') return { playing:false, course:'', free9h:false, label:'ラウンドなし (帰国日)' };
-    return { playing:true, course:'야마나미CC', free9h:!nonWork, label:`やまなみCC 18H${!nonWork?' +9Hサービス':''}` };
+    return { playing:true, course:'14hillsCC', free9h:!nonWork, label:`フォーティーンヒルズCC 18H${!nonWork?' +9Hサービス':''}` };
   } else {
     // 부산(PUS): 입국일 없음, 중간 18H+9H서비스, 귀국일 9H(전 숙소 공통)
     if(dayType === 'arrival')   return { playing:false, course:'', free9h:false, label:'ラウンドなし (入国日)' };
-    if(dayType === 'departure') return { playing:true,  course:'야마나미CC', free9h:false, label:'やまなみCC 9H (帰国日・釜山便)' };
-    return { playing:true, course:'야마나미CC', free9h:!nonWork, label:`やまなみCC 18H${!nonWork?' +9Hサービス':''}` };
+    if(dayType === 'departure') return { playing:true,  course:'14hillsCC', free9h:false, label:'フォーティーンヒルズCC 9H (帰国日・釜山便)' };
+    return { playing:true, course:'14hillsCC', free9h:!nonWork, label:`フォーティーンヒルズCC 18H${!nonWork?' +9Hサービス':''}` };
   }
 }
 
 // 하위 호환 유지용 (기존 코드에서 getGolfCourse 쓰는 곳)
 function getGolfCourse(accom, date){
-  if(accom === '간지호텔') return isNonWorkday(date) ? '야마나미CC' : '구주고원CC';
-  return '야마나미CC';
+  if(accom === '간지호텔') return isNonWorkday(date) ? '14hillsCC' : '14hillsCC';
+  return '14hillsCC';
 }
 
 function renderGolf(date){
@@ -3036,8 +3040,8 @@ function renderGolf(date){
 
   let dayLabel = '';
   if(wd) dayLabel = '<span style="color:var(--amber2);font-size:10px">⚠ 週末 — 9H無料サービスなし (原則)</span>';
-  else if(isHoliday) dayLabel = '<span style="color:var(--amber2);font-size:10px">⚠ 祝日 — 9H無料サービスなし (原則) · 間地ホテル → やまなみCC</span>';
-  else dayLabel = '<span style="color:var(--green2);font-size:10px">✓ 平日 — 9H無料サービス対象 · 間地ホテル → 九重高原CC</span>';
+  else if(isHoliday) dayLabel = '<span style="color:var(--amber2);font-size:10px">⚠ 祝日 — 9H無料サービスなし (原則) · 間地ホテル → フォーティーンヒルズCC</span>';
+  else dayLabel = '<span style="color:var(--green2);font-size:10px">✓ 平日 — 9H無料サービス対象 · 間地ホテル → フォーティーンヒルズCC</span>';
 
   // EV카트 20대 캡: 팀 단위 키 기준 유지
   const EV_CAP = 20;
@@ -3056,12 +3060,12 @@ function renderGolf(date){
       : `<span style="color:var(--text3);font-size:10px;margin-left:8px">EVカート 미신청</span>`;
 
   // 야마나미 코스별 배정 팀수
-  // 조건 확장: accom='야마나미리조트' 뿐 아니라 실제 야마나미CC에서 라운딩하는 모든 팀
+  // 조건 확장: accom='야마나미리조트' 뿐 아니라 실제 14hillsCC에서 라운딩하는 모든 팀
   // (쿠주힐즈/시즈노야도/간지호텔(주말·공휴일·인천첫날·부산귀국일))
   const yamaTeams = playingTeams.filter(r => {
     const origin = String(r.raw?.['출발지']||'');
     const info = getGolfInfo(r.accom, origin, date, r);
-    return info.playing && info.course === '야마나미CC';
+    return info.playing && info.course === '14hillsCC';
   });
   const courseCounts = {ASO:0, SOBO:0, KUJU:0, '':0};
   yamaTeams.forEach(r => {
@@ -3134,13 +3138,13 @@ function renderGolf(date){
       <div class="table-wrap"><table id="${gTid}" style="min-width:1400px"><thead>${hdrHtml(HDRS.GOLF)}</thead><tbody>`;
 
     // 라운딩 있는 팀 / 없는 팀 분리
-    // 이 표는 야마나미 골프장 조편성표 — 야마나미CC 라운딩 팀만 listPlaying
-    // 야마나미CC가 아닌 라운딩(구주고원CC 등) + 입국일/귀국일(라운딩 없음)은 모두 listNoPlay
+    // 이 표는 야마나미 골프장 조편성표 — 14hillsCC 라운딩 팀만 listPlaying
+    // 14hillsCC가 아닌 라운딩(14hillsCC 등) + 입국일/귀국일(라운딩 없음)은 모두 listNoPlay
     const isYamanamiPlay = (p) => {
       const tr = playingTeams.find(r=>String(r.eventSeq||'').trim()===String(p.eventSeq||'').trim())||{};
       const origin = p.origin||tr.raw?.['출발지']||'';
       const gi = getGolfInfo(p.accom, origin, date, tr);
-      return gi.playing && gi.course === '야마나미CC';
+      return gi.playing && gi.course === '14hillsCC';
     };
     const listPlaying    = list.filter(p => isYamanamiPlay(p));
     const listNoPlay     = list.filter(p => !isYamanamiPlay(p));
@@ -3171,8 +3175,8 @@ function renderGolf(date){
       const dayBadgeTextColor = dayType2==='arrival' ? '#42502B' : '#5A6356';
       const dayBadgeText  = dayType2==='arrival' ? '입국일' : dayType2==='departure' ? '귀국일' : '';
       const dayBadge = dayBadgeText ? `<span class="tag" style="background:${dayBadgeColor};color:${dayBadgeTextColor};margin-left:4px;font-size:9px">${dayBadgeText}</span>` : '';
-      // 야마나미CC 외 골프장 라벨 (예: 구주고원CC — 간지호텔 평일 케이스)
-      const otherCourseBadge = (golfInfo.playing && golfInfo.course && golfInfo.course !== '야마나미CC')
+      // 14hillsCC 외 골프장 라벨 (예: 14hillsCC — 간지호텔 평일 케이스)
+      const otherCourseBadge = (golfInfo.playing && golfInfo.course && golfInfo.course !== '14hillsCC')
         ? `<span class="tag" style="background:rgba(245,158,11,.12);color:var(--amber2);margin-left:4px;font-size:9px">⛳ ${golfInfo.course}</span>`
         : '';
       const defaultCarts = Math.ceil((teamRec.pax||1)/4);
@@ -3181,8 +3185,8 @@ function renderGolf(date){
       prevRepNameRef.name = p.repName;
       const indent = !isNewTeam ? `<span style="color:var(--text3);margin-right:4px">↳</span>` : '';
       const baseStyle = isNewTeam&&i>0 ? 'border-top:1px solid var(--border2)' : '';
-      // 흐림 처리: 야마나미CC 라운딩이 아닌 모든 경우 (입국일/귀국일 + 구주고원CC 등 외부 코스)
-      const isYamanami = golfInfo.playing && golfInfo.course === '야마나미CC';
+      // 흐림 처리: 14hillsCC 라운딩이 아닌 모든 경우 (입국일/귀국일 + 14hillsCC 등 외부 코스)
+      const isYamanami = golfInfo.playing && golfInfo.course === '14hillsCC';
       const noPlayOpacity = !isYamanami ? 'opacity:.45' : '';
       const excludedOpacity = p._excluded ? 'opacity:.35;text-decoration:line-through' : '';
       const extraStyle = p.isExtra ? 'background:rgba(100,117,72,.06)' : '';
@@ -3191,11 +3195,11 @@ function renderGolf(date){
       const _gfTc = p.isExtra ? {} : (buildTagCodeMap()[String(p.eventSeq||'').trim()]||{});
       const pTagCode = p.isExtra ? '—' : makeTagCodeSafe(_gfTc.teamIdx||0, i, _gfTc.accomPfx, _gfTc.memberCode, _gfTc.manualCode, _gfTc.pendingMember, _gfTc.eventSeq, _gfTc.year);
       // 야마나미 코스 선택 드롭다운 (저장 보장)
-      // 조건 확장: accom='야마나미리조트' 뿐 아니라 실제 라운딩 코스가 '야마나미CC'인 모든 경우
+      // 조건 확장: accom='야마나미리조트' 뿐 아니라 실제 라운딩 코스가 '14hillsCC'인 모든 경우
       // (시즈노야도/쿠주힐즈, 간지호텔의 주말·공휴일·인천 첫날·부산 귀국일 케이스 포함)
       const yamaCourseMd = manualData[teamKey]||{};
       const yamaCourse = yamaCourseMd.yamaCourse || '';
-      const playsYamanami = golfInfo.playing && golfInfo.course === '야마나미CC';
+      const playsYamanami = golfInfo.playing && golfInfo.course === '14hillsCC';
       const yamaCourseCell = (p.isRep && playsYamanami)
         ? `<select class="editable narrow" onchange="saveField('${teamKey}','yamaCourse',this.value);renderGolf('${date}')" style="font-size:10px;padding:2px 4px">
             <option value="" ${!yamaCourse?'selected':''}>— 未定 —</option>
@@ -3270,16 +3274,16 @@ function renderGolf(date){
       listPlaying.forEach((p, i) => { html += renderGolfRow(p, i, prevRefPlaying, 0); });
     }
 
-    // 라운딩 없는 팀 / 야마나미CC 외 코스 팀 (구주고원CC 등)이 있을 때만 하단 섹션 추가
+    // 라운딩 없는 팀 / 14hillsCC 외 코스 팀 (14hillsCC 등)이 있을 때만 하단 섹션 추가
     if(listNoPlay.length > 0){
-      // 분류 통계: 입국일/귀국일 vs 야마나미CC 외 코스
+      // 분류 통계: 입국일/귀국일 vs 14hillsCC 외 코스
       let dayCount = 0, otherCount = 0;
       listNoPlay.filter(p=>p.isRep||p.isExtra).forEach(p => {
         const tr = playingTeams.find(r=>String(r.eventSeq||'').trim()===String(p.eventSeq||'').trim())||{};
         const origin = p.origin||tr.raw?.['출발지']||'';
         const gi = getGolfInfo(p.accom, origin, date, tr);
         if(!gi.playing) dayCount++;
-        else if(gi.course && gi.course !== '야마나미CC') otherCount++;
+        else if(gi.course && gi.course !== '14hillsCC') otherCount++;
       });
       const subParts = [];
       if(dayCount > 0)  subParts.push(`帰国日/入国日 ${dayCount}팀`);
@@ -3287,7 +3291,7 @@ function renderGolf(date){
       const subLabel = subParts.length ? `(${subParts.join(' · ')})` : '';
       const colSpan = HDRS.GOLF.length;
       html += `<tr class="tr-section"><td colspan="${colSpan}" style="text-align:center;letter-spacing:.08em;color:var(--text3);font-size:10px;padding:6px 10px">
-        やまなみCC 라운드 외 &nbsp;—&nbsp; ${listNoPlay.length}名 &nbsp;<span style="color:var(--text3);font-size:9px">${subLabel}</span>
+        フォーティーンヒルズCC 라운드 외 &nbsp;—&nbsp; ${listNoPlay.length}名 &nbsp;<span style="color:var(--text3);font-size:9px">${subLabel}</span>
       </td></tr>`;
       const prevRefNoPlay = {name: null};
       listNoPlay.forEach((p, i) => { html += renderGolfRow(p, i, prevRefNoPlay, 1); });
@@ -4558,9 +4562,9 @@ async function downloadSettle(){
   xlmTotalRow(ws1,r,['合計','',settl.reduce((a,x)=>a+x.pax,0),settl.reduce((a,x)=>a+x.stay,0),settl.reduce((a,x)=>a+x.transport,0),settl.reduce((a,x)=>a+x.total,0)]);
 
   // ── 시트2: 精算明細 ──
-  const COL2 = 17;
+  const COL2 = 19;
   const ws2 = wb.addWorksheet('精算明細', { views:[{state:'frozen',ySplit:3}], pageSetup:A4L });
-  xlColWidths(ws2, [5,12,8,10,16,22,11,11,6,5,16,12,12,12,12,12,22]);
+  xlColWidths(ws2, [5,12,8,10,16,22,11,11,6,5,16,12,12,12,12,12,22,22,22]);
   xlmTitle(ws2, 1, '現地精算表 — 明細  ' + today(), COL2);
   xlmHeader(ws2, 2, HDRS.SETTLE);
   r=3;
@@ -4573,10 +4577,10 @@ async function downloadSettle(){
       prevAccom=rec.accom;
     }
     const k=`settle_${rec.eventSeq}`;
-    xlmDataRow(ws2,r,[rec.no,rec.eventNo||'-',rec.status||'-',rec.memberType||'-',rec.repName,getEngName(rec.eventSeq),rec.dep,rec.arr,rec.nights,rec.pax,rec.accom,rec.roomType,rec.rate,rec.stay,rec.transport,rec.total,(manualData[k]||{}).remarks||''],i%2===0,{numCols:[13,14,15,16],centerCols:[1,3,9,10],boldCols:[5]});
+    xlmDataRow(ws2,r,[rec.no,rec.eventNo||'-',rec.status||'-',rec.memberType||'-',rec.repName,getEngName(rec.eventSeq),rec.dep,rec.arr,rec.nights,rec.pax,rec.accom,rec.roomType,rec.rate,rec.stay,rec.transport,rec.total,(manualData[k]||{}).remarks||'',(rec.raw&&rec.raw['비고'])||'',(rec.raw&&rec.raw['현지 비고'])||''],i%2===0,{numCols:[13,14,15,16],centerCols:[1,3,9,10],boldCols:[5]});
     r++;
   });
-  xlmTotalRow(ws2,r,['','','','','合計','','','','',settl.reduce((a,x)=>a+x.pax,0),'','','',settl.reduce((a,x)=>a+x.stay,0),settl.reduce((a,x)=>a+x.transport,0),settl.reduce((a,x)=>a+x.total,0),'']);
+  xlmTotalRow(ws2,r,['','','','','合計','','','','',settl.reduce((a,x)=>a+x.pax,0),'','','',settl.reduce((a,x)=>a+x.stay,0),settl.reduce((a,x)=>a+x.transport,0),settl.reduce((a,x)=>a+x.total,0),'','','']);
 
   const fnSuffix = settleFilter.size === 0 ? '' : '_' + [...settleFilter].map(a=>accomEngName(a)).join('-');
   await xlSave(wb, `現地精算表${fnSuffix}_${today()}.xlsx`);
@@ -4731,7 +4735,7 @@ async function _downloadDinner(selectedDates, selectedAccoms){
         : `${selectedDates[0].slice(5)}~${selectedDates[selectedDates.length-1].slice(5)}`)
     : today();
   const HDR = HDRS.DINNER;
-  const COLW= [5,12,16,22,10,18,6,8,30];
+  const COLW= [5,12,16,22,10,18,6,8,30,24,24];
   const COL = HDR.length;
 
   dinnerDates.forEach(d=>{
@@ -4795,7 +4799,7 @@ async function _downloadDinner(selectedDates, selectedAccoms){
         stayDay,
         getEngName(p.eventSeq)||'',
         teamRec.pax||'',
-        md.table||'',md.remarks||''],
+        md.table||'',md.remarks||'',(teamRec.raw&&teamRec.raw['비고'])||'',(teamRec.raw&&teamRec.raw['현지 비고'])||''],
         COL,globalNo%2===0,{boldCols:[4],numCols:[7]});
       ws.getCell(r,4).font={bold:true,size:9,color:{argb:XL.FG_ACCENT},name:'Meiryo'};
       r++;
@@ -5057,7 +5061,7 @@ async function _downloadGolf(selectedDates){
   const COL=HDR.length;
 
   golfDates.forEach(d=>{
-    const dayType=isWeekend(d)?'【週末】':isJpHoliday(d)?'【祝日 — 間地→やまなみCC】':'【平日 — 間地→九重高原CC】';
+    const dayType=isWeekend(d)?'【週末】':isJpHoliday(d)?'【祝日 — 間地→フォーティーンヒルズCC】':'【平日 — 間地→フォーティーンヒルズCC】';
     const playingTeams=processed.filter(r=>r.accom&&r.dep<=d&&r.arr>d);
     const playingSeqs=new Set(playingTeams.map(r=>String(r.eventSeq||'').trim()));
     const seqAccomMap2={}; playingTeams.forEach(r=>{seqAccomMap2[String(r.eventSeq||'').trim()]=r.accom;});
@@ -8539,7 +8543,7 @@ function dispatchNotesHTML(rec, memo){
   return dispatchNoteSegments(rec, memo).map(s => s.b ? `<b>${s.t}</b>` : s.t).join('');
 }
 
-// 행사 골프 코스 요약 (일자별 라운드 대신 코스명만) — '야마나미CC ・ 九重高原CC'
+// 행사 골프 코스 요약 (일자별 라운드 대신 코스명만) — '14hillsCC ・ フォーティーンヒルズCC'
 function dispatchCourseSummary(d){
   const courses = [...new Set((d.golf||[]).map(g => g.course).filter(Boolean))];
   return courses.length ? courses.join(' ・ ') : 'ラウンドなし';
@@ -8561,7 +8565,7 @@ function dispatchRoomTypeJp(rt){
 // 라운딩 일정 산출 — 지침 규칙
 // 인천: 입국일 18H / 중간 18H(+평일 9H서비스) / 귀국일 없음
 // 부산: 입국일 없음 / 중간 18H(+평일 9H서비스) / 귀국일 やまなみ 9H
-// 간지호텔 중간일: 평일 → 九重高原CC, 주말·공휴일 → やまなみCC
+// 간지호텔 중간일: 평일 → フォーティーンヒルズCC, 주말·공휴일 → フォーティーンヒルズCC
 function dispatchGolfRows(rec, isPUS){
   const rows = [];
   if(!rec.dep || !rec.arr) return rows;
@@ -8571,13 +8575,13 @@ function dispatchGolfRows(rec, isPUS){
     const ds = fmtDate(cur);
     if(ds === rec.dep){
       if(isPUS) continue;                                   // 부산: 입국일 라운딩 없음
-      rows.push({date:ds, course:'やまなみCC', holes:18, note:'入国日'});
+      rows.push({date:ds, course:'フォーティーンヒルズCC', holes:18, note:'入国日'});
     } else if(ds === rec.arr){
       if(!isPUS) continue;                                  // 인천: 귀국일 라운딩 없음
-      rows.push({date:ds, course:'やまなみCC', holes:9, note:'帰国日(釜山便)'});
+      rows.push({date:ds, course:'フォーティーンヒルズCC', holes:9, note:'帰国日(釜山便)'});
     } else {
       const nonWork = isNonWorkday(ds);
-      const course = (rec.accom === '간지호텔' && !nonWork) ? '九重高原CC' : 'やまなみCC';
+      const course = (rec.accom === '간지호텔' && !nonWork) ? 'フォーティーンヒルズCC' : 'フォーティーンヒルズCC';
       rows.push({date:ds, course, holes:18, note: nonWork ? (isJpHoliday(ds)?'祝日':'週末') : '+9Hサービス対象'});
     }
   }
