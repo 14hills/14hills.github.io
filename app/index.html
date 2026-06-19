@@ -91,7 +91,9 @@ body{background:var(--bg);color:var(--text);font-family:var(--sans);min-height:1
 .ghost-btn:hover{border-color:var(--accent);color:var(--accent2)}
 
 /* NAV TABS */
-.nav{background:var(--surface2);border-bottom:1px solid var(--border);padding:0 1.5rem;display:flex;gap:0;position:sticky;top:52px;z-index:190}
+.nav{background:var(--surface2);border-bottom:1px solid var(--border);padding:0 1.5rem;display:flex;gap:0;position:sticky;top:52px;z-index:190;flex-wrap:wrap}
+.nav-sep{align-self:center;width:1px;height:20px;background:var(--border);margin:0 8px}
+.wip-chip{font-size:8.5px;font-weight:700;background:var(--amber-dim);color:var(--amber2);border:1px solid var(--amber);border-radius:6px;padding:1px 5px;letter-spacing:-.02em;line-height:1.3}
 .nav-tab{box-sizing:border-box;padding:0 18px;height:44px;display:flex;align-items:center;justify-content:center;gap:7px;font-size:12px;font-weight:500;line-height:1;color:var(--text3);cursor:pointer;border-bottom:2px solid transparent;transition:all .2s;white-space:nowrap}
 .nav-tab:hover{color:var(--text2)}
 .nav-tab.active{color:var(--accent2);border-bottom-color:var(--accent)}
@@ -466,6 +468,12 @@ tr.draggable-row td:first-child::before{content:'⠿';color:var(--text3);margin-
   <div class="nav-tab locked" id="nav-settle" onclick="gotoSection('settle')">
     <div class="nav-dot"></div> ④ <span data-i18n="nav_settle">現地精算表</span>
   </div>
+  <div class="nav-sep"></div>
+  <div class="nav-tab wip" id="nav-transfer" onclick="gotoSection('transfer')"><div class="nav-dot"></div> 送迎 <span class="wip-chip">준비중</span></div>
+  <div class="nav-tab wip" id="nav-accom" onclick="gotoSection('accom')"><div class="nav-dot"></div> 宿泊 <span class="wip-chip">준비중</span></div>
+  <div class="nav-tab wip" id="nav-golf" onclick="gotoSection('golf')"><div class="nav-dot"></div> ゴルフ <span class="wip-chip">준비중</span></div>
+  <div class="nav-tab wip" id="nav-aircover" onclick="gotoSection('aircover')"><div class="nav-dot"></div> 航空カバー <span class="wip-chip">준비중</span></div>
+  <div class="nav-tab wip" id="nav-shizu" onclick="gotoSection('shizu')"><div class="nav-dot"></div> 志津の宿 <span class="wip-chip">준비중</span></div>
 </div>
 
 <!-- ── SESSION BAR ───────────────────────────────────────── -->
@@ -750,7 +758,7 @@ tr.draggable-row td:first-child::before{content:'⠿';color:var(--text3);margin-
 <div class="section" id="sec-aircover">
   <div class="rule-box">
     <strong>✈ 공항 미팅 안내:</strong>
-    입국편 TW287 (09:25 仁川→熊本) · ZE967 (13:25 金海→熊本) &nbsp;/&nbsp; 출국편 TW288 (10:25 熊本→仁川) · ZE968 (14:30 熊本→金海) &nbsp;·&nbsp;
+    도착 공항 <strong>中部国際空港セントレア(NGO·나고야)</strong> &nbsp;·&nbsp; 도착 출구에서 「포틴힐즈」 피켓 현지 직원 대기 &nbsp;·&nbsp; 항공편·시간은 행사별 데이터 기준 &nbsp;·&nbsp;
     서울(ICN) / 부산(PUS) 자동 분리 &nbsp;·&nbsp; A5 가로 · 1페이지 1팀 · 航空カバー置き場 양식 재현 &nbsp;·&nbsp; xlsx 4시트(서울IN/OUT · 부산IN/OUT) 다운로드
   </div>
   <div class="card">
@@ -1772,8 +1780,8 @@ function analyze(){
       pnr:     String(r['PNR']||'').trim(),
       dest:    String(r['도착지']||'').trim(),
       depTime:    fmtTime(r['한국출발']),   // 往路 한국 출발 시각
-      locArrTime: fmtTime(r['현지도착']),   // 往路 현지(구마모토) 도착 시각
-      retDepTime: fmtTime(r['현지출발']),   // 復路 현지(구마모토) 출발 시각
+      locArrTime: fmtTime(r['현지도착']),   // 往路 현지(나고야) 도착 시각
+      retDepTime: fmtTime(r['현지출발']),   // 復路 현지(나고야) 출발 시각
       korArrTime: fmtTime(r['한국도착']),   // 復路 한국 도착 시각
       depDate: fmtDate(r['출발일자']), arrDate: fmtDate(r['도착일자']),
       origin,
@@ -1944,7 +1952,7 @@ function buildSettle(){
 
 // ── ② 송영 배정표 빌드 ────────────────────────────────────────
 const FLIGHT_TIMES = {'TW287':'09:25 着','ZE967':'13:25 着','TW288':'10:25 発','ZE968':'14:30 発'};
-const FLIGHT_LABELS = {'TW287':'TW287 (ICN→KMJ)','ZE967':'ZE967 (PUS→KMJ)','TW288':'TW288 (KMJ→ICN)','ZE968':'ZE968 (KMJ→PUS)'};
+const FLIGHT_LABELS = {'TW287':'TW287 (ICN→NGO)','ZE967':'ZE967 (PUS→NGO)','TW288':'TW288 (NGO→ICN)','ZE968':'ZE968 (NGO→PUS)'};
 
 function buildTransfer(){
   // processed 기준으로 날짜 추출 (항공조인 이미 제외됨)
@@ -2096,7 +2104,7 @@ function renderTransfer(date){
           <div><div style="font-size:9px;color:var(--text3);margin-bottom:3px">ドライバー</div>
             <input class="editable" value="${md.driver||''}" onchange="saveField('${k}','driver',this.value)" placeholder="名前"></div>
           <div><div style="font-size:9px;color:var(--text3);margin-bottom:3px">ルート</div>
-            <input class="editable wide" value="${md.route||''}" onchange="saveField('${k}','route',this.value)" placeholder="${isIn?'熊本空港→やまなみ...':'やまなみ→熊本空港...'}"></div>
+            <input class="editable wide" value="${md.route||''}" onchange="saveField('${k}','route',this.value)" placeholder="${isIn?'中部空港→14hills...':'14hills→中部空港...'}"></div>
           <div><div style="font-size:9px;color:var(--text3);margin-bottom:3px">途中立寄り <span style="color:var(--accent3)">(경유지)</span></div>
             <input class="editable wide" value="${md.stopover||''}" onchange="saveField('${k}','stopover',this.value)" placeholder="例: スーパー / コンビニ / 温泉..."></div>
           <div><div style="font-size:9px;color:var(--text3);margin-bottom:3px">備考</div>
@@ -2147,7 +2155,7 @@ function renderTransfer(date){
             const repBadge = r.isExtra ? '' : `<span class="tag" style="background:#ECEFE6;color:#5A6356;margin-left:4px;font-size:9px">REP</span>`;
             const rk = r.isExtra ? `tr_row_${date}_${fn}_extra_${r.extraId}` : `tr_row_${date}_${fn}_${r.eventSeq}`;
             const rmd = manualData[rk]||{};
-            const kumamotoAirport = '熊本空港(KMJ)';
+            const kumamotoAirport = '中部国際空港(NGO)';
             const depLabel = isIn ? kumamotoAirport : accomLabel;
             const arrLabel = isIn ? accomLabel      : kumamotoAirport;
 
@@ -2192,7 +2200,7 @@ function renderTransfer(date){
             : `<span class="tag" style="background:var(--amber-dim);color:var(--amber2);margin-left:4px;font-size:9px">👥 現地合流</span>`;
           const rk = `tr_row_${date}_${fn}_extra_${r.extraId}`;
           const rmd = manualData[rk]||{};
-          const kumamotoAirport = '熊本空港(KMJ)';
+          const kumamotoAirport = '中部国際空港(NGO)';
           const depLabel = isIn ? kumamotoAirport : '(미지정)';
           const arrLabel = isIn ? '(미지정)' : kumamotoAirport;
           const excludedStyle = r._excluded ? 'opacity:.35;text-decoration:line-through' : '';
@@ -4354,25 +4362,23 @@ function printInvoice(){
       <div class="honorific">御中</div>
     </div>
     <div class="from-box">
-      <div>阿蘇やまなみリゾートホテル＆ゴルフ倶楽部</div>
-      <div class="from-name">株式会社SaiZen</div>
-      <div>代表取締役　尹 壯煥</div>
-      <div>〒869-2702</div>
-      <div>熊本県阿蘇郡産山村大字大利630番地</div>
-      <div>TEL：0967-25-2331</div>
-      <div>担当：申（シン）</div>
+      <div>フォーティーンヒルズカントリークラブ (Fourteen Hills CC)</div>
+      <div class="from-name">運営会社名　※要入力</div>
+      <div>代表者名　※要入力</div>
+      <div>〒509-7322</div>
+      <div>岐阜県中津川市飯沼1511-456</div>
+      <div>TEL：+81-573-64-9414</div>
+      <div>担当：※要入力</div>
       <div class="bank-box">
         ●お振込先<br>
-        KEB ハナ銀行　福岡支店<br>
-        普通　5110025036<br>
-        カ)サイゼン<br>
-        適格事業所番号　T5330001033564
+        ※ 14hills 請求先口座 情報を入力してください<br>
+        (銀行・支店・口座番号・名義・適格番号)
       </div>
     </div>
   </div>
 
   <div class="greeting">
-    この度は、私ども阿蘇やまなみリゾートホテル&ゴルフ倶楽部をご利用頂き誠にありがとうございます。<br>
+    この度は、私どもフォーティーンヒルズカントリークラブをご利用頂き誠にありがとうございます。<br>
     下記の通り御請求いたしますので何卒よろしくお支払い賜りたくお願い申し上げます。<br>
     ご不明な点がありましたときは、お手数ですが弊社窓口まで至急ご連絡ください。
   </div>
@@ -4533,7 +4539,7 @@ async function downloadSettle(){
 
   const ws1 = wb.addWorksheet('精算要約', { views:[{state:'frozen',ySplit:3}], pageSetup:A4P });
   xlColWidths(ws1, [18,8,8,14,14,14]);
-  xlmTitle(ws1, 1, 'メリットツアー × サイゼン — 現地精算表  ' + today(), COL);
+  xlmTitle(ws1, 1, 'メリットツアー × 14hills — 現地精算表  ' + today(), COL);
   xlmHeader(ws1, 2, ['施設','件数','人数','宿泊費(¥)','送迎費(¥)','合計(¥)']);
   let r=3;
   const accomList=['호텔','카라반'];
@@ -4687,8 +4693,8 @@ async function _downloadTransfer(selectedDates){
           const grpCode = getRepGrpCode(seq);
           const rk = `tr_row_${d}_${fn}_${t.eventSeq}`;
           const rmd = manualData[rk]||{};
-          const depLabel = isIn ? '熊本空港(KMJ)' : accomJpName(t.accom||'-');
-          const arrLabel = isIn ? accomJpName(t.accom||'-') : '熊本空港(KMJ)';
+          const depLabel = isIn ? '中部国際空港(NGO)' : accomJpName(t.accom||'-');
+          const arrLabel = isIn ? accomJpName(t.accom||'-') : '中部国際空港(NGO)';
           const row = [no, t.eventNo||'-', grpCode, t.repName, t.repName, engFull, t.pax, depLabel, rmd.stopover||'', arrLabel];
           xlDataRow(ws,r,row,COL,ti%2===0,{numCols:[7],boldCols:[4]});
           r++;
