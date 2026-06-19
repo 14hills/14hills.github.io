@@ -460,29 +460,14 @@ tr.draggable-row td:first-child::before{content:'⠿';color:var(--text3);margin-
   <div class="nav-tab locked" id="nav-nametag" onclick="gotoSection('nametag')">
     <div class="nav-dot"></div> ① <span data-i18n="nav_nametag">ネームタグ</span>
   </div>
-  <div class="nav-tab locked" id="nav-aircover" onclick="gotoSection('aircover')">
-    <div class="nav-dot"></div> ② <span data-i18n="nav_aircover">航空カバー置き場</span>
-  </div>
   <div class="nav-tab locked" id="nav-dispatch" onclick="gotoSection('dispatch')">
-    <div class="nav-dot"></div> ③ <span data-i18n="nav_dispatch">現地手配書</span>
+    <div class="nav-dot"></div> ② <span data-i18n="nav_dispatch">現地手配書</span>
   </div>
   <div class="nav-tab locked" id="nav-dinner" onclick="gotoSection('dinner')">
-    <div class="nav-dot"></div> ④ <span data-i18n="nav_dinner">夕食名前版</span>
+    <div class="nav-dot"></div> ③ <span data-i18n="nav_dinner">夕食名前版</span>
   </div>
   <div class="nav-tab locked" id="nav-settle" onclick="gotoSection('settle')">
-    <div class="nav-dot"></div> ⑤ <span data-i18n="nav_settle">現地精算表</span>
-  </div>
-  <div class="nav-tab locked" id="nav-shizu" onclick="gotoSection('shizu');shzRender()">
-    <div class="nav-dot"></div> ⑥ <span data-i18n="nav_shizu">志津の宿 予約表</span>
-  </div>
-  <div class="nav-tab locked wip" id="nav-transfer" onclick="gotoSection('transfer')">
-    <div class="nav-dot"></div> ⑦ <span data-i18n="nav_transfer">送迎配車表</span><span class="wip-badge" data-i18n="wip">준비중</span>
-  </div>
-  <div class="nav-tab locked wip" id="nav-accom" onclick="gotoSection('accom')">
-    <div class="nav-dot"></div> ⑧ <span data-i18n="nav_accom">宿泊配置表</span><span class="wip-badge" data-i18n="wip">준비중</span>
-  </div>
-  <div class="nav-tab locked wip" id="nav-golf" onclick="gotoSection('golf')">
-    <div class="nav-dot"></div> ⑨ <span data-i18n="nav_golf">ゴルフ組合せ表</span><span class="wip-badge" data-i18n="wip">준비중</span>
+    <div class="nav-dot"></div> ④ <span data-i18n="nav_settle">現地精算表</span>
   </div>
 </div>
 
@@ -1218,9 +1203,9 @@ function switchSession(ym){
   if(ym === currentSession) return;
   activateSession(ym);
   // ファイルアップロード 탭으로 이동 + 안내 배너 표시
-  ['settle','transfer','dinner','golf','accom','nametag','aircover','dispatch','shizu'].forEach(t =>
-    document.getElementById('nav-'+t).classList.add('locked')
-  );
+  ['nametag','dispatch','dinner','settle'].forEach(t =>{
+    const el = document.getElementById('nav-'+t); if(el) el.classList.add('locked');
+  });
   gotoSection('upload');
   // 업로드 탭 상단에 안내 배너 표시
   const uploadSec = document.getElementById('sec-upload');
@@ -1848,18 +1833,14 @@ function analyze(){
     }
   });
 
-  // 탭 잠금 해제
-  ['settle','transfer','dinner','golf','accom','nametag','aircover','dispatch','shizu'].forEach(t =>
-    document.getElementById('nav-'+t).classList.remove('locked')
-  );
+  // 탭 잠금 해제 (14hills: 네임택·수배서·저녁·정산 4탭만)
+  ['nametag','dispatch','dinner','settle'].forEach(t =>{
+    const el = document.getElementById('nav-'+t); if(el) el.classList.remove('locked');
+  });
 
   buildSettle();
-  buildTransfer();
   buildDinner();
-  buildGolf();
-  buildAccom();
   buildNametag();
-  buildAircover();
   buildDispatch();
 
   // 변경 감지 실행
@@ -1871,16 +1852,12 @@ function analyze(){
   gotoSection('nametag');
 }
 
-// 분석 후 7개 탭을 모두 재렌더 (마스터 업로드·삭제·수동입력 시 호출)
+// 분석 후 4개 탭을 모두 재렌더 (마스터 업로드·삭제·수동입력 시 호출)
 function renderAll(){
   if(!processed || !processed.length) return;
   buildSettle();
-  buildTransfer();
   buildDinner();
-  buildGolf();
-  buildAccom();
   buildNametag();
-  buildAircover();
   buildDispatch();
   // 미등록 회원 카운트 배지 갱신
   if(typeof updatePendingCount === 'function') updatePendingCount();
@@ -9621,7 +9598,7 @@ function resetApp(){
   // 그룹코드 상태 복원
 
   document.getElementById('btn-analyze').disabled=true;
-  ['settle','transfer','dinner','golf','accom','nametag','aircover','dispatch','shizu'].forEach(t=>document.getElementById('nav-'+t).classList.add('locked'));
+  ['nametag','dispatch','dinner','settle'].forEach(t=>{ const el=document.getElementById('nav-'+t); if(el) el.classList.add('locked'); });
   gotoSection('upload');
   document.getElementById('nav-upload').classList.add('active');
 }
