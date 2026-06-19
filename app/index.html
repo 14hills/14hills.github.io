@@ -165,6 +165,7 @@ tr:hover td{background:var(--accent-dim)}
       <div class="card-title">① <span data-i18n="nav_nametag">ネームタグ</span></div>
       <div class="card-sub" data-i18n="nt_sub">참가자 네임택 (숙박/출발지 기준). 태그코드 = 숙박-MMDD-팀알파-번호 (예 H-0702-A-01).</div>
       <div class="btn-row">
+        <button class="btn-dl" onclick="printNametags()">🖨 네임택 인쇄</button>
         <button class="btn-dl" onclick="downloadNametag()">⬇ xlsx</button>
       </div>
       <div id="out-nametag"></div>
@@ -236,9 +237,9 @@ const EXCLUDE_GUBUN = ['취소', '합계'];
    태그코드 첫 자리 prefix. SaiZen처럼 현장에서 prefix만 보고 숙박유형 즉시 구분.
    상품명(엠클릭) 키워드로 판정. 견적(미정)은 X. */
 const ACCOM = {
-  H: { label:'호텔',   labelJa:'ホテル',   eng:'WINDSOR',  keywords:['윈저','윈져','windsor','호텔','스위트','트윈','패밀리'] },
-  C: { label:'카라반', labelJa:'カラバン', eng:'CARAVAN',  keywords:['카라반','caravan'] },
-  X: { label:'미정',   labelJa:'未定',     eng:'TBD',      keywords:[] }   // 견적·숙박 미정
+  H: { label:'호텔',   labelJa:'ホテル',   eng:'WINDSOR',  bg:'#EDF0E2', bar:'#647548', keywords:['윈저','윈져','windsor','호텔','스위트','트윈','패밀리'] },
+  C: { label:'카라반', labelJa:'カラバン', eng:'CARAVAN',  bg:'#E6EEF2', bar:'#3E6B82', keywords:['카라반','caravan'] },
+  X: { label:'미정',   labelJa:'未定',     eng:'TBD',      bg:'#F2EFE6', bar:'#9A8C5A', keywords:[] }   // 견적·숙박 미정
 };
 function accomCode(product){
   const p = (product||'').toLowerCase();
@@ -593,12 +594,72 @@ function statsPanel(){
     + '<div class="card-sub">출발지 — '+dist(s.byOrigin)+'</div>'
     + '<div class="card-sub">박수 — '+dist(s.byNights)+'</div>';
 }
+/* ════════════════ 네임택 스티커 (SaiZen 95×55mm 6줄 양식) ════════
+   행0 숙박영문 + 박수 | 행1 태그코드(대) | 행2 한글이름(대)
+   행3 영문 | 행4 IN: 출발지·편명·날짜 | 행5 OUT: … */
+function nightsLabel(n){ return n!=null ? n+'N'+(n+1)+'D' : ''; }
+function mmddSlash(d){ const m=txt(d).slice(0,10).match(/^\d{4}-(\d{2})-(\d{2})/); return m?(m[1]+'/'+m[2]):''; }
+function stickerHTML(g){
+  const a = ACCOM[g.accom] || ACCOM.X;
+  const inLine  = ['IN',  g.origin, g.depFlight, mmddSlash(g.dep)].filter(Boolean).join('  ');
+  const outLine = ['OUT', g.origin, g.retFlight, mmddSlash(g.ret)].filter(Boolean).join('  ');
+  return ''
+  + '<div class="nt-sticker" style="background:'+a.bg+';border-left:6px solid '+a.bar+'">'
+  +   '<div class="nt-head">'+esc(a.eng)+' &nbsp; '+esc(nightsLabel(g.nights))+'</div>'
+  +   '<div class="nt-tag">'+esc(g.tag)+'</div>'
+  +   '<div class="nt-name">'+esc(g.name||' ')+(g.isRep?'<span class="nt-rep"> 代表</span>':'')+'</div>'
+  +   '<div class="nt-eng">'+esc(g.eng||' ')+'</div>'
+  +   '<div class="nt-fl">'+esc(inLine)+'</div>'
+  +   '<div class="nt-fl">'+esc(outLine)+'</div>'
+  + '</div>';
+}
+/* 스티커 공통 CSS (미리보기·인쇄 동일 적용) */
+const NT_CSS = `
+.nt-sheet{display:flex;flex-wrap:wrap;gap:4mm;align-content:flex-start}
+.nt-sticker{box-sizing:border-box;width:95mm;height:55mm;padding:4mm 5mm;
+  border:.3mm solid #b9c0ad;border-radius:2mm;overflow:hidden;
+  font-family:'Yu Gothic','Noto Sans KR','Malgun Gothic',sans-serif;color:#1d241a;
+  display:flex;flex-direction:column;justify-content:flex-start}
+.nt-head{font-size:9pt;font-weight:700;letter-spacing:.04em;color:#4b5340}
+.nt-tag{font-size:26pt;font-weight:800;line-height:1.05;font-family:'JetBrains Mono',monospace;margin:.5mm 0}
+.nt-name{font-size:22pt;font-weight:800;line-height:1.1}
+.nt-rep{font-size:10pt;font-weight:700;color:#647548}
+.nt-eng{font-size:9pt;font-weight:600;color:#3b4233;margin-bottom:auto}
+.nt-fl{font-size:9pt;font-weight:600;color:#2c3326;white-space:nowrap}
+`;
+function nametagPreview(rows, limit){
+  if(!rows||!rows.length) return '<div class="empty-note">명단이 없습니다.</div>';
+  const shown = rows.slice(0, limit||12).map(stickerHTML).join('');
+  const more = rows.length>(limit||12) ? '<div class="card-sub" style="margin-top:.5rem">… 외 '+(rows.length-(limit||12))+'명 (인쇄 시 전체 출력)</div>' : '';
+  return '<style>'+NT_CSS+'</style><div class="nt-sheet">'+shown+'</div>'+more;
+}
+function printNametags(){
+  if(!guardReady()) return;
+  const rows = state.processed||[];
+  if(!rows.length){ alert('인쇄할 명단이 없습니다.'); return; }
+  const doc = '<!DOCTYPE html><html lang="ko"><head><meta charset="UTF-8">'
+    + '<title>14hills_nametag</title>'
+    + '<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;700;800&family=JetBrains+Mono:wght@700;800&display=swap" rel="stylesheet">'
+    + '<style>@page{size:A4 landscape;margin:6mm}*{margin:0;padding:0}'
+    + 'body{background:#fff}'+NT_CSS
+    + '.nt-sticker{page-break-inside:avoid;break-inside:avoid}'
+    + '@media screen{body{padding:8mm;background:#eee}}</style></head><body>'
+    + '<div class="nt-sheet">' + rows.map(stickerHTML).join('') + '</div>'
+    + '<scr'+'ipt>window.onload=function(){setTimeout(function(){window.print();},400);};</scr'+'ipt>'
+    + '</body></html>';
+  const w = window.open('', '_blank');
+  if(!w){ alert('팝업이 차단되었습니다. 팝업 허용 후 다시 시도해 주세요.'); return; }
+  w.document.open(); w.document.write(doc); w.document.close();
+}
+
 function renderAll(){
   const roster = rosterTable(state.processed);
-  // ① 네임택: 결합 통계 + 태그코드 로스터
+  // ① 네임택: 통계 + 스티커 미리보기 + 명단
   const nt = document.getElementById('out-nametag');
   if(nt) nt.innerHTML = statsPanel()
-    + '<div class="card-sub" style="margin:.6rem 0 .3rem"><b>개인 명단 (태그코드 부여)</b></div>'
+    + '<div class="card-sub" style="margin:.7rem 0 .35rem"><b>네임택 미리보기</b> (95×55mm · 숙박색 자동)</div>'
+    + nametagPreview(state.processed)
+    + '<div class="card-sub" style="margin:.7rem 0 .3rem"><b>개인 명단 (태그코드 부여)</b></div>'
     + roster;
   // ②③④: 결합 데이터 기반 미리보기 (최종 레이아웃은 §6.4 확정 후)
   ['out-dispatch','out-dinner','out-settle'].forEach(id=>{
