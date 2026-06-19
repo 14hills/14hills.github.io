@@ -163,7 +163,7 @@ tr:hover td{background:var(--accent-dim)}
   <div class="section" id="sec-nametag">
     <div class="card">
       <div class="card-title">① <span data-i18n="nav_nametag">ネームタグ</span></div>
-      <div class="card-sub" data-i18n="nt_sub">참가자 네임택 (그룹/출발지 기준). 태그코드 = Y-MMDD-팀알파-번호.</div>
+      <div class="card-sub" data-i18n="nt_sub">참가자 네임택 (숙박/출발지 기준). 태그코드 = 숙박-MMDD-팀알파-번호 (예 H-0702-A-01).</div>
       <div class="btn-row">
         <button class="btn-dl" onclick="downloadNametag()">⬇ xlsx</button>
       </div>
@@ -231,6 +231,21 @@ const ORIGIN_MAP = { '인천':'ICN', '김해':'PUS', '부산':'PUS', '청주':'C
 
 /* 운영 제외 대상 구분값 (취소·합계 총계행). 견적은 포함(취소만 제외) */
 const EXCLUDE_GUBUN = ['취소', '합계'];
+
+/* ── 14hills 숙박 분류 (SaiZen 4리조트 Y/K/G/S → 14hills 2유형) ──
+   태그코드 첫 자리 prefix. SaiZen처럼 현장에서 prefix만 보고 숙박유형 즉시 구분.
+   상품명(엠클릭) 키워드로 판정. 견적(미정)은 X. */
+const ACCOM = {
+  H: { label:'호텔',   labelJa:'ホテル',   eng:'WINDSOR',  keywords:['윈저','윈져','windsor','호텔','스위트','트윈','패밀리'] },
+  C: { label:'카라반', labelJa:'カラバン', eng:'CARAVAN',  keywords:['카라반','caravan'] },
+  X: { label:'미정',   labelJa:'未定',     eng:'TBD',      keywords:[] }   // 견적·숙박 미정
+};
+function accomCode(product){
+  const p = (product||'').toLowerCase();
+  if(ACCOM.C.keywords.some(k=>p.includes(k.toLowerCase()))) return 'C';
+  if(ACCOM.H.keywords.some(k=>p.includes(k.toLowerCase()))) return 'H';
+  return 'X';
+}
 
 /* ── localStorage 네임스페이스 (SaiZen와 충돌 방지: 14h_ 접두) ── */
 const LS = {
@@ -317,26 +332,8 @@ function setLang(lang){
   applyI18n();
 }
 
-/* ════════════════ 태그코드 (브리프 Y-MMDD-팀알파-번호) ════════
-   §6.3 확정 전 기본값. SaiZen numToTeamCode4 체계로 합칠 수도 있어
-   두 헬퍼를 모두 유지한다. */
-function teamIdxToAlpha(n){            // 0→A, 25→Z, 26→AA ...
-  let s = '';
-  n = Math.max(0, n|0);
-  do { s = String.fromCharCode(65 + (n % 26)) + s; n = Math.floor(n/26) - 1; } while(n >= 0);
-  return s;
-}
-function numToTeamCode4(n){            // SaiZen 현행 체계 (AA01~ZZ99) — 호환 보존
-  const total = n % 67600, num = total % 100, letters = Math.floor(total/100);
-  const a = String.fromCharCode(65 + Math.floor(letters/26));
-  const b = String.fromCharCode(65 + (letters % 26));
-  return a + b + String(num+1).padStart(2,'0');
-}
-function makeTagCode(year, mmdd, teamIdx, paxIdx){
-  const y = String(year).slice(-1);                 // 2026 → 6
-  const md = String(mmdd||'0000').padStart(4,'0');
-  return y + '-' + md + '-' + teamIdxToAlpha(teamIdx) + '-' + String(paxIdx+1).padStart(2,'0');
-}
+/* 태그코드 로직은 결합 엔진(buildTeams/buildGuests, alphaCode)에 통합됨.
+   14hills 양식: {숙박prefix}-{MMDD}-{팀알파}-{개인번호} (예 H-0702-A-01) */
 
 /* ════════════════ ExcelJS xlsx 헬퍼 (SaiZen에서 이식) ════════ */
 const XL = {
@@ -429,10 +426,12 @@ function markLoaded(kind, n){
 /* ════════════════ 결합 엔진 (A 예약리스트 × B 일행별) ════════════
    - 키: 행사번호 (양쪽 공통)
    - 제외: 구분 취소·합계 (견적은 포함 — 취소만 빠짐)
-   - 태그코드: {박수}-{MMDD출발일}-{팀알파}-{개인번호}  (Y-MMDD-팀알파-번호)
-     · 첫 자리 Y = 박수(泊数). 인계 브리프 예시 6-0312-A-01 = 6박
-     · 팀알파 = 동일 (박수+출발일) 그룹 내 A,B,…,Z,AA… 순차 부여
-     · 개인번호 = 팀 내 일행 순번 01~NN
+   - 태그코드(14hills): {숙박prefix}-{MMDD입국일}-{팀알파}-{개인번호}
+     SaiZen Y-0503-aa1 양식 차용. 예 H-0702-A-01
+     · 숙박 prefix = H(호텔)/C(카라반)/X(미정) — 상품명 키워드 판정
+     · MMDD = 출발(입국)일자 월일
+     · 팀알파 = 동일 (숙박+입국일) 그룹 내 A,B,…,Z,AA… 순차
+     · 개인번호 = 대표자 01, 나머지 명단순 02~NN (대표=고객명==예약자명/A대표고객)
    ──────────────────────────────────────────────────────────────── */
 function txt(v){ return v==null ? '' : String(v).trim(); }
 function parseNights(period){            // "3박4일" → 3
@@ -457,6 +456,7 @@ function buildTeams(){
     const gubun = txt(r['구분']);
     const ev    = txt(r['행사번호']);
     if(!ev || EXCLUDE_GUBUN.indexOf(gubun) >= 0) return;   // 취소·합계·빈 행사번호 제외
+    const product = txt(r['상품명']);
     teams.push({
       ev, gubun,
       rep:    txt(r['대표고객']),
@@ -467,21 +467,22 @@ function buildTeams(){
       mmdd:   parseMMDD(r['출발일자']),
       origin: originCode(r['출발지']),
       air:    txt(r['항공']),
-      product:txt(r['상품명']),
+      product,
+      accom:  accomCode(product),                 // H / C / X
       pax:    parseInt(txt(r['예약'])||'0',10) || 0
     });
   });
-  // 팀알파: (박수+출발MMDD) 그룹별, 출발일→행사번호 순 정렬
+  // 팀알파: (숙박prefix+입국MMDD) 그룹별, 출발일→행사번호 순 정렬 (SaiZen 동일 규칙)
   const groups = {};
   teams.slice().sort((a,b)=> (a.dep+a.ev).localeCompare(b.dep+b.ev))
        .forEach(t=>{
-         const key = t.nights+'|'+t.mmdd;
+         const key = t.accom+'|'+t.mmdd;
          (groups[key] = groups[key] || []).push(t);
        });
   Object.values(groups).forEach(arr=>{
     arr.forEach((t,idx)=>{
       t.alpha     = alphaCode(idx);
-      t.teamCode  = `${t.nights}-${t.mmdd}-${t.alpha}`;   // 개인번호 제외 팀 코드
+      t.teamCode  = `${t.accom}-${t.mmdd}-${t.alpha}`;   // 개인번호 제외 팀 코드
     });
   });
   return teams;
@@ -494,15 +495,27 @@ function buildGuests(teams){
   const guests = [];
   teams.forEach(t=>{
     const rows = byEv[t.ev] || [];
-    rows.forEach((r,i)=>{
+    // 대표자=1번: 고객명이 예약자명 또는 A대표고객과 일치하는 행을 맨 앞으로
+    const booker = rows.length ? txt(rows[0]['예약자명']) : '';
+    const repIdx = rows.findIndex(r=>{
+      const nm = txt(r['고객명']);
+      return nm && (nm===booker || nm===t.rep);
+    });
+    const ordered = repIdx > 0
+      ? [rows[repIdx], ...rows.filter((_,i)=>i!==repIdx)]
+      : rows;
+    ordered.forEach((r,i)=>{
       const no = i+1;
       guests.push({
         tag:    `${t.teamCode}-${pad2(no)}`,
         ev:     t.ev,
         rep:    t.rep,
+        isRep:  i===0,
         name:   txt(r['고객명']),
         eng:    (txt(r['영문성'])+' '+txt(r['영문이름'])).trim(),
         sex:    txt(r['성별']),
+        accom:  t.accom,
+        accomLabel: (ACCOM[t.accom]||{}).label || '',
         origin: t.origin,
         dep:    t.dep,
         ret:    t.ret,
@@ -526,6 +539,7 @@ function computeStats(teams, guests){
     guestCount:  guests.length,
     paxSum:      teams.reduce((s,t)=>s+t.pax,0),
     noPaxTeams:  teams.filter(t=>!t.guestCount).length,
+    byAccom:     by(teams, t=>(ACCOM[t.accom]||{}).label+' ('+t.accom+')'),
     byOrigin:    by(teams, t=>t.origin),
     byNights:    by(teams, t=>t.nights!=null ? t.nights+'박' : '(미지정)')
   };
@@ -553,8 +567,8 @@ function esc(v){ return String(v==null?'':v).replace(/[&<>]/g, m=>({'&':'&amp;',
 
 /* 개인 명단(로스터) 표준 컬럼 — 미리보기·xlsx 공통 */
 const ROSTER_COLS = [
-  ['tag','태그코드'], ['name','이름'], ['eng','영문'], ['sex','성별'],
-  ['origin','출발지'], ['nights','박수'], ['dep','출발일'], ['rep','대표자']
+  ['tag','태그코드'], ['accomLabel','숙박'], ['name','이름'], ['eng','영문'],
+  ['sex','성별'], ['origin','출발지'], ['nights','박수'], ['dep','출발일'], ['rep','대표자']
 ];
 function rosterTable(rows, limit){
   if(!rows || !rows.length) return '<div class="empty-note">결합된 개인 명단이 없습니다.</div>';
@@ -575,6 +589,7 @@ function statsPanel(){
     + kv('예약인원 합', s.paxSum+'명')
     + kv('탑승객 미등록 팀', s.noPaxTeams+'팀')
     + '</div>'
+    + '<div class="card-sub">숙박 — '+dist(s.byAccom)+'</div>'
     + '<div class="card-sub">출발지 — '+dist(s.byOrigin)+'</div>'
     + '<div class="card-sub">박수 — '+dist(s.byNights)+'</div>';
 }
