@@ -1,0 +1,388 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>14hills 운영 통합 시스템 — 블루프린트</title>
+<style>
+  :root{
+    --bg:#f4f6f1; --surface:#ffffff; --ink:#23291c; --ink2:#4a5340; --ink3:#7c856e;
+    --line:#d9e0cf; --line2:#c2cdb0;
+    --olive:#4F6B30; --olive2:#3D5526; --olive-dim:#E6EEDA;
+    --blue:#1D4ED8; --blueDim:#E3ECFD;
+    --teal:#0F766E; --tealDim:#DDF0EC;
+    --amber:#B45309; --amberDim:#FBEEDB;
+    --purple:#7C3AED; --purpleDim:#EEE6FC;
+    --gray:#475569; --grayDim:#EEF1F5;
+    --shadow:0 2px 10px rgba(30,40,20,.07);
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:'Pretendard','Apple SD Gothic Neo','Malgun Gothic',system-ui,sans-serif;
+    background:var(--bg);color:var(--ink);line-height:1.6;-webkit-print-color-adjust:exact;print-color-adjust:exact}
+  .wrap{max-width:1120px;margin:0 auto;padding:32px 26px 80px}
+
+  /* 헤더 */
+  .hd{display:flex;justify-content:space-between;align-items:flex-end;gap:18px;
+    border-bottom:3px solid var(--olive);padding-bottom:16px;margin-bottom:8px}
+  .hd h1{font-size:27px;font-weight:800;letter-spacing:-.5px;color:var(--olive2)}
+  .hd .sub{font-size:13px;color:var(--ink2);margin-top:5px}
+  .hd .meta{font-size:11px;color:var(--ink3);text-align:right;line-height:1.7;white-space:nowrap}
+  .badge{display:inline-block;background:var(--olive);color:#fff;font-size:10.5px;font-weight:700;
+    border-radius:5px;padding:2px 8px;letter-spacing:.3px;vertical-align:middle;margin-left:6px}
+
+  .lead{font-size:13.5px;color:var(--ink2);background:var(--olive-dim);border:1px solid var(--line2);
+    border-radius:12px;padding:14px 18px;margin:18px 0 26px}
+  .lead b{color:var(--olive2)}
+
+  /* 섹션 제목 */
+  h2{font-size:18px;font-weight:800;color:var(--ink);margin:34px 0 14px;display:flex;align-items:center;gap:9px}
+  h2 .n{display:inline-flex;align-items:center;justify-content:center;width:25px;height:25px;border-radius:7px;
+    background:var(--olive);color:#fff;font-size:13px;font-weight:800;flex-shrink:0}
+  h2 .en{font-size:11px;font-weight:600;color:var(--ink3);letter-spacing:.5px}
+
+  /* 데이터 흐름 */
+  .flow{display:flex;align-items:stretch;gap:0;flex-wrap:wrap}
+  .fbox{flex:1;min-width:150px;background:var(--surface);border:1px solid var(--line);border-radius:12px;
+    padding:14px 15px;box-shadow:var(--shadow)}
+  .fbox .t{font-size:13.5px;font-weight:800;color:var(--olive2)}
+  .fbox .d{font-size:11.5px;color:var(--ink2);margin-top:5px}
+  .fbox ul{margin:7px 0 0;padding-left:15px}
+  .fbox li{font-size:11px;color:var(--ink2);margin:2px 0}
+  .arrow{display:flex;align-items:center;justify-content:center;color:var(--line2);font-size:24px;
+    font-weight:900;padding:0 7px;flex:0 0 auto}
+  @media (max-width:760px){ .arrow{transform:rotate(90deg);padding:7px 0} .flow{flex-direction:column} }
+
+  /* 모듈 카드 그리드 */
+  .grid{display:grid;grid-template-columns:repeat(2,1fr);gap:16px}
+  @media (max-width:760px){ .grid{grid-template-columns:1fr} }
+  .mod{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:0;overflow:hidden;
+    box-shadow:var(--shadow);display:flex;flex-direction:column}
+  .mod .top{display:flex;align-items:center;gap:10px;padding:13px 16px;border-bottom:1px solid var(--line);background:#fbfcf8}
+  .mod .ic{width:34px;height:34px;border-radius:9px;display:flex;align-items:center;justify-content:center;
+    font-size:18px;flex-shrink:0;background:var(--olive-dim)}
+  .mod .ti{font-size:15px;font-weight:800;color:var(--ink)}
+  .mod .ja{font-size:11px;color:var(--ink3);font-weight:600}
+  .mod .num{margin-left:auto;font-size:11px;font-weight:800;color:#fff;background:var(--olive);border-radius:20px;padding:2px 9px}
+  .mod .body{padding:13px 16px;font-size:12px;flex:1}
+  .row{display:flex;gap:8px;margin:6px 0}
+  .row .k{flex:0 0 58px;font-size:10.5px;font-weight:800;color:var(--ink3);padding-top:1px}
+  .row .v{flex:1;color:var(--ink2);font-size:12px}
+  .chip{display:inline-block;background:var(--grayDim);border:1px solid var(--line);border-radius:6px;
+    padding:1px 7px;font-size:10.5px;color:var(--ink2);margin:2px 3px 0 0}
+  .chip.out{background:var(--olive-dim);border-color:var(--line2);color:var(--olive2);font-weight:700}
+
+  /* 태그코드 */
+  .tag-demo{display:flex;align-items:center;justify-content:center;gap:6px;flex-wrap:wrap;margin:6px 0 16px}
+  .seg{text-align:center}
+  .seg .box{font-family:'Consolas','Menlo',monospace;font-size:30px;font-weight:800;color:#fff;
+    border-radius:10px;padding:8px 16px;min-width:54px;display:inline-block}
+  .seg .lbl{font-size:11px;font-weight:700;color:var(--ink2);margin-top:6px}
+  .seg .sub{font-size:10px;color:var(--ink3)}
+  .dash{font-size:26px;font-weight:800;color:var(--ink3);padding:0 2px}
+  .legend{display:grid;grid-template-columns:repeat(2,1fr);gap:8px 22px;margin-top:4px}
+  @media (max-width:760px){ .legend{grid-template-columns:1fr} }
+  .legend .li{font-size:12px;color:var(--ink2)}
+  .legend .li b{color:var(--ink)}
+  .k-code{font-family:'Consolas',monospace;font-weight:800;background:var(--grayDim);border-radius:4px;padding:0 5px}
+
+  /* 색상칩 */
+  .colors{display:flex;gap:10px;flex-wrap:wrap;margin-top:4px}
+  .col{display:flex;align-items:center;gap:8px;background:var(--surface);border:1px solid var(--line);
+    border-radius:10px;padding:8px 13px;box-shadow:var(--shadow)}
+  .dot{width:16px;height:16px;border-radius:5px;flex-shrink:0}
+  .col .nm{font-size:12.5px;font-weight:700}
+  .col .cd{font-size:10.5px;color:var(--ink3);font-family:monospace}
+
+  /* 일반 카드 */
+  .card{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:16px 18px;box-shadow:var(--shadow)}
+  .card + .card{margin-top:14px}
+  .two{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+  @media (max-width:760px){ .two{grid-template-columns:1fr} }
+  .h3{font-size:13.5px;font-weight:800;color:var(--olive2);margin-bottom:8px;display:flex;align-items:center;gap:7px}
+  .li2{font-size:12.5px;color:var(--ink2);margin:5px 0;padding-left:16px;position:relative}
+  .li2::before{content:'';position:absolute;left:3px;top:8px;width:5px;height:5px;border-radius:50%;background:var(--olive)}
+  .li2 b{color:var(--ink)}
+
+  .note{font-size:11px;color:var(--ink3);margin-top:8px}
+  .pill{display:inline-block;border:1px solid var(--line2);border-radius:20px;padding:2px 10px;font-size:11px;
+    color:var(--ink2);background:#fff;margin:3px 4px 0 0}
+  .foot{margin-top:46px;border-top:1px solid var(--line);padding-top:14px;font-size:11px;color:var(--ink3);text-align:center}
+
+  @media print{
+    body{background:#fff}
+    .wrap{max-width:none;padding:0 6mm}
+    .mod,.fbox,.card,.col{box-shadow:none}
+    h2{break-after:avoid}
+    .mod,.card{break-inside:avoid}
+    .grid{gap:10px}
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <!-- 헤더 -->
+  <div class="hd">
+    <div>
+      <h1>14hills 운영 통합 시스템 <span class="badge">BLUEPRINT</span></h1>
+      <div class="sub">포틴힐즈 컨트리클럽(名古屋·나고야 / 18홀) 현장 운영 자동화 — SaiZen 야마나미 시스템 계열</div>
+    </div>
+    <div class="meta">
+      회의용 구조 설명서<br>
+      단일 HTML 앱 · Supabase 연동<br>
+      산출물: 인쇄(PDF/종이)
+    </div>
+  </div>
+
+  <div class="lead">
+    한국 골프투어 송객을 받아 <b>네임택 · 송영 · 현지 수배서 · 저녁 명단 · 현지 정산</b> 산출물을 자동 생성하는 현장 운영 도구입니다.
+    엠클릭 예약 데이터(엑셀 2종)를 올리면 → 개인/팀 단위로 분석 → <b>월별 세션</b>으로 정리 → 5개 모듈에서 <b>인쇄물</b>을 뽑습니다.
+    고객 소통은 한국어, 현장 산출물은 일본어 기조입니다.
+  </div>
+
+  <!-- 1. 데이터 흐름 -->
+  <h2><span class="n">1</span> 전체 데이터 흐름 <span class="en">DATA FLOW</span></h2>
+  <div class="flow">
+    <div class="fbox">
+      <div class="t">① 입력 (엑셀 2종)</div>
+      <div class="d">엠클릭에서 받은 예약 데이터</div>
+      <ul>
+        <li><b>예약 리스트</b> — 예약현황(팀·상품·숙박·금액)</li>
+        <li><b>일행별 예약</b> — 탑승자정보(개인·항공·여권·현지도착)</li>
+        <li>여러 파일·여러 달 동시 등록 가능</li>
+      </ul>
+    </div>
+    <div class="arrow">→</div>
+    <div class="fbox">
+      <div class="t">② 분석</div>
+      <div class="d">파싱·표준화·매칭</div>
+      <ul>
+        <li><b>processed</b> = 팀(예약) 단위</li>
+        <li><b>passengers</b> = 개인 단위</li>
+        <li>출발지 표준화(인천/부산/청주/대구)</li>
+        <li>태그코드 자동 부여</li>
+      </ul>
+    </div>
+    <div class="arrow">→</div>
+    <div class="fbox">
+      <div class="t">③ 월별 세션</div>
+      <div class="d">출발월(YYYY-MM)별 분리</div>
+      <ul>
+        <li>한 번에 올려도 <b>달별로 자동 분리</b></li>
+        <li>상단 바에서 월 전환</li>
+        <li>클라우드 자동 저장/불러오기</li>
+      </ul>
+    </div>
+    <div class="arrow">→</div>
+    <div class="fbox">
+      <div class="t">④ 산출물 (5모듈)</div>
+      <div class="d">현장용 인쇄물</div>
+      <ul>
+        <li>네임택 · 송영 · 수배서</li>
+        <li>저녁 명단 · 현지 정산</li>
+        <li>모두 <b>인쇄(PDF/종이)</b>로 출력</li>
+      </ul>
+    </div>
+  </div>
+
+  <!-- 2. 5개 모듈 -->
+  <h2><span class="n">2</span> 5개 운영 모듈 <span class="en">MODULES (nav 순서)</span></h2>
+  <div class="grid">
+
+    <!-- 네임택 -->
+    <div class="mod">
+      <div class="top">
+        <div class="ic">🏷️</div>
+        <div><div class="ti">네임택</div><div class="ja">ネームタグ / Name Tag</div></div>
+        <div class="num">①</div>
+      </div>
+      <div class="body">
+        <div class="row"><div class="k">목적</div><div class="v">고객 개인별 이름표(태그코드·이름·항공·숙박)</div></div>
+        <div class="row"><div class="k">단위</div><div class="v">개인(passengers) 1인 = 라벨 1장</div></div>
+        <div class="row"><div class="k">산출물</div><div class="v">
+          <span class="chip out">🖨 A-one 28466 라벨 인쇄</span>
+          <div class="note">18면(3×6) · 53.3×42.3mm · 角丸 · 시작면 지정 가능</div>
+        </div></div>
+        <div class="row"><div class="k">특징</div><div class="v">태그코드 글자색을 <b>출발지별 색</b>으로 구분</div></div>
+      </div>
+    </div>
+
+    <!-- 송영 배차표 -->
+    <div class="mod">
+      <div class="top">
+        <div class="ic">🚌</div>
+        <div><div class="ti">송영 배차표</div><div class="ja">送迎配車表 / Transfer</div></div>
+        <div class="num">②</div>
+      </div>
+      <div class="body">
+        <div class="row"><div class="k">목적</div><div class="v">공항↔호텔 송영(도착/귀국) 명단·배차</div></div>
+        <div class="row"><div class="k">산출물</div><div class="v">
+          <span class="chip out">🖨 空港到着者名簿 A3</span>
+          <span class="chip out">🖨 탑승명단 A3</span>
+          <div class="note">到着者名簿: <b>현지도착시각순</b> 정렬 · 入国便/到着時刻/태그코드<br>
+          탑승명단: 귀국편별 · 정원(기본 45명) 기준 <b>호차 자동분할</b></div>
+        </div></div>
+        <div class="row"><div class="k">시각</div><div class="v">현지도착·현지출발 시각은 <b>일행별예약</b>에서 자동</div></div>
+      </div>
+    </div>
+
+    <!-- 현지 수배서 -->
+    <div class="mod">
+      <div class="top">
+        <div class="ic">📋</div>
+        <div><div class="ti">현지 수배서</div><div class="ja">現地手配書 / Dispatch</div></div>
+        <div class="num">③</div>
+      </div>
+      <div class="body">
+        <div class="row"><div class="k">목적</div><div class="v">행사 1건 = 양면 1장(현지 거래처/스태프용)</div></div>
+        <div class="row"><div class="k">앞면</div><div class="v">행사·항공·숙박·고객명단·골프장 + <b>参考事項(예약 비고·현지비고)</b></div></div>
+        <div class="row"><div class="k">뒷면</div><div class="v"><b>現地発生分 記入表</b> — 현장 추가분 수기 기입<br>
+          <span class="chip">①라운드추가</span><span class="chip">②飲食</span><span class="chip">③延泊</span><span class="chip">④送迎</span><span class="chip">⑤ルームチャージ</span><span class="chip">⑥その他</span></div></div>
+        <div class="row"><div class="k">산출물</div><div class="v"><span class="chip out">🖨 A4 양면 일괄 인쇄</span> · 개인정보 마스킹 토글</div></div>
+      </div>
+    </div>
+
+    <!-- 저녁 명단표 -->
+    <div class="mod">
+      <div class="top">
+        <div class="ic">🍱</div>
+        <div><div class="ti">저녁 명단표</div><div class="ja">夕食名前版 / Dinner</div></div>
+        <div class="num">④</div>
+      </div>
+      <div class="body">
+        <div class="row"><div class="k">목적</div><div class="v">저녁 식사 테이블 배치·인원·메뉴 운영</div></div>
+        <div class="row"><div class="k">단위</div><div class="v">일자별 체류 인원 → 팀/테이블 단위</div></div>
+        <div class="row"><div class="k">산출물</div><div class="v">
+          <span class="chip out">🖨 レストラン名札</span>
+          <span class="chip out">🖨 夕食オーダー A3</span>
+        </div></div>
+        <div class="row"><div class="k">표시</div><div class="v">태그코드 · 테이블No · 참고사항(예약/현지 비고)</div></div>
+      </div>
+    </div>
+
+    <!-- 현지 정산표 -->
+    <div class="mod">
+      <div class="top">
+        <div class="ic">🧾</div>
+        <div><div class="ti">현지 정산표</div><div class="ja">現地精算表 / Settlement</div></div>
+        <div class="num">⑤</div>
+      </div>
+      <div class="body">
+        <div class="row"><div class="k">목적</div><div class="v">현지 거래처 B2B 정산(내부 정산과 별개)</div></div>
+        <div class="row"><div class="k">요율</div><div class="v">체재비 <b>¥15,000</b>/박·인 · 왕복 송영비 <b>¥12,000</b>/인<br>
+          <span class="note">그린피·카트·식사는 현지 정산 항목 아님 · 통화 JPY</span></div></div>
+        <div class="row"><div class="k">차감</div><div class="v">싱글차지 선납·쿠폰·포인트 등 차감 → 실정산액 자동</div></div>
+        <div class="row"><div class="k">산출물</div><div class="v"><span class="chip out">🧾 御請求書 출력/PDF</span></div></div>
+      </div>
+    </div>
+
+    <!-- 공통 인프라 -->
+    <div class="mod">
+      <div class="top">
+        <div class="ic">⚙️</div>
+        <div><div class="ti">공통 인프라</div><div class="ja">Shared</div></div>
+      </div>
+      <div class="body">
+        <div class="row"><div class="k">코어</div><div class="v">태그코드 생성 · 출발지/요일 표준화 · 비고 통합</div></div>
+        <div class="row"><div class="k">세션</div><div class="v">월별 분리 · 클라우드 동기화 · 자동 저장/로드</div></div>
+        <div class="row"><div class="k">보안</div><div class="v"><b>로그인 필수</b> — 미로그인 시 전체 차단</div></div>
+        <div class="row"><div class="k">출력</div><div class="v">전 모듈 <b>인쇄 기반</b>(엑셀 다운로드 없음)</div></div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- 3. 태그코드 -->
+  <h2><span class="n">3</span> 태그코드 체계 <span class="en">TAG CODE</span></h2>
+  <div class="card">
+    <div class="tag-demo">
+      <div class="seg"><span class="box" style="background:var(--olive)">M</span><div class="lbl">요일</div><div class="sub">입국(송영) 요일</div></div>
+      <div class="seg"><span class="box" style="background:var(--blue)">I</span><div class="lbl">출발지</div><div class="sub">인천</div></div>
+      <span class="dash">–</span>
+      <div class="seg"><span class="box" style="background:var(--gray)">A</span><div class="lbl">팀</div><div class="sub">알파벳</div></div>
+      <span class="dash">–</span>
+      <div class="seg"><span class="box" style="background:var(--amber)">01</span><div class="lbl">개인</div><div class="sub">번호</div></div>
+    </div>
+    <div class="two">
+      <div>
+        <div class="h3">① 요일 (입국=현지도착=한국출국일)</div>
+        <div class="legend">
+          <div class="li"><span class="k-code">K</span> &nbsp;火 화요일 (ka)</div>
+          <div class="li"><span class="k-code">M</span> &nbsp;木 목요일 (moku)</div>
+          <div class="li"><span class="k-code">N</span> &nbsp;日 일요일 (nichi)</div>
+          <div class="li" style="color:var(--ink3)">※ 14hills 송영은 火·木·日 고정</div>
+        </div>
+        <div class="h3" style="margin-top:14px">② 출발지</div>
+        <div class="legend">
+          <div class="li"><span class="k-code">I</span> 인천 &nbsp; <span class="k-code">P</span> 부산</div>
+          <div class="li"><span class="k-code">C</span> 청주 &nbsp; <span class="k-code">T</span> 대구</div>
+        </div>
+      </div>
+      <div>
+        <div class="h3">③ 팀 알파벳 · ④ 개인번호</div>
+        <div class="li2"><b>팀</b>: 같은 요일+출발지 배치 안에서 A·B·C…</div>
+        <div class="li2"><b>개인</b>: 01·02·03… 일행 순번</div>
+        <div class="li2"><b>사이클 리셋</b>: 출/귀국 사이클(현장 체류가 겹치는 묶음) 단위로 부여 → 앞 사이클이 모두 귀국하면 <b>소멸 → 코드 재사용</b></div>
+        <div class="note">예) <span class="k-code">MI-A-01</span> 목·인천 A팀 1번 &nbsp;·&nbsp; <span class="k-code">KP-B-02</span> 화·부산 B팀 2번</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 4. 색상 구분 -->
+  <h2><span class="n">4</span> 색상 구분 — 출발지 기준 <span class="en">COLOR</span></h2>
+  <div class="card">
+    <div class="colors">
+      <div class="col"><span class="dot" style="background:var(--blue)"></span><div><div class="nm">인천 (I)</div><div class="cd">#1D4ED8 파랑</div></div></div>
+      <div class="col"><span class="dot" style="background:var(--teal)"></span><div><div class="nm">부산 (P)</div><div class="cd">#0F766E 청록</div></div></div>
+      <div class="col"><span class="dot" style="background:var(--amber)"></span><div><div class="nm">청주 (C)</div><div class="cd">#B45309 호박</div></div></div>
+      <div class="col"><span class="dot" style="background:var(--purple)"></span><div><div class="nm">대구 (T)</div><div class="cd">#7C3AED 보라</div></div></div>
+      <div class="col"><span class="dot" style="background:var(--gray)"></span><div><div class="nm">기타/미정</div><div class="cd">#475569 회색</div></div></div>
+    </div>
+    <div class="note">숙박(호텔/카라반)이 아니라 <b>출발지</b>로 구분합니다. 네임택 태그코드 색 등에 적용.</div>
+  </div>
+
+  <!-- 5. 클라우드 / 세션 / 로그인 -->
+  <h2><span class="n">5</span> 클라우드 · 세션 · 로그인 <span class="en">CLOUD &amp; AUTH</span></h2>
+  <div class="two">
+    <div class="card">
+      <div class="h3">📅 월별 세션 &amp; 등록된 데이터</div>
+      <div class="li2"><b>월별 자동 분리</b>: 6~9월을 한 번에 올려도 출발월별로 각각 등록</div>
+      <div class="li2"><b>상단 "등록된 데이터" 바</b>: 등록된 월 목록(월·담당자·시각·팀/명) 표시, 클릭 전환</div>
+      <div class="li2"><b>자동 저장</b>: 분석을 마치면 클라우드에 자동 저장(전 월)</div>
+      <div class="li2"><b>자동 불러오기</b>: 다른 PC/새 사용자가 접속하면 최신 세션을 자동 로드</div>
+    </div>
+    <div class="card">
+      <div class="h3">🔐 로그인 &amp; 권한</div>
+      <div class="li2"><b>로그인 필수</b>: 미로그인 시 전체 화면 차단(사용 불가)</div>
+      <div class="li2"><b>계정 발급</b>: 로그인 화면에서 요청 → 마스터(관리자) 승인 후 발급</div>
+      <div class="li2"><b>권한</b>: 마스터/관리담당/일반 · 카드(모듈)별 접근 제어 가능</div>
+      <div class="li2"><b>데이터 분리</b>: 14hills 전용 Supabase 프로젝트(SaiZen과 별개)</div>
+    </div>
+  </div>
+
+  <!-- 6. 기술/원칙 -->
+  <h2><span class="n">6</span> 기술 스택 &amp; 운영 원칙 <span class="en">STACK</span></h2>
+  <div class="card">
+    <span class="pill">단일 HTML 바이브 코딩</span>
+    <span class="pill">Supabase(Publishable key)</span>
+    <span class="pill">엑셀 읽기 = SheetJS</span>
+    <span class="pill">출력 = 브라우저 인쇄(PDF/종이)</span>
+    <span class="pill">다운로드 파일명 영문 · 셀 내용 한·일</span>
+    <span class="pill">검증: node --check + jsdom 스모크</span>
+    <div class="note" style="margin-top:10px">
+      <b>설계 원칙</b> — 고객 소통은 한국어, 현장 산출물은 일본어 기조. 코드가 항상 정답(문서와 어긋나면 코드 신뢰).
+      27홀(야마나미) → <b>18홀 단일 코스</b>로 교체. 항공커버·배차/숙박 단독 탭은 미도입(수배서 한 장으로 통합).
+    </div>
+  </div>
+
+  <div class="foot">
+    14hills 운영 통합 시스템 · 회의용 블루프린트 · <span id="gen"></span> 생성<br>
+    상세는 저장소 <code>CLAUDE.md</code> · <code>docs/</code> 브리프 · 실제 동작은 <code>app/index.html</code> 코드를 기준으로 합니다.
+  </div>
+
+</div>
+<script>
+  document.getElementById('gen').textContent = new Date().toISOString().slice(0,10);
+</script>
+</body>
+</html>
