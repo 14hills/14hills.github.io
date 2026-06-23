@@ -6330,15 +6330,34 @@ function resetApp(){
       if(allowed.indexOf(area)<0){ var el=document.getElementById(TABMAP[area]); if(el) el.style.display='none'; }
     });
   }
+  function _authBlock(msgHtml){
+    if(document.getElementById('sbx-hardgate')) return;
+    var d=document.createElement('div'); d.id='sbx-hardgate';
+    d.setAttribute('style','position:fixed;inset:0;z-index:9999;background:rgba(20,30,28,.78);display:flex;align-items:center;justify-content:center;text-align:center;padding:24px;color:#fff;font-size:15px;line-height:1.75;backdrop-filter:blur(2px)');
+    d.innerHTML='<div>'+msgHtml+'</div>';
+    document.body.appendChild(d);
+  }
   function boot(){
-    if(!window.SB14) return;   // sb.js 미로드 → 기존 동작(비차단)
+    // 인증 모듈 미로드 → 미로그인 사용 방지(차단)
+    if(!window.SB14){
+      _authBlock('로그인 모듈을 불러오지 못했습니다.<br>네트워크 확인 후 새로고침해 주세요.'
+        +'<br><button onclick="location.reload()" style="margin-top:14px;padding:8px 18px;border-radius:8px;border:0;background:#fff;color:#374151;font-weight:700;cursor:pointer">새로고침</button>');
+      return;
+    }
     SB14.guard({title:'14hills 운영 통합 시스템'}).then(function(acc){
       statusBtn(acc);
-      if(acc){ applyAreaGate(acc);
-        try{ renderCloudDataBar(); }catch(e){}
-        try{ autoLoadLatestSession(); }catch(e){}
-        if(acc.role==='admin'){ var b=document.getElementById('sb-status-btn'); if(b && !document.getElementById('sb-admin-link')){ var a=document.createElement('a'); a.id='sb-admin-link'; a.href='../admin/'; a.className='ghost-btn'; a.textContent='⚙ 관리'; a.style.marginLeft='4px'; a.title='마스터 관리 페이지'; b.parentNode.insertBefore(a,b.nextSibling); } }
+      if(!acc){
+        // 미로그인/인증불가 → 가드 로그인 오버레이가 없으면 하드 차단(연결 실패 등)
+        if(!document.getElementById('sbx-gate')){
+          _authBlock('로그인이 필요합니다.<br>새로고침 후 로그인해 주세요.'
+            +'<br><button onclick="location.reload()" style="margin-top:14px;padding:8px 18px;border-radius:8px;border:0;background:#fff;color:#374151;font-weight:700;cursor:pointer">새로고침</button>');
+        }
+        return;
       }
+      applyAreaGate(acc);
+      try{ renderCloudDataBar(); }catch(e){}
+      try{ autoLoadLatestSession(); }catch(e){}
+      if(acc.role==='admin'){ var b=document.getElementById('sb-status-btn'); if(b && !document.getElementById('sb-admin-link')){ var a=document.createElement('a'); a.id='sb-admin-link'; a.href='../admin/'; a.className='ghost-btn'; a.textContent='⚙ 관리'; a.style.marginLeft='4px'; a.title='마스터 관리 페이지'; b.parentNode.insertBefore(a,b.nextSibling); } }
     });
   }
   if(document.readyState==='loading') document.addEventListener('DOMContentLoaded',boot); else boot();
