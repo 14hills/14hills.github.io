@@ -136,5 +136,5 @@ create trigger trg_groups_updated before update on groups
 -- ============================================================
 -- 적용 후: Authentication → Providers → Email 활성화,
 --          Authentication → Users → 운영자 계정 추가(Invite/Create).
---          Project URL · anon public key 는 Settings → API 에서 복사.
+--          Project URL · Publishable key(구 anon public key, 형식 sb_publishable_…) 는 Settings → API 에서 복사.
 -- ============================================================

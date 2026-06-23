@@ -9490,17 +9490,17 @@ function resetApp(){
   <div class="sb-card">
     <div id="sb-config" style="display:none">
       <div class="sb-h">☁ Supabase 연결 설정</div>
-      <p class="sb-p">Supabase 프로젝트의 <b>Project URL</b>과 <b>anon public key</b>를 입력하세요. (Supabase → Settings → API) · 절차: <code>docs/02_supabase_설정가이드.md</code></p>
+      <p class="sb-p">Supabase 프로젝트의 <b>Project URL</b>과 <b>Publishable key</b>(구 anon)를 입력하세요. (Supabase → Settings → API) · 절차: <code>docs/02_supabase_설정가이드.md</code></p>
       <label class="sb-l">Project URL</label>
       <input id="sb-url" class="sb-i" placeholder="https://xxxx.supabase.co" autocomplete="off">
-      <label class="sb-l">anon public key</label>
-      <textarea id="sb-key" class="sb-i" rows="3" placeholder="eyJhbGci..." autocomplete="off"></textarea>
+      <label class="sb-l">Publishable key <span style="color:var(--text3);font-weight:400">(구 anon public key)</span></label>
+      <textarea id="sb-key" class="sb-i" rows="3" placeholder="sb_publishable_… (또는 레거시 eyJ…)" autocomplete="off"></textarea>
       <div class="sb-row">
         <button class="sb-btn primary" onclick="sbSaveConfig()">저장 후 로그인</button>
         <button class="sb-btn ghost" onclick="sbClearConfig()">연결 해제</button>
         <button class="sb-btn ghost" onclick="sbHideGate()">닫기</button>
       </div>
-      <p class="sb-note">미입력 시 기존처럼 <b>엑셀 업로드 + localStorage</b>로 동작합니다. 키를 저장하면 로그인 게이트가 켜집니다. (anon 키만 사용 · service_role 금지)</p>
+      <p class="sb-note">미입력 시 기존처럼 <b>엑셀 업로드 + localStorage</b>로 동작합니다. 키를 저장하면 로그인 게이트가 켜집니다. (Publishable key(구 anon)만 사용 · Secret key 금지)</p>
     </div>
     <div id="sb-login" style="display:none">
       <div class="sb-h">🔐 14hills 운영 로그인</div>
@@ -9580,7 +9580,7 @@ function sbSaveConfig(){
   const url=(document.getElementById('sb-url').value||'').trim().replace(/\/+$/,'');
   const key=(document.getElementById('sb-key').value||'').trim();
   if(!/^https:\/\/.+\.supabase\.co$/.test(url)){ alert('Project URL 형식 확인 (예: https://xxxx.supabase.co)'); return; }
-  if(key.length<20){ alert('anon public key를 확인해주세요.'); return; }
+  if(key.length<20){ alert('Publishable key(구 anon)를 확인해주세요.'); return; }
   localStorage.setItem(SB_URL_KEY,url); localStorage.setItem(SB_KEY_KEY,key);
   sbClient=null; alert('저장됐습니다. 로그인 화면으로 이동합니다.'); location.reload();
 }

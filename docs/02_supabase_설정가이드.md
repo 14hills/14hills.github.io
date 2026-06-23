@@ -30,12 +30,12 @@
 1. **Settings (톱니) → API**
 2. 복사해 둘 값 2가지:
    - **Project URL** : `https://xxxx.supabase.co`
-   - **anon public** key (긴 JWT 문자열) — ⚠️ `service_role` 키는 **절대 프론트에 넣지 않음**
+   - **Publishable key** (구 `anon public key`, 형식 `sb_publishable_…` 또는 레거시 JWT `eyJ…`) — ⚠️ `Secret key`(구 `service_role`)는 **절대 프론트에 넣지 않음**
 
 ## 5. 앱에 연결
 1. `https://14hills.github.io/app/` 접속
 2. 우측 상단 **`☁ Supabase`** 버튼 → **연결 설정**
-3. Project URL · anon key 붙여넣기 → **저장** (브라우저 localStorage `14h_sb_url`/`14h_sb_key`에 보관)
+3. Project URL · Publishable key 붙여넣기 → **저장** (브라우저 localStorage `14h_sb_url`/`14h_sb_key`에 보관)
 4. 새로고침하면 **로그인 화면**이 뜸 → 3단계에서 만든 계정으로 로그인
 5. 로그인되면 운영 화면 사용 가능 (헤더에 로그인 이메일·로그아웃 표시)
 
@@ -43,7 +43,8 @@
 > 키를 넣은 순간부터 **로그인 게이트**가 활성화됩니다.
 
 ## 보안 메모
-- 프론트에는 **anon 키만** 사용(공개돼도 RLS로 보호). `service_role`은 서버 전용.
+- 프론트에는 **Publishable key(구 anon)만** 사용(공개돼도 RLS로 보호). `Secret key`(구 service_role)는 서버 전용.
+- ℹ️ Supabase가 키 명칭을 바꿈: `anon` → **Publishable key**, `service_role` → **Secret key**. (RLS의 역할명 `anon`/`authenticated`는 그대로)
 - 현재 RLS는 *로그인 사용자 전체 접근*(내부 운영 전제). 사용자별 분리가 필요하면
   `groups.user_id` 등 소유자 컬럼 + 정책으로 확장(요청 시 적용).
 - 비밀번호 분실 시 Supabase Authentication에서 재설정.
