@@ -366,19 +366,21 @@ tr.draggable-row td:first-child::before{content:'⠿';color:var(--text3);margin-
   <div class="nav-tab active" id="nav-upload" onclick="gotoSection('upload')">
     <div class="nav-dot"></div> <span data-i18n="nav_upload">ファイルアップロード</span>
   </div>
-  <div class="nav-tab locked" id="nav-dispatch" onclick="gotoSection('dispatch')">
-    <div class="nav-dot"></div> ① <span data-i18n="nav_dispatch">現地手配書</span>
-  </div>
   <div class="nav-tab locked" id="nav-nametag" onclick="gotoSection('nametag')">
-    <div class="nav-dot"></div> ② <span data-i18n="nav_nametag">ネームタグ</span>
+    <div class="nav-dot"></div> ① <span data-i18n="nav_nametag">ネームタグ</span>
+  </div>
+  <div class="nav-tab locked" id="nav-transfer" onclick="gotoSection('transfer')">
+    <div class="nav-dot"></div> ② <span data-i18n="nav_transfer">送迎配車表</span>
+  </div>
+  <div class="nav-tab locked" id="nav-dispatch" onclick="gotoSection('dispatch')">
+    <div class="nav-dot"></div> ③ <span data-i18n="nav_dispatch">現地手配書</span>
   </div>
   <div class="nav-tab locked" id="nav-dinner" onclick="gotoSection('dinner')">
-    <div class="nav-dot"></div> ③ <span data-i18n="nav_dinner">夕食名前版</span>
+    <div class="nav-dot"></div> ④ <span data-i18n="nav_dinner">夕食名前版</span>
   </div>
   <div class="nav-tab locked" id="nav-settle" onclick="gotoSection('settle')">
-    <div class="nav-dot"></div> ④ <span data-i18n="nav_settle">現地精算表</span>
+    <div class="nav-dot"></div> ⑤ <span data-i18n="nav_settle">現地精算表</span>
   </div>
-  <div class="nav-tab locked" id="nav-transfer" onclick="gotoSection('transfer')"><div class="nav-dot"></div> ⑤ <span data-i18n="nav_transfer">送迎配車表</span></div>
 </div>
 
 <!-- ── SESSION BAR ───────────────────────────────────────── -->
@@ -1038,7 +1040,7 @@ async function cloudLoadSession(ym){
   renderSessionBar();
   renderAll();
   if(window.SB14&&SB14.log) SB14.log('cloud_load',{ym:ym, groups:processed.filter(r=>r.accom).length, pax:processed.reduce((s,r)=>s+(Number(r.pax)||0),0)});
-  gotoSection('dispatch');
+  gotoSection('nametag');
   _cloudToast('☁ '+ym+' 세션을 클라우드에서 불러왔습니다.');
 }
 
@@ -1701,7 +1703,7 @@ function analyze(){
 
   if(window.SB14&&SB14.log) SB14.log('analyze',{session:currentSession||null, rows:(processed||[]).length, pax:(typeof passengers!=='undefined'?passengers.length:0)});
 
-  gotoSection('dispatch');
+  gotoSection('nametag');
 }
 
 // 분석 후 4개 탭을 모두 재렌더 (마스터 업로드·삭제·수동입력 시 호출)
@@ -5626,8 +5628,9 @@ function dispatchFrontHTML(d, masked){
 
   // 골프 코스 요약 (일자별 라운드 테이블 → 코스명만; 상세 일정은 향후 별도 골프 수배서)
   const courseStr = dispatchCourseSummary(d);
-  // 参考事項: 비고 3컬럼 + 현지메모 (현지 비고/키워드 굵게)
-  const notesHTML = dispatchNotesHTML(r, d.memo);
+  // 参考事項: 예약리스트 비고·현지비고·기타비고 (예약 정보만) — 현장 메모와 분리
+  const notesHTML = dispatchNotesHTML(r, '');
+  const memoEsc = String(d.memo||'').replace(/[&<>]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;'}[c]));
 
   return `<div class="hp-page">
     <div class="hp-head">
@@ -5673,8 +5676,11 @@ function dispatchFrontHTML(d, masked){
       <tr><th style="width:24%">ゴルフ場</th><td class="c"><b>${courseStr}</b></td></tr>
     </table>
 
-    <div class="hp-sec">📝 参考事項</div>
-    <div class="hp-memo">${notesHTML}</div>
+    <div class="hp-sec">📝 参考事項 <span style="font-size:7.5pt;color:#888;font-weight:400">(予約リスト 備考・現地備考)</span></div>
+    <div class="hp-memo">${notesHTML || '<span style="color:#aaa">特記事項なし</span>'}</div>
+
+    <div class="hp-sec">✍️ 現地メモ <span style="font-size:7.5pt;color:#888;font-weight:400">(現場記入用)</span></div>
+    <div class="hp-memo" style="min-height:20mm">${memoEsc}</div>
   </div>`;
 }
 
