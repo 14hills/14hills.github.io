@@ -405,11 +405,7 @@ tr.draggable-row td:first-child::before{content:'⠿';color:var(--text3);margin-
   <div class="nav-tab locked" id="nav-settle" onclick="gotoSection('settle')">
     <div class="nav-dot"></div> ④ <span data-i18n="nav_settle">現地精算表</span>
   </div>
-  <div class="nav-sep"></div>
-  <div class="nav-tab wip" id="nav-transfer" onclick="gotoSection('transfer')"><div class="nav-dot"></div> 送迎 <span class="wip-chip">준비중</span></div>
-  <div class="nav-tab wip" id="nav-accom" onclick="gotoSection('accom')"><div class="nav-dot"></div> 宿泊 <span class="wip-chip">준비중</span></div>
-  <div class="nav-tab wip" id="nav-golf" onclick="gotoSection('golf')"><div class="nav-dot"></div> ゴルフ <span class="wip-chip">준비중</span></div>
-  <div class="nav-tab wip" id="nav-aircover" onclick="gotoSection('aircover')"><div class="nav-dot"></div> 航空カバー <span class="wip-chip">준비중</span></div>
+  <div class="nav-tab locked" id="nav-transfer" onclick="gotoSection('transfer')"><div class="nav-dot"></div> ⑤ <span data-i18n="nav_transfer">送迎配車表</span></div>
 </div>
 
 <!-- ── SESSION BAR ───────────────────────────────────────── -->
@@ -514,7 +510,6 @@ tr.draggable-row td:first-child::before{content:'⠿';color:var(--text3);margin-
 
 <!-- ── ③ 送迎配車表 ────────────────────────────────────── -->
 <div class="section" id="sec-transfer">
-  <div class="wip-banner" data-i18n="wip_banner">🚧 準備中 — この機能は調整中です（クリックして編集できます）</div>
   <div class="rule-box">
     <strong>🚌 송영 운영 안내:</strong> 中部国際空港セントレア(NGO·나고야) ↔ 14hills &nbsp;·&nbsp;
     이동 <strong>약 2시간</strong>(휴게소 1회 경유) &nbsp;·&nbsp;
@@ -577,68 +572,6 @@ tr.draggable-row td:first-child::before{content:'⠿';color:var(--text3);margin-
   </div>
 </div>
 
-<!-- ── ⑥ ゴルフ組合せ表 ────────────────────────────────────── -->
-<div class="section" id="sec-golf">
-  <div class="wip-banner" data-i18n="wip_banner">🚧 準備中 — この機能は調整中です（クリックして編集できます）</div>
-  <div class="rule-box">
-    <strong>🏌 14hills 골프 라운딩 규칙:</strong>
-    <span style="color:var(--green2)">평일(주중)</span> 18홀 + <strong>9홀 무료 서비스</strong> &nbsp;/&nbsp;
-    <span style="color:var(--amber2)">주말·일본공휴일</span> 18홀 (9홀 무료 없음) &nbsp;·&nbsp;
-    입국일은 점심 후 9홀 또는 일몰 라운딩 &nbsp;·&nbsp;
-    <strong>9홀 유료 추가</strong> 가능 (¥4,400/인) &nbsp;·&nbsp;
-    9홀 라운딩 운영 ~26.8월 (26.9월~ 첫날 일몰 약 3·4홀)<br>
-    <span style="color:var(--text3)">※ EV카트 운영 없음 · 코스: 14hillsCC (フォーティーンヒルズCC) 단일 18홀</span>
-  </div>
-  <div class="rule-box">
-    <strong>📅 2026년 일본 공휴일 참고</strong> &nbsp;<span style="color:var(--text3);font-size:10px">(주말·공휴일은 9홀 무료 서비스 없이 18홀 · 골프장·호텔·항공 혼잡)</span><br>
-    3/20(금) 춘분의 날 · 4/29(수) 쇼와의 날 &nbsp;|&nbsp;
-    <span style="color:var(--amber2)">【골든위크】</span> 5/3(일) 헌법기념일 · 5/4(월) 녹색의 날 · 5/5(화) 어린이날 · 5/6(수) 대체휴일 &nbsp;|&nbsp;
-    7/20(월) 바다의 날 · 8/11(화) 산의 날 &nbsp;|&nbsp;
-    <span style="color:var(--amber2)">【실버위크】</span> 9/21(월) 경로의 날 · 9/22(화) 국민의 휴일 · 9/23(수) 추분의 날 &nbsp;|&nbsp;
-    10/12(월) 스포츠의 날 · 11/3(화) 문화의 날 · 11/23(월) 근로감사의 날<br>
-    <span style="color:var(--text3)">※ 성수기: 골든위크(4/29~5/10) · 오봉연휴(8/8~8/16) — 항공·숙박·골프장 예약 조기 마감 가능 &nbsp;|&nbsp; 골프장 대회 개최 등으로 일정 예고 없이 변경될 수 있음</span>
-  </div>
-  <div class="card">
-    <div class="card-title">Golf Assignment Sheet — ゴルフ組合せ表</div>
-    <div class="btn-row" style="margin-top:0;margin-bottom:.75rem">
-      <button class="btn-dl" onclick="downloadGolf()">⬇ ゴルフ組合せ表 다운로드</button>
-      <button class="btn-dl" onclick="sortGolfByTeeOff()" style="background:var(--green-dim);color:var(--green2)">⏱ ティーオフ時間順ソート</button>
-      <button class="btn-undo" id="undo-btn-golf-top" onclick="undoLastTable('golf')" title="되돌릴 내용 없음">↩ 되돌리기</button>
-    </div>
-    <div id="golf-date-filter" class="date-filter"></div>
-    <div id="golf-content" style="overflow-x:auto"></div>
-    <div class="btn-row">
-      <button class="btn-dl" onclick="downloadGolf()">⬇ ゴルフ組合せ表 다운로드</button>
-      <button class="btn-dl" onclick="sortGolfByTeeOff()" style="background:var(--green-dim);color:var(--green2)">⏱ ティーオフ時間順ソート</button>
-      <button class="btn-undo" id="undo-btn-golf" onclick="undoLastTable('golf')" title="되돌릴 내용 없음">↩ 되돌리기</button>
-    </div>
-  </div>
-</div>
-
-<!-- ── ④ 宿泊配置表 ────────────────────────────────────── -->
-<div class="section" id="sec-accom">
-  <div class="wip-banner" data-i18n="wip_banner">🚧 準備中 — この機能は調整中です（クリックして編集できます）</div>
-  <div class="rule-box">
-    <strong>🏨 숙박 단가 안내 (14hills):</strong>
-    윈저호텔 (WINDSOR) <span style="color:var(--accent2)">¥15,000/인/박</span> (트윈룸 13실 · 패밀리룸 19실, 스위트트윈 포함) &nbsp;·&nbsp;
-    카라반 (CARAVAN) <span style="color:var(--purple2)">¥15,000/인/박</span> (9실) &nbsp;·&nbsp;
-    <span style="color:var(--text3)">총 116명 규모 · 왕복 송영 ¥12,000/인 · 메리트투어 수익 ¥500/인/박(별도) · 항공조인·미해당 상품 정산 제외</span>
-  </div>
-  <div class="card">
-    <div class="card-title">Accommodation Sheet — 宿泊配置表</div>
-    <div class="btn-row" style="margin-top:0;margin-bottom:.75rem">
-      <button class="btn-dl" onclick="downloadAccom()">⬇ 宿泊配置表 다운로드</button>
-      <button class="btn-undo" id="undo-btn-accom-top" onclick="undoLastTable('accom')" title="되돌릴 내용 없음">↩ 되돌리기</button>
-    </div>
-    <div id="accom-date-filter" class="date-filter"></div>
-    <div id="accom-content"></div>
-    <div class="btn-row">
-      <button class="btn-dl" onclick="downloadAccom()">⬇ 宿泊配置表 다운로드</button>
-      <button class="btn-undo" id="undo-btn-accom" onclick="undoLastTable('accom')" title="되돌릴 내용 없음">↩ 되돌리기</button>
-    </div>
-  </div>
-</div>
-
 <!-- ── ① ネームタグ ─────────────────────────────────────────── -->
 <div class="section" id="sec-nametag">
   <div class="rule-box">
@@ -658,28 +591,6 @@ tr.draggable-row td:first-child::before{content:'⠿';color:var(--text3);margin-
       <button class="btn-dl" onclick="downloadNametag()">⬇ 네임택 다운로드 (xlsx)</button>
       <button class="btn-dl" onclick="openLabelPrintModal()" style="background:var(--green-dim);color:var(--green2);border-color:var(--green)">🖨 ネームタグ 인쇄</button>
       <button class="btn-undo" id="undo-btn-nametag" onclick="undoLastTable('nametag')" title="되돌릴 내용 없음">↩ 되돌리기</button>
-    </div>
-  </div>
-</div>
-
-<!-- ── ② 航空カバー置き場 ──────────────────────────────────────────── -->
-<div class="section" id="sec-aircover">
-  <div class="rule-box">
-    <strong>✈ 공항 미팅 안내:</strong>
-    도착 공항 <strong>中部国際空港セントレア(NGO·나고야)</strong> &nbsp;·&nbsp; 도착 출구에서 「포틴힐즈」 피켓 현지 직원 대기 &nbsp;·&nbsp; 항공편·시간은 행사별 데이터 기준 &nbsp;·&nbsp;
-    서울(ICN) / 부산(PUS) 자동 분리 &nbsp;·&nbsp; A5 가로 · 1페이지 1팀 · 航空カバー置き場 양식 재현 &nbsp;·&nbsp; xlsx 4시트(서울IN/OUT · 부산IN/OUT) 다운로드
-  </div>
-  <div class="card">
-    <div class="card-title">航空カバー置き場 시트</div>
-    <div class="btn-row" style="margin-top:0;margin-bottom:.75rem">
-      <button class="btn-dl" onclick="downloadAircover()">⬇ 航空カバー置き場 다운로드 (xlsx)</button>
-      <button class="btn-dl" onclick="openAircoverPrintModal()" style="background:var(--green-dim);color:var(--green2);border-color:var(--green)">🖨 航空カバー置き場 인쇄</button>
-    </div>
-    <div id="aircover-filter" class="date-filter" style="margin-bottom:.75rem"></div>
-    <div id="aircover-content"></div>
-    <div class="btn-row">
-      <button class="btn-dl" onclick="downloadAircover()">⬇ 航空カバー置き場 다운로드 (xlsx)</button>
-      <button class="btn-dl" onclick="openAircoverPrintModal()" style="background:var(--green-dim);color:var(--green2);border-color:var(--green)">🖨 航空カバー置き場 인쇄</button>
     </div>
   </div>
 </div>
@@ -1081,7 +992,7 @@ function switchSession(ym){
   if(ym === currentSession) return;
   activateSession(ym);
   // ファイルアップロード 탭으로 이동 + 안내 배너 표시
-  ['nametag','dispatch','dinner','settle'].forEach(t =>{
+  ['nametag','dispatch','dinner','settle','transfer'].forEach(t =>{
     const el = document.getElementById('nav-'+t); if(el) el.classList.add('locked');
   });
   gotoSection('upload');
@@ -1717,7 +1628,7 @@ function analyze(){
   });
 
   // 탭 잠금 해제 (14hills: 네임택·수배서·저녁·정산 4탭만)
-  ['nametag','dispatch','dinner','settle'].forEach(t =>{
+  ['nametag','dispatch','dinner','settle','transfer'].forEach(t =>{
     const el = document.getElementById('nav-'+t); if(el) el.classList.remove('locked');
   });
 
@@ -1725,6 +1636,7 @@ function analyze(){
   buildDinner();
   buildNametag();
   buildDispatch();
+  buildTransfer();
 
   // 변경 감지 실행
   if(currentSession) runDiffAndNotify(currentSession);
@@ -1742,6 +1654,7 @@ function renderAll(){
   buildDinner();
   buildNametag();
   buildDispatch();
+  buildTransfer();
   // 미등록 회원 카운트 배지 갱신
   if(typeof updatePendingCount === 'function') updatePendingCount();
   // 표 가로 스크롤 페이드/버튼 갱신
@@ -9349,7 +9262,7 @@ function resetApp(){
   // 그룹코드 상태 복원
 
   document.getElementById('btn-analyze').disabled=true;
-  ['nametag','dispatch','dinner','settle'].forEach(t=>{ const el=document.getElementById('nav-'+t); if(el) el.classList.add('locked'); });
+  ['nametag','dispatch','dinner','settle','transfer'].forEach(t=>{ const el=document.getElementById('nav-'+t); if(el) el.classList.add('locked'); });
   gotoSection('upload');
   document.getElementById('nav-upload').classList.add('active');
 }
