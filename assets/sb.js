@@ -51,8 +51,8 @@
 
   // ── 스타일 ──
   var IN = 'padding:11px 13px;border:1px solid var(--border,#cfd9d6);border-radius:9px;font-size:14px;font-family:inherit;background:var(--surface,#fff);color:var(--text,#1f2a18);width:100%;box-sizing:border-box';
-  var BTN = 'width:100%;padding:11px;border:1px solid var(--accent,#2E6E6A);background:var(--accent,#2E6E6A);color:#fff;font-weight:800;font-size:14.5px;border-radius:9px;cursor:pointer;font-family:inherit';
-  var LINK = 'color:var(--accent,#2E6E6A);font-weight:700;font-size:12px;text-decoration:none;cursor:pointer';
+  var BTN = 'width:100%;padding:11px;border:1px solid var(--accent,#475569);background:var(--accent,#475569);color:#fff;font-weight:800;font-size:14.5px;border-radius:9px;cursor:pointer;font-family:inherit';
+  var LINK = 'color:var(--accent,#475569);font-weight:700;font-size:12px;text-decoration:none;cursor:pointer';
 
   function overlay(id) {
     var d = document.createElement('div'); if (id) d.id = id;
@@ -69,11 +69,11 @@
   function renderLogin(card, title) {
     var em = ''; try { em = localStorage.getItem('14h_last_email') || ''; } catch (e) {}
     card.innerHTML =
-        '<div style="font-size:20px;font-weight:800;color:var(--accent2,#245955)">로그인</div>'
+        '<div style="font-size:20px;font-weight:800;color:var(--accent2,#374151)">로그인</div>'
       + '<div style="margin-top:6px;color:var(--text2,#566049);font-size:12.5px">' + esc(title || '14hills 운영 통합 시스템') + '</div>'
       + '<input id="sbx-em" type="email" placeholder="이메일" autocomplete="username" spellcheck="false" value="' + esc(em) + '" style="margin-top:18px;' + IN + '">'
       + '<input id="sbx-pw" type="password" placeholder="비밀번호" autocomplete="current-password" style="margin-top:10px;' + IN + '">'
-      + '<label style="display:flex;align-items:center;gap:6px;margin-top:11px;font-size:12.5px;color:var(--text2,#566049);cursor:pointer;user-select:none"><input id="sbx-rm" type="checkbox"' + (em ? ' checked' : '') + ' style="width:15px;height:15px;accent-color:var(--accent,#2E6E6A);cursor:pointer">아이디 기억</label>'
+      + '<label style="display:flex;align-items:center;gap:6px;margin-top:11px;font-size:12.5px;color:var(--text2,#566049);cursor:pointer;user-select:none"><input id="sbx-rm" type="checkbox"' + (em ? ' checked' : '') + ' style="width:15px;height:15px;accent-color:var(--accent,#475569);cursor:pointer">아이디 기억</label>'
       + '<div id="sbx-err" style="display:none;margin-top:10px;color:#b13b2c;font-size:12.5px;font-weight:600"></div>'
       + '<button type="button" id="sbx-go" style="margin-top:14px;' + BTN + '">로그인</button>'
       + '<div style="margin-top:14px;color:var(--text3,#8a937c);font-size:11.5px">계정은 마스터(관리자)가 발급합니다.</div>'
@@ -101,7 +101,7 @@
   // ── 가입(계정 발급) 요청 — access_requests insert ──
   function renderRequest(card, title) {
     card.innerHTML =
-        '<div style="font-size:19px;font-weight:800;color:var(--accent2,#245955)">가입 요청</div>'
+        '<div style="font-size:19px;font-weight:800;color:var(--accent2,#374151)">가입 요청</div>'
       + '<div style="margin-top:6px;color:var(--text2,#566049);font-size:12px;line-height:1.5">계정이 없으시면 아래로 요청을 보내세요.<br>마스터(관리자) 확인 후 계정이 발급됩니다.</div>'
       + '<input id="sbx-rnm" type="text" placeholder="이름" autocomplete="name" style="margin-top:16px;' + IN + '">'
       + '<input id="sbx-rem" type="email" placeholder="이메일(계정으로 사용할 주소)" autocomplete="email" spellcheck="false" style="margin-top:10px;' + IN + '">'
@@ -119,7 +119,7 @@
       err.style.display = 'none'; btn.disabled = true; btn.textContent = '보내는 중…';
       c.from('access_requests').insert({ name: n, email: e, dept: dp.value.trim() || null }).then(function (res) {
         if (res && res.error) { fail('요청 실패: ' + res.error.message); return; }
-        card.innerHTML = '<div style="font-size:34px">✓</div><div style="margin-top:8px;font-size:17px;font-weight:800;color:var(--accent2,#245955)">요청이 접수되었습니다</div><div style="margin-top:8px;color:var(--text2,#566049);font-size:13px;line-height:1.55">마스터(관리자) 확인 후 <b>' + esc(e) + '</b><br>으로 계정이 발급됩니다.</div><button type="button" id="sbx-rok" style="margin-top:18px;' + BTN + '">로그인으로</button>';
+        card.innerHTML = '<div style="font-size:34px">✓</div><div style="margin-top:8px;font-size:17px;font-weight:800;color:var(--accent2,#374151)">요청이 접수되었습니다</div><div style="margin-top:8px;color:var(--text2,#566049);font-size:13px;line-height:1.55">마스터(관리자) 확인 후 <b>' + esc(e) + '</b><br>으로 계정이 발급됩니다.</div><button type="button" id="sbx-rok" style="margin-top:18px;' + BTN + '">로그인으로</button>';
         card.querySelector('#sbx-rok').addEventListener('click', function () { renderLogin(card, title); });
       }).catch(function (x) { fail('요청 오류: ' + x.message); });
     }
@@ -131,14 +131,14 @@
   function loginCard(title) { var c = cardBox(330); renderLogin(c, title); return c; }
   function denyCard(home) {
     var w = cardBox(360);
-    w.innerHTML = '<div style="font-size:18px;font-weight:800;color:#b13b2c">접근 권한이 없습니다</div><div style="margin-top:10px;color:var(--text2,#566049);font-size:13.5px">이 페이지 권한이 없습니다.<br>마스터(관리자)에게 문의하세요.</div><div style="margin-top:16px"><a href="' + esc(home || '../app/') + '" style="color:var(--accent2,#245955);font-weight:700;text-decoration:none">← 홈으로</a></div>';
+    w.innerHTML = '<div style="font-size:18px;font-weight:800;color:#b13b2c">접근 권한이 없습니다</div><div style="margin-top:10px;color:var(--text2,#566049);font-size:13.5px">이 페이지 권한이 없습니다.<br>마스터(관리자)에게 문의하세요.</div><div style="margin-top:16px"><a href="' + esc(home || '../app/') + '" style="color:var(--accent2,#374151);font-weight:700;text-decoration:none">← 홈으로</a></div>';
     return w;
   }
 
   // ── 초대/비번재설정(#type=invite|recovery / ?code=) → 비밀번호 설정 ──
   function setPasswordCard(c) {
     var d = overlay('sbx-gate'); var card = cardBox(330);
-    card.innerHTML = '<div style="font-size:20px;font-weight:800;color:var(--accent2,#245955)">비밀번호 설정</div><div style="margin-top:6px;color:var(--text2,#566049);font-size:12.5px">초대받은 계정의 비밀번호를 설정하세요.</div><input id="sbx-np" type="password" placeholder="새 비밀번호(6자 이상)" autocomplete="new-password" style="margin-top:16px;' + IN + '"><div id="sbx-pe" style="display:none;margin-top:10px;color:#b13b2c;font-size:12.5px;font-weight:600"></div><button type="button" id="sbx-pgo" style="margin-top:14px;' + BTN + '">설정하고 시작</button>';
+    card.innerHTML = '<div style="font-size:20px;font-weight:800;color:var(--accent2,#374151)">비밀번호 설정</div><div style="margin-top:6px;color:var(--text2,#566049);font-size:12.5px">초대받은 계정의 비밀번호를 설정하세요.</div><input id="sbx-np" type="password" placeholder="새 비밀번호(6자 이상)" autocomplete="new-password" style="margin-top:16px;' + IN + '"><div id="sbx-pe" style="display:none;margin-top:10px;color:#b13b2c;font-size:12.5px;font-weight:600"></div><button type="button" id="sbx-pgo" style="margin-top:14px;' + BTN + '">설정하고 시작</button>';
     d.appendChild(card); document.body.appendChild(d);
     var np = card.querySelector('#sbx-np'), pe = card.querySelector('#sbx-pe'), btn = card.querySelector('#sbx-pgo');
     function go() {

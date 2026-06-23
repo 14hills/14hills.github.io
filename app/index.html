@@ -12,12 +12,12 @@
 <style>
 *{box-sizing:border-box;margin:0;padding:0}
 /* ── 14hills 브랜드 팔레트 (라이트 고정) ──
-   SaiZen 올리브그린과 구분: 딥 틸(blue-green) #2E6E6A / #245955,
+   SaiZen 올리브그린과 구분: 슬레이트(slate) #475569 / #374151,
    쿨 뉴트럴 배경, 차콜 텍스트. 업무용으로 채도 낮춰 눈 편하게 */
 :root{
-  --bg:#F3F6F5;--surface:#FFFFFF;--surface2:#F6F9F8;--surface3:#EDF2F1;--surface4:#E3EBE9;
-  --border:#CFD9D6;--border2:#92A5A0;
-  --accent:#2E6E6A;--accent2:#245955;--accent3:#1C443F;--accent-dim:#E2EEEC;
+  --bg:#F5F6F8;--surface:#FFFFFF;--surface2:#F8F9FB;--surface3:#EEF1F5;--surface4:#E3E8EF;
+  --border:#D5DBE3;--border2:#9AA4B2;
+  --accent:#475569;--accent2:#374151;--accent3:#1F2937;--accent-dim:#E8ECF1;
   --green:#4F6B30;--green2:#3D5526;--green-dim:#E6EEDA;
   --amber:#8A5E16;--amber2:#7A5414;--amber-dim:#F4EDD9;
   --red:#B0432E;--red2:#8A3322;--red-dim:#F6E2DC;
@@ -29,9 +29,9 @@
 }
 /* light 클래스 호환: :root와 동일 값으로 라이트 고정 */
 body.light{
-  --bg:#F3F6F5;--surface:#FFFFFF;--surface2:#F6F9F8;--surface3:#EDF2F1;--surface4:#E3EBE9;
-  --border:#CFD9D6;--border2:#92A5A0;
-  --accent:#2E6E6A;--accent2:#245955;--accent3:#1C443F;--accent-dim:#E2EEEC;
+  --bg:#F5F6F8;--surface:#FFFFFF;--surface2:#F8F9FB;--surface3:#EEF1F5;--surface4:#E3E8EF;
+  --border:#D5DBE3;--border2:#9AA4B2;
+  --accent:#475569;--accent2:#374151;--accent3:#1F2937;--accent-dim:#E8ECF1;
   --green:#4F6B30;--green2:#3D5526;--green-dim:#E6EEDA;
   --amber:#8A5E16;--amber2:#7A5414;--amber-dim:#F4EDD9;
   --red:#B0432E;--red2:#8A3322;--red-dim:#F6E2DC;
@@ -82,7 +82,7 @@ body{background:var(--bg);color:var(--text);font-family:var(--sans);min-height:1
 /* HEADER */
 .header{background:var(--surface);border-bottom:1px solid var(--border);padding:0 1.5rem;display:flex;align-items:center;justify-content:space-between;height:52px;position:sticky;top:0;z-index:200}
 .logo{display:flex;align-items:center;gap:10px}
-.logo-mark{width:32px;height:32px;background:linear-gradient(135deg,#2E6E6A,#3D8A84);border-radius:8px;display:flex;align-items:center;justify-content:center;box-shadow:0 2px 8px rgba(46,110,106,.4);flex-shrink:0;color:#fff;font-weight:800;font-size:12px;letter-spacing:-.02em}
+.logo-mark{width:32px;height:32px;background:linear-gradient(135deg,#475569,#64748B);border-radius:8px;display:flex;align-items:center;justify-content:center;box-shadow:0 2px 8px rgba(71,85,105,.4);flex-shrink:0;color:#fff;font-weight:800;font-size:12px;letter-spacing:-.02em}
 .logo-img{height:34px;width:auto;display:block}
 .logo-img-dark{display:none}
 .logo-text{font-size:13px;font-weight:700;letter-spacing:.01em}
@@ -2747,7 +2747,7 @@ const JP_HOLIDAYS = new Set([
 
 // ── 팀 색상 팔레트 (팀:xxx 묶음 시각화) ──────────────────────
 const TEAM_COLORS = [
-  {bg:'#E6EEDA',border:'#647548',text:'#42502B'},
+  {bg:'#E8ECF1',border:'#475569',text:'#374151'},
   {bg:'#DFEDEA',border:'#4E8C82',text:'#3D726A'},
   {bg:'#EAE6F0',border:'#7C6BA8',text:'#544776'},
   {bg:'#F7EDD7',border:'#B8842C',text:'#7A5A1E'},
@@ -4170,7 +4170,7 @@ function printInvoice(){
   <div class="date-line">${dateStr}</div>
 
   <div class="logos">
-    <div class="logo-saizen" style="font-weight:800;font-size:18px;color:#2E6E6A;display:flex;align-items:center;letter-spacing:.02em">FOURTEEN HILLS CC</div>
+    <div class="logo-saizen" style="font-weight:800;font-size:18px;color:#475569;display:flex;align-items:center;letter-spacing:.02em">FOURTEEN HILLS CC</div>
   </div>
 
   <div class="title">御 請 求 書</div>
@@ -7742,7 +7742,7 @@ function generateAndPrintAircover(selectedDates, originFilter, selectedAccoms){
 
   // 숙소 prefix → 라벨/색상 (14hills: H=윈저호텔 / C=카라반 / X=미정)
   const accomPfxMap = {
-    H: {label:'WINDSOR', color:'#2E6E6A'},
+    H: {label:'WINDSOR', color:'#475569'},
     C: {label:'CARAVAN', color:'#5B21B6'},
     X: {label:'未定',    color:'#6B7280'},
   };
