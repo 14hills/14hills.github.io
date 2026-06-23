@@ -1,4 +1,12 @@
 -- ============================================================
+-- ⛔ DEPRECATED / 미사용 — sql/04_access_control.sql 로 대체됨
+--    (SaiZen ops 모델로 통일: profiles → user_access, role admin/manager/staff,
+--     카드(areas) 기반 + 가입요청. 실행하지 마세요. 02 → 04 순서로 실행.)
+--    이미 실행했다면: 04가 트리거를 덮어쓰며, 잔여 profiles 테이블은
+--    drop table if exists profiles cascade; 로 정리 가능(선택).
+-- ============================================================
+-- (이하 구버전 — 참고용 보존)
+-- ============================================================
 -- 14hills Supabase — 역할(RBAC) · 설정값 · 활동로그 (Phase 2 기반)
 -- 적용: SQL Editor → 붙여넣기 → Run  (sql/02 이후 실행)
 -- 역할: master(마스터) / manager(관리담당) / operator(일반)
