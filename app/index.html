@@ -3115,11 +3115,31 @@ function printInvoice(){
 
 // ── ⑥ ネームタグ 빌드 ────────────────────────────────────────
 
-// 숙박지 → 태그 prefix
+// 숙박지 → 태그 prefix (색상 구분용 — 태그코드 본문에는 미사용)
 function accomPrefix(accom){
   if(accom==='호텔')   return 'H';   // 윈저호텔
   if(accom==='카라반') return 'C';
   return 'X';                        // 미정(견적)
+}
+
+// 태그코드 1번째 코드: 입국(送迎) 요일 — 14hills 송영 패턴은 火/木/日 고정
+//  火曜日(ka)=K · 木曜日(moku)=M · 日曜日(nichi)=N · 그 외(예외)는 안전 폴백
+function dowTagCode(dateStr){
+  const s = String(dateStr||'').slice(0,10);
+  if(!/^\d{4}-\d{2}-\d{2}$/.test(s)) return 'X';
+  const g = new Date(s+'T00:00:00').getDay();   // 0=일 … 6=토
+  return ({0:'N',2:'K',4:'M'})[g] || ({1:'G',3:'S',5:'F',6:'D'})[g] || 'X';
+}
+
+// 태그코드 2번째 코드: 출발지 — 인천=I · 부산(김해)=P · 청주=C · 대구=T · 그 외 첫 글자
+function originTagCode(origin){
+  const o = String(origin||'').trim();
+  const u = o.toUpperCase();
+  if(o.includes('인천')||u==='ICN'||u==='INC') return 'I';
+  if(o.includes('부산')||o.includes('김해')||u==='PUS'||u==='BUS'||u==='PNS') return 'P';
+  if(o.includes('청주')||u==='CJJ'||u==='CJU') return 'C';
+  if(o.includes('대구')||u==='TAE'||u==='DGU') return 'T';
+  return u[0] || 'X';
 }
 
 // 숙박지 일본어명 (엑셀 출력용)
@@ -3229,8 +3249,8 @@ function makeTagCodeSafe(teamIdx, paxIdx, accomPfx, memberCode, manualCode, pend
 function makeTagCode(teamIdx, paxIdx, accomPfx, memberCode, manualCode, pendingMember, eventSeq, year){
   const base = TAG_BASE[String(eventSeq||'').trim()];
   const num  = String((paxIdx|0)+1).padStart(2,'0');
-  if(base) return base + '-' + num;                 // 정상: H-A-01
-  return (accomPfx||'X') + '-A-' + num;               // fallback (미매핑 안전망)
+  if(base) return base + '-' + num;                 // 정상: KI-A-01 (요일+출발지-팀-번호)
+  return 'XX-A-' + num;                              // fallback (미매핑 안전망)
 }
 
 // 일행별예약에서 (eventSeq, 대표자명)으로 생년월일 6자리 찾기
@@ -3306,17 +3326,27 @@ function buildTagCodeMap(){
     procMap[String(r.eventSeq||'').trim()] = r;
   });
 
+  // 그룹별 출발지(인천/부산/청주/대구): 대표승객 origin 우선 → 예약리스트 raw 출발지
+  const paxAll = (typeof passengers!=='undefined'?passengers:[]);
+  const originOf = {};
+  Object.keys(procMap).forEach(seq=>{
+    const rep = paxAll.find(p=>String(p.eventSeq||'').trim()===seq && p.isRep)
+             || paxAll.find(p=>String(p.eventSeq||'').trim()===seq);
+    originOf[seq] = (rep && rep.origin) || (procMap[seq].raw && procMap[seq].raw['출발지']) || '';
+  });
+
   const yearCounter = {};
-  TAG_BASE = {};             // eventSeq → '{prefix}-{팀알파}'
+  TAG_BASE = {};             // eventSeq → '{요일}{출발지}-{팀알파}' (예: KI-A)
   // '출/귀국 사이클' 단위 팀알파: dep 순으로 처리하며 체류구간이 끊기면(앞 사이클
-  //  전원 귀국) 리셋. cohortMaxArr=현재 사이클의 가장 늦은 귀국일, cohortAlpha=숙박별 순번.
+  //  전원 귀국) 리셋 → 코드 소멸·재사용. cohortMaxArr=현재 사이클 최대 귀국일,
+  //  cohortAlpha=요일+출발지 prefix별 팀 순번.
   let cohortMaxArr = '';
   const cohortAlpha = {};
   const seqs = Object.keys(procMap).sort((a,b)=>{
     const ra = procMap[a], rb = procMap[b];
     if(ra.dep!==rb.dep) return (ra.dep||'').localeCompare(rb.dep||'');
-    const pa = accomPrefix(ra.accom), pb = accomPrefix(rb.accom);
-    if(pa!==pb) return pa.localeCompare(pb);
+    const oa = originTagCode(originOf[a]), ob = originTagCode(originOf[b]);
+    if(oa!==ob) return oa.localeCompare(ob);
     return a.localeCompare(b);
   });
 
@@ -3349,20 +3379,22 @@ function buildTagCodeMap(){
     const teamIdx = yearCounter[year];
     yearCounter[year] += 1;
 
-    // 14hills 태그 베이스: 숙박prefix-팀알파 (개인번호는 makeTagCode에서 부여)
-    //  사이클 경계: 이 팀 출국일이 현재 사이클 전원 귀국일보다 뒤(겹침 없음)면 새 사이클→리셋.
+    // 14hills 태그 베이스: {요일}{출발지}-{팀알파} (개인번호는 makeTagCode에서 부여)
+    //  요일=입국 송영 요일(火K/木M/日N) · 출발지=인천I/부산P · 팀알파=A,B,C…
+    //  사이클 경계: 이 팀 출국일이 현재 사이클 전원 귀국일보다 뒤(겹침 없음)면 새 사이클→리셋(코드 재사용).
+    const tagPfx = dowTagCode(rec.dep) + originTagCode(originOf[seq]);
     const dep = String(rec.dep||'');
     const arr = String(rec.arr||'');
     if(!cohortMaxArr || (dep && dep > cohortMaxArr)){
-      Object.keys(cohortAlpha).forEach(k=>delete cohortAlpha[k]);   // 새 사이클: 숙박별 팀알파 A부터
+      Object.keys(cohortAlpha).forEach(k=>delete cohortAlpha[k]);   // 새 사이클: prefix별 팀알파 A부터
       cohortMaxArr = arr;
     } else if(arr > cohortMaxArr){
       cohortMaxArr = arr;
     }
-    if(cohortAlpha[pfx]===undefined) cohortAlpha[pfx] = 0;
-    const teamAlpha = teamAlphaCode(cohortAlpha[pfx]);
-    cohortAlpha[pfx] += 1;
-    TAG_BASE[seq] = pfx + '-' + teamAlpha;
+    if(cohortAlpha[tagPfx]===undefined) cohortAlpha[tagPfx] = 0;
+    const teamAlpha = teamAlphaCode(cohortAlpha[tagPfx]);
+    cohortAlpha[tagPfx] += 1;
+    TAG_BASE[seq] = tagPfx + '-' + teamAlpha;
 
     tagMap[seq] = {
       eventSeq: seq,                          // 자기 자신 키 (호출부 편의)
