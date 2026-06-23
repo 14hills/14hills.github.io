@@ -46,7 +46,26 @@
     }).catch(function () { return null; });
     return _meP;
   }
-  function signOut() { var c = client(); if (c) c.auth.signOut().then(function () { location.reload(); }).catch(function () { location.reload(); }); }
+  // ── 활동 로그 기록 (fire-and-forget · 실패해도 UI 영향 없음) ──
+  //   action: 'login'|'logout'|'analyze'|'download'|'print'|'set_access'|'request' …
+  //   detail: jsonb (예: {file:'…'} / {kind:'…'} / {session:'2026-07'})
+  function logAct(action, detail) {
+    var c = client(); if (!c) return Promise.resolve();
+    try {
+      return c.auth.getSession().then(function (r) {
+        var u = (r && r.data && r.data.session && r.data.session.user) || null;
+        if (!u) return;   // 미로그인 상태면 기록하지 않음
+        return c.from('activity_log').insert({ user_id: u.id, email: u.email || null, action: String(action || ''), detail: (detail == null ? null : detail) });
+      }).catch(function () {});
+    } catch (e) { return Promise.resolve(); }
+  }
+
+  function signOut() {
+    var c = client(); if (!c) { location.reload(); return; }
+    var done = false, fin = function () { if (done) return; done = true; location.reload(); };
+    setTimeout(fin, 900);   // 로그 기록이 지연되어도 로그아웃은 진행
+    logAct('logout').then(function () { c.auth.signOut().then(fin, fin); }, function () { c.auth.signOut().then(fin, fin); });
+  }
   function canArea(acc, area) { return !!acc && (acc.role === 'admin' || acc.role === 'manager' || (acc.areas || []).indexOf(area) >= 0); }
 
   // ── 스타일 ──
@@ -88,7 +107,11 @@
       try { if (rm.checked) localStorage.setItem('14h_last_email', e); else localStorage.removeItem('14h_last_email'); } catch (x) {}
       c.auth.signInWithPassword({ email: e, password: p }).then(function (res) {
         if (res && res.error) { fail('로그인 실패: ' + res.error.message); return; }
-        location.reload();
+        var u = (res && res.data && res.data.user) || null;
+        var done = false, fin = function () { if (done) return; done = true; location.reload(); };
+        setTimeout(fin, 900);   // 로그 기록이 지연되어도 진입은 진행
+        try { c.from('activity_log').insert({ user_id: u ? u.id : null, email: u ? u.email : (e || null), action: 'login', detail: null }).then(fin, fin); }
+        catch (x2) { fin(); }
       }).catch(function (x) { fail('로그인 오류: ' + x.message); });
     }
     btn.addEventListener('click', go);
@@ -186,7 +209,7 @@
   }
 
   global.SB14 = {
-    client: client, me: me, signOut: signOut, guard: guard, canArea: canArea,
+    client: client, me: me, signOut: signOut, guard: guard, canArea: canArea, log: logAct,
     loginCard: loginCard, url: cfgUrl, key: cfgKey, esc: esc,
     AREAS: ['data', 'dispatch', 'nametag', 'dinner', 'settle']
   };

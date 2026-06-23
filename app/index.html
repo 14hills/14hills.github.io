@@ -1616,6 +1616,8 @@ function analyze(){
   // 미등록 회원 카운트 배지 갱신
   if(typeof updatePendingCount === 'function') updatePendingCount();
 
+  if(window.SB14&&SB14.log) SB14.log('analyze',{session:currentSession||null, rows:(processed||[]).length, pax:(typeof passengers!=='undefined'?passengers.length:0)});
+
   gotoSection('dispatch');
 }
 
@@ -2875,6 +2877,7 @@ async function xlSave(wb, filename){
   const a = document.createElement('a'); a.href=url; a.download=filename;
   document.body.appendChild(a); a.click();
   setTimeout(()=>{ document.body.removeChild(a); URL.revokeObjectURL(url); }, 500);
+  if(window.SB14&&SB14.log) SB14.log('download',{file:filename});
 }
 
 // ── 다운로드 함수들 ──────────────────────────────────────────
@@ -5520,6 +5523,7 @@ function labelPrintConfirm(){
 }
 
 function generateAndPrintLabels(selectedDates, originFilter, startSlot, selectedAccoms){
+  if(window.SB14&&SB14.log) SB14.log('print',{kind:'nametag', days:(selectedDates||[]).length});
   // 데이터 수집 (_downloadNametag와 동일 로직, 출발지/숙소 필터 추가)
   const accomSet = selectedAccoms ? new Set(selectedAccoms) : null;
   const procMap = {};
@@ -5748,6 +5752,7 @@ function openRestaurantPrintModal(){
 }
 
 function generateAndPrintRestaurants(selectedDates, selectedAccoms){
+  if(window.SB14&&SB14.log) SB14.log('print',{kind:'dinner_restaurant', days:(selectedDates||[]).length});
   const _accomSet = selectedAccoms ? new Set(selectedAccoms) : null;
   const tagMap = buildTagCodeMap();
 
@@ -5911,6 +5916,7 @@ function openDinnerOrderPrintModal(){
 }
 
 function generateAndPrintDinnerOrder(selectedDates, selectedAccoms){
+  if(window.SB14&&SB14.log) SB14.log('print',{kind:'dinner_order', days:(selectedDates||[]).length});
   const _accomSet = selectedAccoms ? new Set(selectedAccoms) : null;
   const tagMap = buildTagCodeMap();
   const todayStr = today();
@@ -6649,6 +6655,7 @@ function printDispatch(seq){
   if(seq) data = data.filter(d => d.seq === String(seq).trim());
   else data = data.filter(dispatchPass);  // 일괄 인쇄: 화면 표시분만
   if(!data.length){ alert('대상 행사가 없습니다.'); return; }
+  if(window.SB14&&SB14.log) SB14.log('print',{kind:'dispatch', count:data.length, single:!!seq});
 
   const masked = dispatchMaskOn;
   const pages = data.map(d => dispatchFrontHTML(d, masked) + dispatchBackHTML(d)).join('');
@@ -7516,6 +7523,7 @@ function printBoardingList(){
   const deptime=(((document.getElementById('bus-deptime')||{}).value)||'07:00').trim();
   const dates=[...new Set(processed.filter(r=>r.accom&&r.arr).map(r=>r.arr))].sort();
   if(!dates.length){ alert('귀국일 데이터가 없습니다.'); return; }
+  if(window.SB14&&SB14.log) SB14.log('print',{kind:'transfer_boarding', days:dates.length});
   let pages='';
   dates.forEach(date=>{
     let groups=processed.filter(r=>r.accom&&r.arr===date)
@@ -7590,6 +7598,7 @@ function printArrivalRoster(){
   const pax=(typeof passengers!=='undefined'?passengers:[]);
   const dates=[...new Set(processed.filter(r=>r.accom&&r.dep).map(r=>r.dep))].sort();
   if(!dates.length){ alert('입국일 데이터가 없습니다.'); return; }
+  if(window.SB14&&SB14.log) SB14.log('print',{kind:'transfer_arrival', days:dates.length});
   const WD=['日','月','火','水','木','金','土'];
   let pages='';
   dates.forEach(date=>{
