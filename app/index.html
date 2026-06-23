@@ -4799,6 +4799,8 @@ function generateAndPrintLabels(selectedDates, originFilter, startSlot, selected
         accom: accomEngName(rec.accom),
         nights, tagCode,
         korName, engFull,
+        gender: p.gender || '',
+        teamPax: Number(rec.pax) || paxList.length,
         depFmt, arrFmt,
         depFlight, retFlight,
         depPort, retPort,
@@ -4836,10 +4838,14 @@ function generateAndPrintLabels(selectedDates, originFilter, startSlot, selected
       if(!m) return s;
       return `${m[1].padStart(2,'0')}/${m[2].padStart(2,'0')}`;
     };
+    const _g = String(c.gender||'').trim().toUpperCase();
+    const sexMark = (_g==='남'||_g==='M'||_g==='남자') ? '男' : (_g==='여'||_g==='F'||_g==='여자') ? '女' : '';
+    const sexCls  = sexMark==='男' ? 'lp-sex-m' : sexMark==='女' ? 'lp-sex-f' : '';
     return `<div class="lp-cell">
       <div class="lp-body">
         <div class="lp-r1" style="color:${c.tagColor}">${c.tagCode}</div>
         <div class="lp-r2">${c.korName} <span class="lp-r2-eng">${c.engFull?'('+c.engFull+')':''}</span></div>
+        <div class="lp-r5">${sexMark?`<span class="lp-sex ${sexCls}">${sexMark}</span>`:''}<span class="lp-team">同行 ${c.teamPax}名</span></div>
         <div class="lp-r3">IN&nbsp; ${c.depPort} ${fmtMMDD(c.depFmt)}</div>
         <div class="lp-r4">OUT ${c.retPort} ${fmtMMDD(c.arrFmt)}</div>
       </div>
@@ -4900,6 +4906,11 @@ function generateAndPrintLabels(selectedDates, originFilter, startSlot, selected
   .lp-r2 { font-size: 16pt; font-weight: 700; text-align: center; line-height: 1.1; margin-bottom: 1.3mm; }
   .lp-r2-eng { font-size: 7.5pt; color: #6b7a90; font-weight: 500; }
   .lp-r3, .lp-r4 { font-size: 8.5pt; text-align: center; font-family: 'Consolas', 'Menlo', monospace; color: #1a2540; line-height: 1.35; }
+  .lp-r5 { display:flex; align-items:center; justify-content:center; gap:2.5mm; margin-bottom:1.3mm; line-height:1; }
+  .lp-sex { display:inline-flex; align-items:center; justify-content:center; min-width:5.2mm; height:5.2mm; border-radius:50%; font-size:8.5pt; font-weight:800; color:#fff; }
+  .lp-sex-m { background:#1d4ed8; } /* 男 파랑 */
+  .lp-sex-f { background:#be185d; } /* 女 자홍 */
+  .lp-team { font-size:8.5pt; font-weight:700; color:#1a2540; }
   @media print {
     html, body { background: #fff; }
     .lp-toolbar { display: none; }
