@@ -2800,12 +2800,6 @@ function saveTeamTags(){
 function isNonWorkday(date){ return isWeekend(date) || isJpHoliday(date); }
 function isJpHoliday(date){ return JP_HOLIDAYS.has(String(date).slice(0,10)); }
 
-// 숙박별 색상 (인쇄/화면 공용 — 윈저호텔:틸 / 카라반:보라)
-function xlAccomColor(accom){
-  if(accom==='호텔')   return { fg:'FF1C443F', bg:'FFE2EEEC' };  // 윈저호텔: 틸
-  if(accom==='카라반') return { fg:'FF4C1D95', bg:'FFEDE9FE' };  // 카라반: 보라
-  return { fg:'FF1E3A5F', bg:'FFDDEEFF' };
-}
 
 // ── 날짜 선택 모달 공통 (인쇄 미리보기 등에서 재사용) ────────────
 function showDatePickerModal(title, dates, onConfirm, confirmLabel, options){
@@ -3140,6 +3134,18 @@ function originTagCode(origin){
   if(o.includes('청주')||u==='CJJ'||u==='CJU') return 'C';
   if(o.includes('대구')||u==='TAE'||u==='DGU') return 'T';
   return u[0] || 'X';
+}
+
+// 출발지별 색상 (네임택 등 시각 구분용 — 숙박이 아닌 출발지 기준)
+//  인천:파랑 · 부산:청록 · 청주:호박 · 대구:보라 · 기타/미정:회색
+function xlOriginColor(origin){
+  switch(originTagCode(origin)){
+    case 'I': return { fg:'FF1D4ED8', bg:'FFE3ECFD' };  // 인천(I): 파랑
+    case 'P': return { fg:'FF0F766E', bg:'FFDDF0EC' };  // 부산(P): 청록
+    case 'C': return { fg:'FFB45309', bg:'FFFBEEDB' };  // 청주(C): 호박
+    case 'T': return { fg:'FF7C3AED', bg:'FFEEE6FC' };  // 대구(T): 보라
+    default:  return { fg:'FF475569', bg:'FFEEF1F5' };  // 기타/미정: 회색
+  }
 }
 
 // 숙박지 일본어명 (엑셀 출력용)
@@ -4673,7 +4679,7 @@ function generateAndPrintLabels(selectedDates, originFilter, startSlot, selected
         depFmt, arrFmt,
         depFlight, retFlight,
         depPort, retPort,
-        accomColor: xlAccomColor(rec.accom).fg.replace('FF','#')
+        tagColor: xlOriginColor(p.origin || (rec.raw && rec.raw['출발지'])).fg.replace('FF','#')
       });
     });
   });
@@ -4709,7 +4715,7 @@ function generateAndPrintLabels(selectedDates, originFilter, startSlot, selected
     };
     return `<div class="lp-cell">
       <div class="lp-body">
-        <div class="lp-r1" style="color:${c.accomColor}">${c.tagCode}</div>
+        <div class="lp-r1" style="color:${c.tagColor}">${c.tagCode}</div>
         <div class="lp-r2">${c.korName} <span class="lp-r2-eng">${c.engFull?'('+c.engFull+')':''}</span></div>
         <div class="lp-r3">IN&nbsp; ${c.depPort} ${fmtMMDD(c.depFmt)}</div>
         <div class="lp-r4">OUT ${c.retPort} ${fmtMMDD(c.arrFmt)}</div>
