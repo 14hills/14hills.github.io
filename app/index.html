@@ -6,6 +6,7 @@
 <title>14hills 운영 통합 시스템</title>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/exceljs/4.3.0/exceljs.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
 <style>
 *{box-sizing:border-box;margin:0;padding:0}
@@ -382,6 +383,7 @@ tr.draggable-row td:first-child::before{content:'⠿';color:var(--text3);margin-
       <button id="app-lang-en" onclick="setAppLang('en')">EN</button>
     </div>
     <span class="badge">v14.6</span>
+    <button class="ghost-btn" id="sb-status-btn" onclick="sbOpenPanel()" title="Supabase 연결/로그인">☁ Supabase</button>
     <button class="ghost-btn" onclick="resetApp()" data-i18n="app_reset">초기화</button>
   </div>
 </div>
@@ -9464,6 +9466,149 @@ function resetApp(){
   if(document.readyState === 'loading') document.addEventListener('DOMContentLoaded', applyAppLang);
   else applyAppLang();
 })();
+</script>
+
+<!-- ── Supabase 연결/로그인 게이트 (Phase 1) ──────────────────── -->
+<style>
+.sb-gate{position:fixed;inset:0;background:rgba(20,30,28,.55);z-index:2000;display:flex;align-items:center;justify-content:center;padding:1rem;backdrop-filter:blur(2px)}
+.sb-card{background:var(--surface);border:1px solid var(--border);border-top:4px solid var(--accent);border-radius:14px;padding:24px 26px;width:min(440px,94vw);box-shadow:0 8px 30px rgba(0,0,0,.2)}
+.sb-h{font-size:17px;font-weight:800;color:var(--accent2);margin-bottom:6px}
+.sb-p{font-size:12px;color:var(--text2);margin-bottom:14px;line-height:1.5}
+.sb-l{display:block;font-size:11px;font-weight:700;color:var(--text2);margin:10px 0 4px}
+.sb-i{width:100%;padding:9px 11px;border:1px solid var(--border);border-radius:8px;background:var(--surface2);color:var(--text);font-size:13px;font-family:var(--mono);outline:none}
+.sb-i:focus{border-color:var(--accent);background:var(--accent-dim)}
+.sb-row{display:flex;gap:8px;margin-top:16px;flex-wrap:wrap}
+.sb-btn{border:none;border-radius:8px;padding:9px 16px;font-size:12px;font-weight:700;cursor:pointer}
+.sb-btn.primary{background:var(--accent);color:#fff}
+.sb-btn.primary:hover{background:var(--accent2)}
+.sb-btn.ghost{background:var(--surface3);color:var(--text2);border:1px solid var(--border)}
+.sb-msg{font-size:11.5px;color:var(--red2);margin-top:10px;min-height:16px}
+.sb-note{font-size:10.5px;color:var(--text3);margin-top:14px;line-height:1.5}
+#sb-status-btn{font-size:11px}
+</style>
+<div id="sb-gate" class="sb-gate" data-locked="0" style="display:none" onclick="sbGateBgClick(event)">
+  <div class="sb-card">
+    <div id="sb-config" style="display:none">
+      <div class="sb-h">☁ Supabase 연결 설정</div>
+      <p class="sb-p">Supabase 프로젝트의 <b>Project URL</b>과 <b>anon public key</b>를 입력하세요. (Supabase → Settings → API) · 절차: <code>docs/02_supabase_설정가이드.md</code></p>
+      <label class="sb-l">Project URL</label>
+      <input id="sb-url" class="sb-i" placeholder="https://xxxx.supabase.co" autocomplete="off">
+      <label class="sb-l">anon public key</label>
+      <textarea id="sb-key" class="sb-i" rows="3" placeholder="eyJhbGci..." autocomplete="off"></textarea>
+      <div class="sb-row">
+        <button class="sb-btn primary" onclick="sbSaveConfig()">저장 후 로그인</button>
+        <button class="sb-btn ghost" onclick="sbClearConfig()">연결 해제</button>
+        <button class="sb-btn ghost" onclick="sbHideGate()">닫기</button>
+      </div>
+      <p class="sb-note">미입력 시 기존처럼 <b>엑셀 업로드 + localStorage</b>로 동작합니다. 키를 저장하면 로그인 게이트가 켜집니다. (anon 키만 사용 · service_role 금지)</p>
+    </div>
+    <div id="sb-login" style="display:none">
+      <div class="sb-h">🔐 14hills 운영 로그인</div>
+      <p class="sb-p">등록된 운영자 계정으로 로그인하세요.</p>
+      <label class="sb-l">이메일</label>
+      <input id="sb-email" class="sb-i" type="email" placeholder="ops@14hills.example" autocomplete="username">
+      <label class="sb-l">비밀번호</label>
+      <input id="sb-pw" class="sb-i" type="password" placeholder="••••••••" autocomplete="current-password" onkeydown="if(event.key==='Enter')sbLogin()">
+      <div class="sb-row">
+        <button class="sb-btn primary" onclick="sbLogin()">로그인</button>
+        <button class="sb-btn ghost" onclick="sbGotoConfig()">연결 설정 변경</button>
+      </div>
+      <div id="sb-login-msg" class="sb-msg"></div>
+    </div>
+    <div id="sb-account" style="display:none">
+      <div class="sb-h">☁ Supabase 계정</div>
+      <p class="sb-p">로그인됨: <b id="sb-acc-email"></b></p>
+      <div class="sb-row">
+        <button class="sb-btn primary" onclick="sbLogout()">로그아웃</button>
+        <button class="sb-btn ghost" onclick="sbGotoConfig()">연결 설정</button>
+        <button class="sb-btn ghost" onclick="sbHideGate()">닫기</button>
+      </div>
+      <p class="sb-note">데이터 저장/불러오기(동기화)는 Phase 2에서 연결됩니다.</p>
+    </div>
+  </div>
+</div>
+<script>
+// ── Supabase 연동 (Phase 1: 연결 설정 + 로그인 게이트) ──────────
+// 미연결(키 없음) → 게이트 없이 기존 동작. 연결 시 로그인 필수.
+const SB_URL_KEY='14h_sb_url', SB_KEY_KEY='14h_sb_key';
+let sbClient=null, sbUser=null;
+function sbCfg(){ return { url:(localStorage.getItem(SB_URL_KEY)||'').trim(), key:(localStorage.getItem(SB_KEY_KEY)||'').trim() }; }
+function sbConfigured(){ const c=sbCfg(); return !!(c.url && c.key); }
+function sbLibReady(){ return typeof window.supabase!=='undefined' && !!window.supabase.createClient; }
+function sbGetClient(){
+  if(sbClient) return sbClient;
+  if(!sbConfigured() || !sbLibReady()) return null;
+  const c=sbCfg();
+  try{ sbClient=window.supabase.createClient(c.url,c.key,{auth:{persistSession:true,storageKey:'14h_sb_auth',autoRefreshToken:true}}); }
+  catch(e){ console.warn('supabase init 실패',e); sbClient=null; }
+  return sbClient;
+}
+async function sbInit(){
+  sbRenderStatus();
+  if(!sbConfigured()) return;                 // 미연결 → 기존 동작
+  if(!sbLibReady()){ sbRenderStatus('lib-fail'); return; }
+  const cl=sbGetClient(); if(!cl){ sbRenderStatus('lib-fail'); return; }
+  try{ const r=await cl.auth.getSession(); sbUser=(r&&r.data&&r.data.session)?r.data.session.user:null; }
+  catch(e){ sbUser=null; }
+  if(sbUser){ sbHideGate(); } else { sbShowGate('login'); }
+  sbRenderStatus();
+  try{ cl.auth.onAuthStateChange(function(_e,session){ sbUser=session?session.user:null; if(sbUser) sbHideGate(); sbRenderStatus(); }); }catch(e){}
+}
+function sbRenderStatus(state){
+  const b=document.getElementById('sb-status-btn'); if(!b) return;
+  if(!sbConfigured()){ b.textContent='☁ 미연결'; b.title='클릭해 Supabase 연결 설정'; return; }
+  if(state==='lib-fail'){ b.textContent='☁ 연결 오류'; b.title='supabase-js 로드 실패 또는 설정 오류'; return; }
+  if(sbUser){ b.textContent='☁ '+(sbUser.email||'로그인됨'); b.title='클릭: 계정/로그아웃'; }
+  else { b.textContent='☁ 로그인 필요'; b.title='클릭해 로그인'; }
+}
+function sbOpenPanel(){ sbShowGate(sbUser?'account':(sbConfigured()?'login':'config')); }
+function sbShowGate(mode){
+  const g=document.getElementById('sb-gate'); if(!g) return;
+  document.getElementById('sb-config').style.display = mode==='config'?'block':'none';
+  document.getElementById('sb-login').style.display  = mode==='login'?'block':'none';
+  document.getElementById('sb-account').style.display= mode==='account'?'block':'none';
+  g.dataset.locked = (mode==='login' && !sbUser) ? '1':'0';   // 로그인 게이트는 닫기 불가
+  const c=sbCfg(); const u=document.getElementById('sb-url'); const k=document.getElementById('sb-key');
+  if(u) u.value=c.url; if(k) k.value=c.key;
+  if(mode==='account'){ const em=document.getElementById('sb-acc-email'); if(em) em.textContent=(sbUser&&sbUser.email)||''; }
+  g.style.display='flex';
+}
+function sbHideGate(){ const g=document.getElementById('sb-gate'); if(g) g.style.display='none'; }
+function sbGateBgClick(e){ const g=document.getElementById('sb-gate'); if(e.target===g && g.dataset.locked!=='1') sbHideGate(); }
+function sbGotoConfig(){ sbShowGate('config'); }
+function sbSaveConfig(){
+  const url=(document.getElementById('sb-url').value||'').trim().replace(/\/+$/,'');
+  const key=(document.getElementById('sb-key').value||'').trim();
+  if(!/^https:\/\/.+\.supabase\.co$/.test(url)){ alert('Project URL 형식 확인 (예: https://xxxx.supabase.co)'); return; }
+  if(key.length<20){ alert('anon public key를 확인해주세요.'); return; }
+  localStorage.setItem(SB_URL_KEY,url); localStorage.setItem(SB_KEY_KEY,key);
+  sbClient=null; alert('저장됐습니다. 로그인 화면으로 이동합니다.'); location.reload();
+}
+function sbClearConfig(){
+  if(!confirm('Supabase 연결 설정을 지울까요?\n(미연결=기존 엑셀+localStorage 동작으로 복귀)')) return;
+  localStorage.removeItem(SB_URL_KEY); localStorage.removeItem(SB_KEY_KEY); location.reload();
+}
+async function sbLogin(){
+  const email=(document.getElementById('sb-email').value||'').trim();
+  const pw=document.getElementById('sb-pw').value||'';
+  const msg=document.getElementById('sb-login-msg');
+  const cl=sbGetClient();
+  if(!cl){ if(msg) msg.textContent='연결이 설정되지 않았습니다.'; return; }
+  if(!email||!pw){ if(msg) msg.textContent='이메일과 비밀번호를 입력하세요.'; return; }
+  if(msg) msg.textContent='로그인 중…';
+  try{
+    const r=await cl.auth.signInWithPassword({ email:email, password:pw });
+    if(r.error){ if(msg) msg.textContent='로그인 실패: '+r.error.message; return; }
+    sbUser=r.data.user; if(msg) msg.textContent=''; sbHideGate(); sbRenderStatus();
+  }catch(e){ if(msg) msg.textContent='오류: '+((e&&e.message)||e); }
+}
+async function sbLogout(){
+  const cl=sbGetClient(); if(cl){ try{ await cl.auth.signOut(); }catch(e){} }
+  sbUser=null; sbRenderStatus(); sbShowGate('login');
+}
+function sbBoot(){ try{ sbInit(); }catch(e){ console.warn('sbInit',e); } }
+if(document.readyState === 'loading') document.addEventListener('DOMContentLoaded', sbBoot);
+else sbBoot();
 </script>
 </body>
 </html>
