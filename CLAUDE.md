@@ -35,7 +35,8 @@ SaiZen 야마나미 시스템(`/app/index.html`)의 구조·코드 패턴을 차
 - **태그코드 포맷 확정(§6.3)**: `숙박prefix-MMDD입국일-팀알파-개인번호`(예 `H-0702-A-01`). SaiZen `Y-0503-aa1` 양식 차용 — 숙박 prefix는 **H(호텔)/C(카라반)/X(미정)** 2유형. 구현은 `app/index.html`의 `buildTeams`/`buildGuests`/`accomCode`, 상세는 `docs/00_인계브리프.md §5-2`.
 
 ## 4. Supabase (14hills 전용 — SaiZen DB와 완전 분리)
-- **별도 프로젝트**(서울 리전 권장). **anon 키만 프론트에**, `service_role` 노출 금지.
+- **🔑 키 명칭 변경(중요·기억)**: Supabase가 **`anon public key` → `Publishable key`**(`sb_publishable_…`), **`service_role` → `Secret key`**로 명칭을 바꿈. 프론트엔 **Publishable key**만 사용(구 anon과 동일 역할·공개 가능). 단 **RLS의 역할명 `anon`/`authenticated`는 그대로**(키 명칭과 별개).
+- **별도 프로젝트**(리전: 활성 사용자=일본이면 도쿄, 한국이면 서울 — 내부도구라 차이 미미). **Publishable key(구 anon)만 프론트에**, `Secret key`(구 service_role) 노출 금지.
 - 스키마 초안: `14hills/sql/01_schema_draft.sql` (`groups`·`guests`·`arrangements`·`dinners`·`dinner_assignments`·`settlements`).
 - **RLS 필수**: anon 공개 접근 시 데이터 노출 위험 → 인증 방식 확정 후 policy 추가(스키마 말미 주의 참조).
 - 접속정보 localStorage 키는 SaiZen `/ops/`(`saizen_sb_url`/`saizen_sb_key`)와 **충돌하지 않도록 14hills 전용 키**(`14h_sb_url`/`14h_sb_key` 등)로 분리.
@@ -56,7 +57,7 @@ SaiZen 야마나미 시스템(`/app/index.html`)의 구조·코드 패턴을 차
 
 ## 7. 체크리스트 (인계 브리프 §6 기준)
 - [ ] §6 열린 결정 6가지 확정
-- [ ] 14hills Supabase 프로젝트 생성 + Project URL · anon 키 확보
+- [ ] 14hills Supabase 프로젝트 생성 + Project URL · Publishable key(구 anon) 확보
 - [ ] `/app/index.html`에서 네임택 / 수배서 / 저녁 / 정산 로직 추출
 - [ ] 14hills 상수로 분기(골프장명 · 18홀 · 출발지 · JPY)
 - [ ] 초안 스키마 적용 후 구조에 맞게 확정 + RLS policy
