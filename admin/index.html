@@ -1,0 +1,249 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>14hills 운영 관리 · 권한 관리(마스터)</title>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="../assets/sb.js"></script>
+<style>
+  :root{
+    --bg:#F3F6F5; --surface:#FFFFFF; --surface2:#F6F9F8; --surface3:#EDF2F1;
+    --border:#CFD9D6; --border2:#92A5A0;
+    --text:#1C2A28; --text2:#475651; --muted:#8a948f;
+    --accent:#2E6E6A; --accent2:#245955; --accent3:#1C443F; --accentSoft:#E2EEEC;
+    --ok:#2f7d4f; --warn:#9a7322; --err:#b13b2c;
+    --mono:'SFMono-Regular',Consolas,'Liberation Mono',Menlo,monospace;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:'Pretendard','Apple SD Gothic Neo','Malgun Gothic',system-ui,sans-serif;background:var(--bg);color:var(--text);line-height:1.5;min-height:100vh}
+  .topbar{position:sticky;top:0;z-index:30;background:var(--surface);border-bottom:3px solid var(--accent);padding:13px 22px;display:flex;align-items:center;gap:14px;flex-wrap:wrap;box-shadow:0 1px 4px rgba(15,23,42,.06)}
+  .logo-mark{width:30px;height:30px;background:linear-gradient(135deg,#2E6E6A,#3D8A84);border-radius:8px;display:flex;align-items:center;justify-content:center;color:#fff;font-weight:800;font-size:11px;letter-spacing:-.02em}
+  .logo-text{font-size:15px;font-weight:800;color:var(--accent2);letter-spacing:-.01em}
+  .step{font-size:10.5px;font-weight:700;color:#fff;background:var(--accent2);border-radius:99px;padding:3px 11px}
+  .navhome{color:var(--accent2);font-weight:700;text-decoration:none;font-size:13px}
+  .grow{flex:1}
+  .pill{font-size:12px;font-weight:700;padding:4px 12px;border-radius:99px;background:var(--surface3);color:var(--text2);border:1px solid var(--border)}
+  .pill.ok{background:var(--accentSoft);color:var(--ok);border-color:#b4cda0}
+  .pill.err{background:#f7e6e2;color:var(--err);border-color:#e3bdb4}
+  input,select{font-family:inherit}
+  .inp{padding:7px 10px;border:1px solid var(--border2);border-radius:6px;background:var(--surface);color:var(--text);font-size:13px}
+  .inp:focus{outline:none;border-color:var(--accent);box-shadow:0 0 0 2px var(--accentSoft)}
+  .btn{font-family:inherit;font-size:13px;font-weight:700;border-radius:7px;padding:7px 15px;border:1px solid var(--accent);background:var(--accent);color:#fff;cursor:pointer;transition:.15s}
+  .btn:hover:not(:disabled){background:var(--accent3)}
+  .btn:disabled{opacity:.4;cursor:not-allowed}
+  .btn.sm{font-size:12px;padding:5px 11px}
+  .ghost{background:var(--surface3);color:var(--text2);border:1px solid var(--border)}
+  .wrap{padding:16px 20px 90px;max-width:1100px;margin:0 auto}
+  .panel{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:14px 16px;margin-bottom:16px;box-shadow:0 1px 3px rgba(15,23,42,.04)}
+  .panel > h3{font-size:14px;font-weight:800;color:var(--accent);margin-bottom:6px}
+  .panel .desc{font-size:12px;color:var(--text2);margin-bottom:11px}
+  .deny{padding:30px 20px;text-align:center;color:var(--muted);font-size:14px;font-weight:600}
+  table.users{width:100%;border-collapse:collapse;font-size:13px}
+  table.users th{text-align:left;font-size:11px;color:#fff;background:var(--accent);font-weight:700;padding:8px;white-space:nowrap}
+  table.users td{padding:8px;border-bottom:1px solid var(--border);vertical-align:top}
+  .uname{font-weight:700}
+  .uemail{font-size:11.5px;color:var(--muted);font-family:var(--mono)}
+  .prof{display:flex;flex-direction:column;gap:5px;min-width:160px}
+  .prof .psm{font-size:12px;padding:5px 8px;width:160px}
+  .rolesel{min-width:108px}
+  .areas{display:flex;flex-wrap:wrap;gap:10px 14px;max-width:460px}
+  .areas.dim{opacity:.4;pointer-events:none}
+  .areas .allnote{font-size:11.5px;color:var(--accent2);font-weight:700}
+  .deptgrp{border:1px solid var(--border);border-radius:8px;padding:7px 9px;background:var(--surface2)}
+  .depthead{font-size:12px;color:var(--text);margin-bottom:5px;border-bottom:1px dashed var(--border2);padding-bottom:4px;display:inline-flex;align-items:center;gap:4px}
+  .depthead .dnote{font-size:10.5px;color:var(--muted);font-weight:600}
+  .deptkids{display:flex;flex-direction:column;gap:3px;padding-left:3px}
+  .deptkids label,.depthead{cursor:pointer}
+  .deptkids label{display:inline-flex;align-items:center;gap:4px;font-size:12px;color:var(--text2)}
+  .rbadge{font-size:9.5px;font-weight:800;border-radius:4px;padding:2px 7px;white-space:nowrap}
+  .rb-admin{color:#fff;background:var(--accent2)} .rb-manager{color:#fff;background:var(--accent)} .rb-staff{color:var(--text2);background:var(--surface3);border:1px solid var(--border2)}
+  #toast{position:fixed;bottom:22px;left:50%;transform:translateX(-50%);z-index:200;display:flex;flex-direction:column;gap:8px;align-items:center}
+  .toast{background:var(--surface);border:1px solid var(--border);border-left:4px solid var(--accent);border-radius:9px;padding:10px 18px;font-size:13px;font-weight:600;color:var(--text);box-shadow:0 6px 18px rgba(0,0,0,.16)}
+  .toast.err{border-left-color:var(--err);background:#fbeeeb;color:#8a2a1c}
+  .toast.ok{border-left-color:var(--ok);background:var(--accentSoft);color:#234d2f}
+</style>
+</head>
+<body>
+<div class="topbar">
+  <div class="logo-mark">14H</div><div class="logo-text">14hills</div>
+  <span class="step">권한 관리 · 마스터</span>
+  <a class="navhome" href="../app/">← 운영 앱</a>
+  <div class="grow"></div>
+  <span class="pill" id="me-pill">…</span>
+  <button class="btn sm ghost" id="btn-logout" type="button" style="display:none">로그아웃</button>
+</div>
+
+<div class="wrap">
+  <div class="panel" id="req-panel" style="display:none">
+    <h3>가입 요청 <span class="pill" id="req-badge" style="display:none"></span></h3>
+    <div class="desc">처음 접속자가 보낸 <b>계정 발급 요청</b>입니다. 확인 후 <b>Supabase Dashboard → Authentication → Invite</b>(또는 Add user)로 계정을 발급하고,
+      아래에서 <b>[처리완료]</b>로 표시하세요. (자가 회원가입은 OFF — 요청은 계정이 아닙니다)</div>
+    <div id="req-list"><div class="deny">불러오는 중…</div></div>
+  </div>
+
+  <div class="panel">
+    <h3>담당자 권한 관리</h3>
+    <div class="desc">각 계정의 <b>역할</b>(마스터·관리담당·일반)과 들어갈 수 있는 <b>카드</b>를 지정합니다.
+      마스터는 전 카드. <b>관리담당·일반은 체크한 카드만</b>(전부 주려면 모두 체크). 기본값은 <b>일반·권한 없음</b>입니다.
+      <br>※ <b>이 「권한 관리」 화면 자체</b>는 <b>마스터(admin) 전용</b>입니다 — 보안상 위임할 수 없습니다(다른 사람에게 맡기려면 그 계정을 마스터로 지정).</div>
+    <div id="users"><div class="deny">불러오는 중…</div></div>
+  </div>
+</div>
+
+<div id="toast"></div>
+<script>
+// ════════════════════════════════════════════════════════════════
+//  14hills 권한 관리(마스터 전용) — sql/04_access_control.sql RPC 호출
+//  (SaiZen ops admin.html 포팅 · 연결/인증은 ../assets/sb.js[SB14])
+// ════════════════════════════════════════════════════════════════
+const $=s=>document.querySelector(s);
+let supa=null, rows=[];
+
+// 14hills 카드(area) ↔ /app/ 모듈
+const AREAS=[['data','데이터등록'],['dispatch','現地手配書(수배서)'],['nametag','ネームタグ(네임택)'],['dinner','夕食(저녁)'],['settle','現地精算(정산)']];
+const AREA_LABEL=Object.fromEntries(AREAS);
+// 부서 단위로 카드를 묶어 한 번에 체크 (area는 카드별 저장)
+const DEPTS=[
+  ['데이터',   ['data']],
+  ['현지운영', ['dispatch','nametag']],
+  ['식음',     ['dinner']],
+  ['정산',     ['settle']],
+];
+const ROLE_LABEL={admin:'마스터',manager:'관리담당',staff:'일반'};
+const PROF_DEPTS=[['ops','현지운영'],['fnb','식음'],['settle','정산'],['data','데이터'],['acct','회계']];
+const DEPT_LABEL=Object.fromEntries(PROF_DEPTS);
+function deptOpts(cur){ return '<option value="">(부서 없음)</option>'+PROF_DEPTS.map(([k,l])=>`<option value="${k}" ${k===cur?'selected':''}>${l}</option>`).join(''); }
+const esc=(window.SB14&&SB14.esc)||(s=>String(s==null?'':s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c])));
+
+function buildAreas(checked){
+  const set=new Set(checked||[]);
+  return DEPTS.map(([dlab,keys])=>{
+    const kids=keys.map(k=>`<label><input type="checkbox" data-area="${k}" ${set.has(k)?'checked':''}> ${AREA_LABEL[k]||k}</label>`).join('');
+    return `<div class="deptgrp">
+        <label class="depthead"><input type="checkbox" data-deptall="${keys.join(',')}"> <b>${dlab}</b> <span class="dnote">부서 전체</span></label>
+        <div class="deptkids">${kids}</div>
+      </div>`;
+  }).join('');
+}
+function wireDeptAll(scope){
+  scope.querySelectorAll('[data-deptall]').forEach(master=>{
+    const keys=master.dataset.deptall.split(',');
+    const kids=()=>keys.map(k=>scope.querySelector(`[data-area="${k}"]`)).filter(Boolean);
+    const sync=()=>{const ks=kids();master.checked=ks.length&&ks.every(c=>c.checked);master.indeterminate=!master.checked&&ks.some(c=>c.checked);};
+    master.addEventListener('change',()=>{kids().forEach(c=>c.checked=master.checked);});
+    kids().forEach(c=>c.addEventListener('change',sync));
+    sync();
+  });
+}
+function toast(msg,cls){const t=document.createElement('div');t.className='toast'+(cls?' '+cls:'');t.textContent=msg;$('#toast').appendChild(t);setTimeout(()=>{t.style.opacity='0';t.style.transition='.3s';setTimeout(()=>t.remove(),300);},2600);}
+
+async function load(){
+  const {data,error}=await supa.rpc('admin_list_users');
+  if(error){toast('목록 로드 실패: '+error.message,'err');$('#users').innerHTML='<div class="deny">로드 실패 — sql/04 적용·마스터 권한 확인</div>';return;}
+  rows=data||[]; render();
+}
+function render(){
+  const box=$('#users');
+  if(!rows.length){ box.innerHTML='<div class="deny">계정이 없습니다.</div>'; return; }
+  let html='<table class="users"><thead><tr><th>계정(이메일)</th><th>이름·부서·직급</th><th>역할</th><th>접근 카드(관리담당·일반)</th><th></th></tr></thead><tbody>';
+  rows.forEach(u=>{
+    const roleOpts=['admin','manager','staff'].map(r=>`<option value="${r}" ${r===u.role?'selected':''}>${ROLE_LABEL[r]}</option>`).join('');
+    const showAreas=u.role!=='admin';
+    html+=`<tr data-id="${u.user_id}">
+      <td><div class="uemail">${esc(u.email||'')}</div></td>
+      <td><div class="prof">
+        <input class="inp psm" data-f="name" value="${esc(u.name||'')}" placeholder="이름(작성자)">
+        <select class="inp psm" data-f="dept">${deptOpts(u.dept)}</select>
+        <input class="inp psm" data-f="title" value="${esc(u.title||'')}" placeholder="직급(예: 과장)">
+      </div></td>
+      <td><select class="inp rolesel" data-f="role">${roleOpts}</select></td>
+      <td><div class="areas${showAreas?'':' dim'}" data-areas>${showAreas?buildAreas(u.areas||[]):'<span class="allnote">전 카드 접근(마스터)</span>'}</div></td>
+      <td><button class="btn sm" data-save>저장</button></td>
+    </tr>`;
+  });
+  html+='</tbody></table>'; box.innerHTML=html;
+  box.querySelectorAll('[data-areas]').forEach(ar=>{ if(ar.querySelector('[data-area]')) wireDeptAll(ar); });
+  box.querySelectorAll('select[data-f="role"]').forEach(sel=>{
+    sel.addEventListener('change',()=>{
+      const tr=sel.closest('tr'), ar=tr.querySelector('[data-areas]');
+      if(sel.value!=='admin'){ ar.classList.remove('dim'); if(!ar.querySelector('[data-area]')){ ar.innerHTML=buildAreas([]); wireDeptAll(ar); } }
+      else{ ar.classList.add('dim'); ar.innerHTML='<span class="allnote">전 카드 접근(마스터)</span>'; }
+    });
+  });
+  box.querySelectorAll('button[data-save]').forEach(b=>b.addEventListener('click',()=>saveRow(b.closest('tr'))));
+}
+async function saveRow(tr){
+  const id=tr.dataset.id;
+  const role=tr.querySelector('select[data-f="role"]').value;
+  const name=(tr.querySelector('[data-f="name"]').value||'').trim();
+  const dept=tr.querySelector('[data-f="dept"]').value||'';
+  const title=(tr.querySelector('[data-f="title"]').value||'').trim();
+  const areas=role!=='admin' ? [...tr.querySelectorAll('[data-area]')].filter(c=>c.checked).map(c=>c.dataset.area) : [];
+  const {error}=await supa.rpc('admin_set_access',{p_user:id,p_role:role,p_areas:areas,p_name:name,p_dept:dept,p_title:title});
+  if(error){toast('저장 실패: '+error.message,'err');return;}
+  toast('저장됨','ok'); await load();
+}
+
+// ── 가입 요청 ──
+function fmtDt(s){ if(!s) return ''; const d=new Date(s); const p=n=>String(n).padStart(2,'0'); return `${d.getFullYear()}-${p(d.getMonth()+1)}-${p(d.getDate())} ${p(d.getHours())}:${p(d.getMinutes())}`; }
+async function loadRequests(){
+  const panel=$('#req-panel'); if(!panel||!supa) return;
+  const {data,error}=await supa.from('access_requests').select('*').order('created_at',{ascending:false}).limit(100);
+  if(error){ panel.style.display='none'; return; }
+  panel.style.display=''; renderRequests(data||[]);
+}
+function renderRequests(list){
+  const pend=list.filter(r=>r.status==='pending');
+  const badge=$('#req-badge');
+  if(badge){ badge.style.display=''; badge.className='pill'+(pend.length?' err':' ok'); badge.textContent='대기 '+pend.length; }
+  const box=$('#req-list');
+  if(!list.length){ box.innerHTML='<div class="deny">아직 요청이 없습니다.</div>'; return; }
+  const STAT={pending:['대기','rb-staff'],approved:['처리완료','rb-manager'],rejected:['거절','rb-admin']};
+  let html='<table class="users"><thead><tr><th>요청자</th><th>이메일</th><th>부서·메모</th><th>요청시각</th><th>상태</th><th></th></tr></thead><tbody>';
+  list.forEach(r=>{
+    const st=STAT[r.status]||[r.status,'rb-staff'];
+    html+=`<tr data-id="${esc(r.id)}">
+      <td class="uname">${esc(r.name||'')}</td>
+      <td><span class="uemail">${esc(r.email||'')}</span></td>
+      <td style="font-size:12px;color:var(--text2)">${esc(r.dept||'')}${r.message?('<div style="color:var(--muted);margin-top:2px">'+esc(r.message)+'</div>'):''}</td>
+      <td style="font-size:11.5px;color:var(--muted);white-space:nowrap">${fmtDt(r.created_at)}</td>
+      <td><span class="rbadge ${st[1]}">${st[0]}</span>${r.handled_by?('<div style="font-size:10.5px;color:var(--muted);margin-top:3px">'+esc(r.handled_by)+'</div>'):''}</td>
+      <td style="white-space:nowrap">
+        ${r.status!=='approved'?'<button class="btn sm" data-act="approved">처리완료</button> ':''}
+        ${r.status!=='rejected'?'<button class="btn sm" data-act="rejected" style="background:transparent;color:var(--err);border-color:#e3bdb4">거절</button> ':''}
+        <button class="btn sm" data-act="delete" style="background:transparent;color:var(--muted);border-color:var(--border2)">삭제</button>
+      </td>
+    </tr>`;
+  });
+  html+='</tbody></table>'; box.innerHTML=html;
+  box.querySelectorAll('button[data-act]').forEach(b=>b.addEventListener('click',()=>handleReq(b.closest('tr').dataset.id,b.dataset.act)));
+}
+async function handleReq(id,act){
+  if(act==='delete'){
+    if(!confirm('이 요청을 삭제할까요?')) return;
+    const {error}=await supa.from('access_requests').delete().eq('id',id);
+    if(error){toast('삭제 실패: '+error.message,'err');return;}
+    toast('삭제됨','ok'); await loadRequests(); return;
+  }
+  let meEmail=''; try{ meEmail=((await supa.auth.getUser()).data.user||{}).email||''; }catch(e){}
+  const {error}=await supa.from('access_requests').update({status:act, handled_by:meEmail, handled_at:new Date().toISOString()}).eq('id',id);
+  if(error){toast('처리 실패: '+error.message,'err');return;}
+  toast(act==='approved'?'처리완료':'거절 표시','ok'); await loadRequests();
+}
+
+// ── 진입: SB14 가드(마스터 전용) ──
+function boot(){
+  if(!window.SB14){ $('#me-pill').textContent='연결 모듈 없음'; $('#me-pill').className='pill err'; return; }
+  SB14.guard({area:'admin', title:'14hills 운영 관리', home:'../app/'}).then(acc=>{
+    if(!acc || acc.role!=='admin'){ $('#me-pill').textContent=acc?('역할: '+(ROLE_LABEL[acc.role]||acc.role)):'로그인 필요'; $('#me-pill').className='pill err'; return; }
+    supa=SB14.client();
+    $('#me-pill').textContent='☁ '+(acc.name||acc.email)+' · 마스터'; $('#me-pill').className='pill ok';
+    const lo=$('#btn-logout'); lo.style.display=''; lo.addEventListener('click',()=>SB14.signOut());
+    load(); loadRequests();
+  });
+}
+if(document.readyState==='loading') document.addEventListener('DOMContentLoaded',boot); else boot();
+</script>
+</body>
+</html>
