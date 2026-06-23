@@ -4019,9 +4019,10 @@ function numToTeamCode4(n){
 }
 
 // ── 14hills 태그코드 (구 그룹코드 마스터 제거) ───────────────────
-// 형식: {숙박prefix}-{입국MMDD}-{팀알파}-{개인번호}  예: H-0702-A-01
-// buildTagCodeMap이 (숙박+입국일)별 팀알파를 계산해 TAG_BASE에 적재.
-let TAG_BASE = {};   // eventSeq → '{prefix}-{MMDD}-{팀알파}' (개인번호 제외)
+// 형식: {숙박prefix}-{팀알파}-{개인번호}  예: H-A-01  (3코드, 입국MMDD 제거)
+// 팀알파는 '출/귀국 사이클'(현장 체류가 겹치는 팀 묶음) 단위로 A부터 부여하고,
+// 앞 사이클이 모두 귀국하면 다음 사이클은 다시 A로 리셋(체류 겹침이 없으면 코드 재사용).
+let TAG_BASE = {};   // eventSeq → '{prefix}-{팀알파}' (개인번호 제외)
 function teamAlphaCode(i){ let s=''; i=(i|0)+1; while(i>0){ const r=(i-1)%26; s=String.fromCharCode(65+r)+s; i=Math.floor((i-1)/26);} return s; }
 
 // 인쇄/카드 출력 전용 안전 헬퍼 — 빈 태그코드 절대 반환 안 함
@@ -4031,8 +4032,8 @@ function makeTagCodeSafe(teamIdx, paxIdx, accomPfx, memberCode, manualCode, pend
 function makeTagCode(teamIdx, paxIdx, accomPfx, memberCode, manualCode, pendingMember, eventSeq, year){
   const base = TAG_BASE[String(eventSeq||'').trim()];
   const num  = String((paxIdx|0)+1).padStart(2,'0');
-  if(base) return base + '-' + num;                 // 정상: H-0702-A-01
-  return (accomPfx||'X') + '-0000-A-' + num;          // fallback (미매핑 안전망)
+  if(base) return base + '-' + num;                 // 정상: H-A-01
+  return (accomPfx||'X') + '-A-' + num;               // fallback (미매핑 안전망)
 }
 
 // 일행별예약에서 (eventSeq, 대표자명)으로 생년월일 6자리 찾기
@@ -4109,8 +4110,11 @@ function buildTagCodeMap(){
   });
 
   const yearCounter = {};
-  const groupCounter = {};   // (숙박prefix + 입국MMDD) → 팀 순번
-  TAG_BASE = {};             // eventSeq → '{prefix}-{MMDD}-{팀알파}'
+  TAG_BASE = {};             // eventSeq → '{prefix}-{팀알파}'
+  // '출/귀국 사이클' 단위 팀알파: dep 순으로 처리하며 체류구간이 끊기면(앞 사이클
+  //  전원 귀국) 리셋. cohortMaxArr=현재 사이클의 가장 늦은 귀국일, cohortAlpha=숙박별 순번.
+  let cohortMaxArr = '';
+  const cohortAlpha = {};
   const seqs = Object.keys(procMap).sort((a,b)=>{
     const ra = procMap[a], rb = procMap[b];
     if(ra.dep!==rb.dep) return (ra.dep||'').localeCompare(rb.dep||'');
@@ -4148,14 +4152,20 @@ function buildTagCodeMap(){
     const teamIdx = yearCounter[year];
     yearCounter[year] += 1;
 
-    // 14hills 태그 베이스: (숙박prefix + 입국MMDD)별 팀알파 순차 부여
+    // 14hills 태그 베이스: 숙박prefix-팀알파 (개인번호는 makeTagCode에서 부여)
+    //  사이클 경계: 이 팀 출국일이 현재 사이클 전원 귀국일보다 뒤(겹침 없음)면 새 사이클→리셋.
     const dep = String(rec.dep||'');
-    const mmdd = (dep.slice(5,7) + dep.slice(8,10)) || '0000';
-    const gkey = pfx + '|' + mmdd;
-    if(groupCounter[gkey]===undefined) groupCounter[gkey] = 0;
-    const teamAlpha = teamAlphaCode(groupCounter[gkey]);
-    groupCounter[gkey] += 1;
-    TAG_BASE[seq] = pfx + '-' + mmdd + '-' + teamAlpha;
+    const arr = String(rec.arr||'');
+    if(!cohortMaxArr || (dep && dep > cohortMaxArr)){
+      Object.keys(cohortAlpha).forEach(k=>delete cohortAlpha[k]);   // 새 사이클: 숙박별 팀알파 A부터
+      cohortMaxArr = arr;
+    } else if(arr > cohortMaxArr){
+      cohortMaxArr = arr;
+    }
+    if(cohortAlpha[pfx]===undefined) cohortAlpha[pfx] = 0;
+    const teamAlpha = teamAlphaCode(cohortAlpha[pfx]);
+    cohortAlpha[pfx] += 1;
+    TAG_BASE[seq] = pfx + '-' + teamAlpha;
 
     tagMap[seq] = {
       eventSeq: seq,                          // 자기 자신 키 (호출부 편의)
@@ -5176,7 +5186,7 @@ function renderNametag(date){
           const repBadge = p.isRep
             ? `<span class="tag" style="background:var(--green-dim);color:var(--green2);margin-left:4px;font-size:9px">REP</span>`
             : '';
-          // 14hills 태그코드는 (숙박prefix-입국MMDD-팀알파-개인번호)로 항상 자동 생성된다.
+          // 14hills 태그코드는 (숙박prefix-팀알파-개인번호, 예 H-A-01)로 항상 자동 생성된다.
           // (SaiZen의 회원 그룹코드 수기입력은 14hills 태그코드에 영향이 없어 제거 — 자동코드 그대로 표시)
           const tagCellHTML = `${tagCode}${repBadge}`;
           const nameCell = p.isRep
