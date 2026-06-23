@@ -4,9 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>14hills 운영 통합 시스템</title>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/exceljs/4.3.0/exceljs.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script><script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="../assets/sb.js"></script>
 <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
 <style>
@@ -170,14 +168,8 @@ body{background:var(--bg);color:var(--text);font-family:var(--sans);min-height:1
 .table-wrap::-webkit-scrollbar-track{background:var(--surface2);border-radius:0 0 8px 8px}
 .table-wrap::-webkit-scrollbar-thumb{background:var(--surface4);border-radius:5px}
 .table-wrap::-webkit-scrollbar-thumb:hover{background:var(--accent)}
-/* 가로 스크롤 컨테이너 (래퍼) — 페이드 + 버튼 부모 */
+/* 가로 스크롤 컨테이너 (래퍼) — ◀▶ 버튼 부모 */
 .table-scroll{position:relative}
-/* 좌우 페이드 — 더 스크롤할 내용이 있을 때 가장자리에 표시 */
-.table-scroll .table-fade{position:absolute;top:0;bottom:0;width:42px;pointer-events:none;z-index:5;opacity:0;transition:opacity .2s}
-.table-scroll .table-fade-l{left:0;background:linear-gradient(90deg,var(--surface) 0%,transparent 100%)}
-.table-scroll .table-fade-r{right:0;background:linear-gradient(270deg,var(--surface) 0%,transparent 100%)}
-.table-scroll.can-left  .table-fade-l{opacity:1}
-.table-scroll.can-right .table-fade-r{opacity:1}
 /* 좌우 이동 버튼 */
 .table-scroll .table-nav{position:absolute;top:50%;transform:translateY(-50%);z-index:6;width:30px;height:30px;border-radius:50%;border:1px solid var(--border);background:var(--surface);color:var(--text);cursor:pointer;display:none;align-items:center;justify-content:center;font-size:14px;box-shadow:0 2px 8px rgba(0,0,0,.18);transition:background .15s,opacity .2s}
 .table-scroll .table-nav:hover{background:var(--accent);color:#fff;border-color:var(--accent)}
@@ -478,9 +470,7 @@ tr.draggable-row td:first-child::before{content:'⠿';color:var(--text3);margin-
       <button class="settle-filter-btn" data-accom="호텔" onclick="toggleSettleFilter('호텔')">WINDSOR</button>
       <button class="settle-filter-btn" data-accom="카라반" onclick="toggleSettleFilter('카라반')">CARAVAN</button>
     </div>
-    <div class="btn-row" style="margin-top:0;margin-bottom:.75rem">
-      <button class="btn-dl" onclick="downloadSettle()">⬇ 現地精算表 다운로드</button>
-      <button class="btn-dl" onclick="printInvoice()" style="border-color:var(--green);color:var(--green2)">🧾 御請求書 출력 / PDF</button>
+    <div class="btn-row" style="margin-top:0;margin-bottom:.75rem">      <button class="btn-dl" onclick="printInvoice()" style="border-color:var(--green);color:var(--green2)">🧾 御請求書 출력 / PDF</button>
     </div>
     <div class="table-wrap">
       <table id="settle-table">
@@ -488,9 +478,7 @@ tr.draggable-row td:first-child::before{content:'⠿';color:var(--text3);margin-
         <tbody id="settle-tbody"></tbody>
       </table>
     </div>
-    <div class="btn-row">
-      <button class="btn-dl" onclick="downloadSettle()">⬇ 現地精算表 다운로드</button>
-      <button class="btn-dl" onclick="printInvoice()" style="border-color:var(--green);color:var(--green2)">🧾 御請求書 출력 / PDF</button>
+    <div class="btn-row">      <button class="btn-dl" onclick="printInvoice()" style="border-color:var(--green);color:var(--green2)">🧾 御請求書 출력 / PDF</button>
       <button class="btn-undo" id="undo-btn-settle-table" onclick="undoDrag('settle-table')" title="되돌릴 내용 없음">↩ 되돌리기</button>
     </div>
   </div>
@@ -506,9 +494,7 @@ tr.draggable-row td:first-child::before{content:'⠿';color:var(--text3);margin-
   </div>
   <div class="card">
     <div class="card-title">Transfer Assignment Sheet — 送迎配車表</div>
-    <div class="btn-row" style="margin-top:0;margin-bottom:.75rem;align-items:center;gap:8px;flex-wrap:wrap">
-      <button class="btn-dl" onclick="downloadTransfer()">⬇ 送迎配車表 다운로드</button>
-      <label style="font-size:11px;color:var(--text2);display:inline-flex;align-items:center;gap:4px">정원 <input id="bus-cap" type="number" value="45" min="1" style="width:52px;padding:4px 6px;border:1px solid var(--border);border-radius:5px;text-align:center;font-size:12px"></label>
+    <div class="btn-row" style="margin-top:0;margin-bottom:.75rem;align-items:center;gap:8px;flex-wrap:wrap">      <label style="font-size:11px;color:var(--text2);display:inline-flex;align-items:center;gap:4px">정원 <input id="bus-cap" type="number" value="45" min="1" style="width:52px;padding:4px 6px;border:1px solid var(--border);border-radius:5px;text-align:center;font-size:12px"></label>
       <label style="font-size:11px;color:var(--text2);display:inline-flex;align-items:center;gap:4px">출발시간 <input id="bus-deptime" type="text" value="07:00" style="width:58px;padding:4px 6px;border:1px solid var(--border);border-radius:5px;text-align:center;font-size:12px"></label>
       <button class="btn-dl" onclick="printBoardingList()" style="background:var(--green-dim);color:var(--green2);border-color:var(--green)">🖨 탑승명단 A3 인쇄</button>
       <button class="btn-dl" onclick="printArrivalRoster()" style="background:var(--amber-dim);color:var(--amber2);border-color:var(--amber)">🖨 空港到着者名簿 A3</button>
@@ -516,9 +502,7 @@ tr.draggable-row td:first-child::before{content:'⠿';color:var(--text3);margin-
     </div>
     <div id="transfer-date-filter" class="date-filter"></div>
     <div id="transfer-content"></div>
-    <div class="btn-row">
-      <button class="btn-dl" onclick="downloadTransfer()">⬇ 送迎配車表 다운로드</button>
-      <button class="btn-undo" id="undo-btn-transfer" onclick="undoTransfer()" title="되돌릴 내용 없음">↩ 되돌리기</button>
+    <div class="btn-row">      <button class="btn-undo" id="undo-btn-transfer" onclick="undoTransfer()" title="되돌릴 내용 없음">↩ 되돌리기</button>
     </div>
   </div>
 </div>
@@ -545,19 +529,13 @@ tr.draggable-row td:first-child::before{content:'⠿';color:var(--text3);margin-
   </div>
   <div class="card">
     <div class="card-title">Dinner Assignment Sheet — 夕食名前版</div>
-    <div class="btn-row" style="margin-top:0;margin-bottom:.75rem">
-      <button class="btn-dl" onclick="downloadDinner()">⬇ 夕食名前版 다운로드</button>
-      <button class="btn-dl" onclick="downloadRestaurantNameplate()" style="background:var(--purple-dim);color:var(--purple2)">⬇ レストラン名札 (xlsx)</button>
-      <button class="btn-dl" onclick="openRestaurantPrintModal()" style="background:var(--green-dim);color:var(--green2);border-color:var(--green)">🖨 レストラン名札 인쇄</button>
+    <div class="btn-row" style="margin-top:0;margin-bottom:.75rem">      <button class="btn-dl" onclick="openRestaurantPrintModal()" style="background:var(--green-dim);color:var(--green2);border-color:var(--green)">🖨 レストラン名札 인쇄</button>
       <button class="btn-dl" onclick="openDinnerOrderPrintModal()" style="background:var(--amber-dim);color:var(--amber2);border-color:var(--amber)">🖨 夕食オーダー A3 인쇄</button>
       <button class="btn-undo" id="undo-btn-dinner-top" onclick="undoLastTable('dinner')" title="되돌릴 내용 없음">↩ 되돌리기</button>
     </div>
     <div id="dinner-date-filter" class="date-filter"></div>
     <div id="dinner-content"></div>
-    <div class="btn-row">
-      <button class="btn-dl" onclick="downloadDinner()">⬇ 夕食名前版 다운로드</button>
-      <button class="btn-dl" onclick="downloadRestaurantNameplate()" style="background:var(--purple-dim);color:var(--purple2)">⬇ レストラン名札 (xlsx)</button>
-      <button class="btn-dl" onclick="openRestaurantPrintModal()" style="background:var(--green-dim);color:var(--green2);border-color:var(--green)">🖨 レストラン名札 인쇄</button>
+    <div class="btn-row">      <button class="btn-dl" onclick="openRestaurantPrintModal()" style="background:var(--green-dim);color:var(--green2);border-color:var(--green)">🖨 レストラン名札 인쇄</button>
       <button class="btn-dl" onclick="openDinnerOrderPrintModal()" style="background:var(--amber-dim);color:var(--amber2);border-color:var(--amber)">🖨 夕食オーダー A3 인쇄</button>
       <button class="btn-undo" id="undo-btn-dinner" onclick="undoLastTable('dinner')" title="되돌릴 내용 없음">↩ 되돌리기</button>
     </div>
@@ -568,20 +546,16 @@ tr.draggable-row td:first-child::before{content:'⠿';color:var(--text3);margin-
 <div class="section" id="sec-nametag">
   <div class="rule-box">
     <strong>🏷 네임택 안내:</strong> APIS 등록 탑승객 기준으로 자동 생성 · 미등록 고객은 <span style="color:var(--text3)">(미등록)</span> 표시 &nbsp;·&nbsp;
-    입국일 날짜 칩으로 일자별 확인 · xlsx 다운로드 시 날짜 선택 모달(전체/일자별) → タグ全体リスト + スティッカー印刷 시트 자동 생성
+    입국일 날짜 칩으로 일자별 확인 · 「🖨 ネームタグ 인쇄」로 A-one 28466 라벨시트(18면·53.3×42.3mm)에 맞춰 미리보기→인쇄
   </div>
   <div class="card">
     <div class="card-title">네임택 목록</div>
-    <div class="btn-row" style="margin-top:0;margin-bottom:.75rem">
-      <button class="btn-dl" onclick="downloadNametag()">⬇ 네임택 다운로드 (xlsx)</button>
-      <button class="btn-dl" onclick="openLabelPrintModal()" style="background:var(--green-dim);color:var(--green2);border-color:var(--green)">🖨 ネームタグ 인쇄</button>
+    <div class="btn-row" style="margin-top:0;margin-bottom:.75rem">      <button class="btn-dl" onclick="openLabelPrintModal()" style="background:var(--green-dim);color:var(--green2);border-color:var(--green)">🖨 ネームタグ 인쇄</button>
       <button class="btn-undo" id="undo-btn-nametag-top" onclick="undoLastTable('nametag')" title="되돌릴 내용 없음">↩ 되돌리기</button>
     </div>
     <div id="nametag-filter" class="date-filter"></div>
     <div id="nametag-content"></div>
-    <div class="btn-row">
-      <button class="btn-dl" onclick="downloadNametag()">⬇ 네임택 다운로드 (xlsx)</button>
-      <button class="btn-dl" onclick="openLabelPrintModal()" style="background:var(--green-dim);color:var(--green2);border-color:var(--green)">🖨 ネームタグ 인쇄</button>
+    <div class="btn-row">      <button class="btn-dl" onclick="openLabelPrintModal()" style="background:var(--green-dim);color:var(--green2);border-color:var(--green)">🖨 ネームタグ 인쇄</button>
       <button class="btn-undo" id="undo-btn-nametag" onclick="undoLastTable('nametag')" title="되돌릴 내용 없음">↩ 되돌리기</button>
     </div>
   </div>
@@ -614,14 +588,10 @@ tr.draggable-row td:first-child::before{content:'⠿';color:var(--text3);margin-
     </div>
     <div id="dispatch-date-filter" class="date-filter" style="margin-bottom:.75rem"></div>
     <div class="btn-row" style="margin-top:0;margin-bottom:.75rem">
-      <button class="btn-dl" onclick="printDispatch()" style="background:var(--green-dim);color:var(--green2);border-color:var(--green)">🖨 전체 일괄 인쇄 (앞·뒤 양면)</button>
-      <button class="btn-dl" onclick="downloadDispatchXlsx()">⬇ 現地手配書 다운로드 (xlsx)</button>
-    </div>
+      <button class="btn-dl" onclick="printDispatch()" style="background:var(--green-dim);color:var(--green2);border-color:var(--green)">🖨 전체 일괄 인쇄 (앞·뒤 양면)</button>    </div>
     <div class="table-wrap"><table id="dispatch-table"><thead id="dispatch-thead"></thead><tbody id="dispatch-tbody"></tbody></table></div>
     <div class="btn-row">
-      <button class="btn-dl" onclick="printDispatch()" style="background:var(--green-dim);color:var(--green2);border-color:var(--green)">🖨 전체 일괄 인쇄 (앞·뒤 양면)</button>
-      <button class="btn-dl" onclick="downloadDispatchXlsx()">⬇ 現地手配書 다운로드 (xlsx)</button>
-    </div>
+      <button class="btn-dl" onclick="printDispatch()" style="background:var(--green-dim);color:var(--green2);border-color:var(--green)">🖨 전체 일괄 인쇄 (앞·뒤 양면)</button>    </div>
   </div>
 </div>
 
@@ -629,7 +599,7 @@ tr.draggable-row td:first-child::before{content:'⠿';color:var(--text3);margin-
 
 <script>
 // ════════════════════════════════════════════════════════════════
-// 헤더 상수 — 화면(HTML <th>)과 xlsx 다운로드가 이 배열을 공유
+// 헤더 상수 — 화면(HTML <th>) 렌더가 이 배열을 공유
 // 수정은 여기 한 곳만 하면 양쪽이 자동으로 동일해짐
 // ════════════════════════════════════════════════════════════════
 const HDRS = {
@@ -2830,172 +2800,14 @@ function saveTeamTags(){
 function isNonWorkday(date){ return isWeekend(date) || isJpHoliday(date); }
 function isJpHoliday(date){ return JP_HOLIDAYS.has(String(date).slice(0,10)); }
 
-// ════════════════════════════════════════════════════════════════
-// ExcelJS 스타일 헬퍼 — v7.0
-// ════════════════════════════════════════════════════════════════
-
-// 공통 컬러 팔레트
-const XL = {
-  // 배경색 (ARGB) — 프린트 친화적 라이트 팔레트
-  BG_TITLE:   'FF1E3A5F',  // 진한 남색 — 타이틀 행 (진한 색만 유지, 흰 글씨)
-  BG_HDR:     'FFD6E4F7',  // 연한 파란 — 헤더 행
-  BG_SUBHDR:  'FFDDEEFF',  // 아주 연한 파란 — 섹션 구분행
-  BG_TOTAL:   'FFD6F5E3',  // 연한 초록 — 합계행
-  BG_ALT:     'FFF5F8FF',  // 거의 흰색 — 짝수행
-  BG_WHITE:   'FFFFFFFF',  // 흰색 — 홀수행
-
-  // 글자색 (ARGB) — 검정/진한색 계열
-  FG_TITLE:   'FFFFFFFF',  // 타이틀: 흰 글씨 (진한 배경)
-  FG_HDR:     'FF1E3A5F',  // 헤더: 진한 남색
-  FG_SUBHDR:  'FF1E3A5F',  // 섹션: 진한 남색
-  FG_TOTAL:   'FF14532D',  // 합계: 진한 초록
-  FG_ACCENT:  'FF1D4ED8',  // 강조: 진한 파란
-  FG_NORMAL:  'FF1A2540',  // 일반: 진한 네이비
-  FG_MUTED:   'FF4A5A80',  // 흐린: 중간 블루그레이
-  FG_NUM:     'FF1D4ED8',  // 숫자: 진한 파란
-
-  // 테두리
-  BORDER_THIN:  { style:'thin',  color:{ argb:'FFBFCFE8' } },
-  BORDER_MED:   { style:'medium',color:{ argb:'FF8BA8D4' } },
-};
-
-// 단일 행 생성 헬퍼
-function xlCell(ws, row, col, value, opts={}){
-  const cell = ws.getCell(row, col);
-  cell.value = value ?? null;
-  if(opts.bold)        cell.font = { ...(cell.font||{}), bold:true };
-  if(opts.color)       cell.font = { ...(cell.font||{}), color:{argb:opts.color} };
-  if(opts.size)        cell.font = { ...(cell.font||{}), size:opts.size };
-  if(opts.bg)          cell.fill = { type:'pattern', pattern:'solid', fgColor:{argb:opts.bg} };
-  if(opts.align)       cell.alignment = { horizontal:opts.align, vertical:'middle', wrapText:!!opts.wrap };
-  if(opts.numFmt)      cell.numFmt = opts.numFmt;
-  if(opts.border){
-    cell.border = {
-      top:XL.BORDER_THIN, left:XL.BORDER_THIN,
-      bottom:XL.BORDER_THIN, right:XL.BORDER_THIN
-    };
-  }
-  return cell;
-}
-
-// 타이틀 행 (병합)
-function xlTitle(ws, rowIdx, text, colCount){
-  ws.mergeCells(rowIdx, 1, rowIdx, colCount);
-  const cell = ws.getCell(rowIdx, 1);
-  cell.value = text;
-  cell.font  = { bold:true, size:11, color:{argb:XL.FG_TITLE}, name:'Meiryo' };
-  cell.fill  = { type:'pattern', pattern:'solid', fgColor:{argb:XL.BG_TITLE} };
-  cell.alignment = { horizontal:'left', vertical:'middle', indent:1 };
-  cell.border = { top:XL.BORDER_MED, left:XL.BORDER_MED, bottom:XL.BORDER_MED, right:XL.BORDER_MED };
-  ws.getRow(rowIdx).height = 18;
-}
-
-// 헤더 행
-function xlHeader(ws, rowIdx, headers, opts={}){
-  const row = ws.getRow(rowIdx);
-  row.height = opts.height || 18;
-  headers.forEach((h,i)=>{
-    const cell = ws.getCell(rowIdx, i+1);
-    cell.value = h;
-    cell.font  = { bold:true, size:9, color:{argb:XL.FG_HDR}, name:'Meiryo' };
-    cell.fill  = { type:'pattern', pattern:'solid', fgColor:{argb:opts.bg||XL.BG_HDR} };
-    cell.alignment = { horizontal:'center', vertical:'middle', wrapText:false };
-    cell.border = { top:XL.BORDER_MED, left:XL.BORDER_THIN, bottom:XL.BORDER_MED, right:XL.BORDER_THIN };
-  });
-}
-
-// 섹션 구분행
-function xlSection(ws, rowIdx, text, colCount, colorFg=XL.FG_SUBHDR, colorBg=XL.BG_SUBHDR){
-  ws.mergeCells(rowIdx, 1, rowIdx, colCount);
-  const cell = ws.getCell(rowIdx, 1);
-  cell.value = text;
-  cell.font  = { bold:true, size:10, color:{argb:colorFg}, name:'Meiryo' };
-  cell.fill  = { type:'pattern', pattern:'solid', fgColor:{argb:colorBg} };
-  cell.alignment = { horizontal:'left', vertical:'middle', indent:1 };
-  cell.border = { top:XL.BORDER_MED, bottom:XL.BORDER_MED };
-  ws.getRow(rowIdx).height = 16;
-}
-
-// 데이터 행 (교대 배경)
-function xlDataRow(ws, rowIdx, values, colCount, isAlt=false, opts={}){
-  const row = ws.getRow(rowIdx);
-  row.height = opts.height || 15;
-  const bg = opts.forceBg || (isAlt ? XL.BG_ALT : XL.BG_WHITE);
-  values.forEach((v, i)=>{
-    const cell = ws.getCell(rowIdx, i+1);
-    cell.value = (v===null||v===undefined) ? null : v;
-    cell.font  = { size:9, color:{argb:XL.FG_NORMAL}, name:'Meiryo' };
-    cell.fill  = { type:'pattern', pattern:'solid', fgColor:{argb:bg} };
-    cell.alignment = { vertical:'middle', wrapText:false };
-    cell.border = { top:XL.BORDER_THIN, left:XL.BORDER_THIN, bottom:XL.BORDER_THIN, right:XL.BORDER_THIN };
-  });
-  // 숫자 컬럼 우정렬 + 색상 (opts.numCols: 1-based 인덱스 배열)
-  if(opts.numCols) opts.numCols.forEach(c=>{
-    const cell = ws.getCell(rowIdx, c);
-    if(typeof cell.value==='number'){
-      cell.alignment = { horizontal:'right', vertical:'middle' };
-      cell.font = { ...cell.font, color:{argb:XL.FG_NUM} };
-      if(opts.numFmt) cell.numFmt = opts.numFmt;
-    }
-  });
-  // 특정 컬럼 굵게
-  if(opts.boldCols) opts.boldCols.forEach(c=>{
-    const cell = ws.getCell(rowIdx, c);
-    cell.font = { ...cell.font, bold:true };
-  });
-}
-
-// 합계 행
-function xlTotalRow(ws, rowIdx, values, colCount){
-  const row = ws.getRow(rowIdx);
-  row.height = 17;
-  values.forEach((v,i)=>{
-    const cell = ws.getCell(rowIdx, i+1);
-    cell.value = (v===null||v===undefined) ? null : v;
-    cell.font  = { bold:true, size:10, color:{argb:XL.FG_TOTAL}, name:'Meiryo' };
-    cell.fill  = { type:'pattern', pattern:'solid', fgColor:{argb:XL.BG_TOTAL} };
-    cell.alignment = { horizontal: typeof v==='number' ? 'right' : 'center', vertical:'middle' };
-    cell.border = { top:XL.BORDER_MED, left:XL.BORDER_THIN, bottom:XL.BORDER_MED, right:XL.BORDER_THIN };
-    if(typeof v==='number') cell.numFmt = '#,##0';
-  });
-}
-
-// 열 너비 설정
-function xlColWidths(ws, widths){
-  widths.forEach((w,i)=>{ ws.getColumn(i+1).width = w; });
-}
-
-// 숙소별 섹션 색상 반환
+// 숙박별 색상 (인쇄/화면 공용 — 윈저호텔:틸 / 카라반:보라)
 function xlAccomColor(accom){
   if(accom==='호텔')   return { fg:'FF1C443F', bg:'FFE2EEEC' };  // 윈저호텔: 틸
   if(accom==='카라반') return { fg:'FF4C1D95', bg:'FFEDE9FE' };  // 카라반: 보라
-  return { fg:XL.FG_SUBHDR, bg:XL.BG_SUBHDR };
+  return { fg:'FF1E3A5F', bg:'FFDDEEFF' };
 }
 
-// 구분값 → xlsx 셀 색상
-function xlStatusColor(status){
-  if(status==='정산') return { fg:'FF14532D', bg:'FFD1FAE5' };  // 진한초록/연초록
-  if(status==='확정') return { fg:'FF1D4ED8', bg:'FFD6E4F7' };  // 진한파랑/연파랑
-  if(status==='대기') return { fg:'FF4C1D95', bg:'FFEDE9FE' };  // 진한보라/연보라
-  if(status==='견적') return { fg:'FF854D0E', bg:'FFFEF9C3' };  // 진한노랑/연노랑
-  if(status==='취소') return { fg:'FF991B1B', bg:'FFFEE2E2' };  // 진한빨강/연빨강
-  return { fg:XL.FG_NORMAL, bg:XL.BG_WHITE };
-}
-
-// ExcelJS 워크북 → Blob → 다운로드
-async function xlSave(wb, filename){
-  const buf = await wb.xlsx.writeBuffer();
-  const blob = new Blob([buf], {type:'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'});
-  const url = URL.createObjectURL(blob);
-  const a = document.createElement('a'); a.href=url; a.download=filename;
-  document.body.appendChild(a); a.click();
-  setTimeout(()=>{ document.body.removeChild(a); URL.revokeObjectURL(url); }, 500);
-  if(window.SB14&&SB14.log) SB14.log('download',{file:filename});
-}
-
-// ── 다운로드 함수들 ──────────────────────────────────────────
-
-// ── 날짜 선택 모달 공통 ──────────────────────────────────────
+// ── 날짜 선택 모달 공통 (인쇄 미리보기 등에서 재사용) ────────────
 function showDatePickerModal(title, dates, onConfirm, confirmLabel, options){
   const existing = document.getElementById('dl-modal-bg');
   if(existing) existing.remove();
@@ -3095,14 +2907,6 @@ function dlModalConfirm(){
   if(bg._onConfirm) bg._onConfirm(selected, selectedAccoms);
 }
 
-// ── 다운로드 래퍼 함수 (날짜 선택 모달) ─────────────────────
-function downloadTransfer(){
-  const dates = [...new Set([...processed.filter(r=>r.accom).map(r=>r.dep),...processed.filter(r=>r.accom).map(r=>r.arr)])].filter(Boolean).sort();
-  showDatePickerModal('送迎配車表', dates, (sel)=>_downloadTransfer(sel));
-}
-function downloadDinner(){
-  showDatePickerModal('夕食名前版', getDinnerDates(), (sel,acc)=>_downloadDinner(sel,acc), null, {accomFilter:true});
-}
 // ── 御請求書 (Invoice) ────────────────────────────────────────
 const MERIT_LOGO_B64  = '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';
 
@@ -3307,613 +3111,6 @@ function printInvoice(){
   win.document.write(html);
   win.document.close();
   setTimeout(()=>win.print(), 800);
-}
-
-// ════════════════════════════════════════════════════════════════
-// 現地精算表 전용 — 모노크롬 회계 스타일 (A안)
-// 검정 글씨 + 회색 음영만. 색 구분 제거, 위계는 굵기·테두리·음영으로.
-// ════════════════════════════════════════════════════════════════
-const XLM = {
-  FG:        'FF1A1A1A',  // 본문 글씨: 거의 검정
-  FG_TITLE:  'FFFFFFFF',  // 타이틀: 흰 글씨
-  BG_TITLE:  'FF3A3A3A',  // 타이틀: 진회색 바탕
-  BG_HDR:    'FFE8E8E6',  // 헤더: 옅은 회색
-  BG_SECTION:'FFD8D8D4',  // 숙소 섹션: 중간 회색
-  BG_TOTAL:  'FFDCDCD8',  // 합계: 옅은 회색
-  BG_ALT:    'FFF6F6F4',  // 짝수행: 아주 옅은 회색
-  BG_WHITE:  'FFFFFFFF',
-  B_THIN:    { style:'thin',  color:{argb:'FFCFCFCB'} },
-  B_MED:     { style:'medium',color:{argb:'FF888884'} },
-};
-
-function xlmTitle(ws, rowIdx, text, colCount){
-  ws.mergeCells(rowIdx,1,rowIdx,colCount);
-  const c=ws.getCell(rowIdx,1);
-  c.value=text;
-  c.font={bold:true,size:11,color:{argb:XLM.FG_TITLE},name:'Meiryo'};
-  c.fill={type:'pattern',pattern:'solid',fgColor:{argb:XLM.BG_TITLE}};
-  c.alignment={horizontal:'left',vertical:'middle',indent:1};
-  c.border={top:XLM.B_MED,left:XLM.B_MED,bottom:XLM.B_MED,right:XLM.B_MED};
-  ws.getRow(rowIdx).height=20;
-}
-function xlmHeader(ws, rowIdx, headers){
-  const row=ws.getRow(rowIdx); row.height=18;
-  headers.forEach((h,i)=>{
-    const c=ws.getCell(rowIdx,i+1);
-    c.value=h;
-    c.font={bold:true,size:9,color:{argb:XLM.FG},name:'Meiryo'};
-    c.fill={type:'pattern',pattern:'solid',fgColor:{argb:XLM.BG_HDR}};
-    c.alignment={horizontal:'center',vertical:'middle',wrapText:false};
-    c.border={top:XLM.B_MED,left:XLM.B_THIN,bottom:XLM.B_MED,right:XLM.B_THIN};
-  });
-}
-function xlmSection(ws, rowIdx, text, colCount){
-  ws.mergeCells(rowIdx,1,rowIdx,colCount);
-  const c=ws.getCell(rowIdx,1);
-  c.value=text;
-  c.font={bold:true,size:10,color:{argb:XLM.FG},name:'Meiryo'};
-  c.fill={type:'pattern',pattern:'solid',fgColor:{argb:XLM.BG_SECTION}};
-  c.alignment={horizontal:'left',vertical:'middle',indent:1};
-  c.border={top:XLM.B_MED,bottom:XLM.B_MED};
-  ws.getRow(rowIdx).height=17;
-}
-function xlmDataRow(ws, rowIdx, values, isAlt=false, opts={}){
-  const row=ws.getRow(rowIdx); row.height=opts.height||15;
-  const bg=isAlt?XLM.BG_ALT:XLM.BG_WHITE;
-  values.forEach((v,i)=>{
-    const c=ws.getCell(rowIdx,i+1);
-    c.value=(v===null||v===undefined)?null:v;
-    c.font={size:9,color:{argb:XLM.FG},name:'Meiryo'};
-    c.fill={type:'pattern',pattern:'solid',fgColor:{argb:bg}};
-    c.alignment={vertical:'middle',wrapText:false};
-    c.border={top:XLM.B_THIN,left:XLM.B_THIN,bottom:XLM.B_THIN,right:XLM.B_THIN};
-  });
-  // 숫자 컬럼: 검정 우정렬 + 천단위 콤마 (음수는 빨강)
-  if(opts.numCols) opts.numCols.forEach(cn=>{
-    const c=ws.getCell(rowIdx,cn);
-    if(typeof c.value==='number'){
-      c.alignment={horizontal:'right',vertical:'middle'};
-      c.numFmt='#,##0;[Red]-#,##0';
-    }
-  });
-  // 중앙 정렬 컬럼
-  if(opts.centerCols) opts.centerCols.forEach(cn=>{
-    const c=ws.getCell(rowIdx,cn);
-    c.alignment={horizontal:'center',vertical:'middle'};
-  });
-  // 굵게
-  if(opts.boldCols) opts.boldCols.forEach(cn=>{
-    const c=ws.getCell(rowIdx,cn);
-    c.font={...c.font,bold:true};
-  });
-}
-function xlmTotalRow(ws, rowIdx, values, opts={}){
-  const row=ws.getRow(rowIdx); row.height=18;
-  values.forEach((v,i)=>{
-    const c=ws.getCell(rowIdx,i+1);
-    c.value=(v===null||v===undefined)?null:v;
-    c.font={bold:true,size:10,color:{argb:XLM.FG},name:'Meiryo'};
-    c.fill={type:'pattern',pattern:'solid',fgColor:{argb:XLM.BG_TOTAL}};
-    c.alignment={horizontal:typeof v==='number'?'right':'center',vertical:'middle'};
-    c.border={top:XLM.B_MED,left:XLM.B_THIN,bottom:XLM.B_MED,right:XLM.B_THIN};
-    if(typeof v==='number') c.numFmt='#,##0;[Red]-#,##0';
-  });
-}
-
-async function downloadSettle(){
-  const wb = new ExcelJS.Workbook();
-  wb.creator = '14hills'; wb.created = new Date();
-
-  const settl = processed.filter(r=>r.accom && settlePass(r.accom));
-  // DOM 순서 반영: settle-table tbody의 draggable-row 순서대로
-  const domRows = document.querySelectorAll('#settle-table tbody tr.draggable-row');
-  const sorted = domRows.length > 0
-    ? [...domRows].map(tr => {
-        const seq = tr.dataset.eventseq;
-        return settl.find(r => String(r.eventSeq||'').trim() === String(seq||'').trim());
-      }).filter(Boolean)
-    : [...settl].sort((a,b)=>a.accom.localeCompare(b.accom)||a.dep.localeCompare(b.dep));
-  const COL = 6;
-
-  // ── 시트1: 精算要約 ──
-  const A4P = { paperSize:9, orientation:'portrait',  fitToPage:true, fitToWidth:1, fitToHeight:0, margins:{left:0.5,right:0.5,top:0.5,bottom:0.5,header:0,footer:0} };
-  const A4L = { paperSize:9, orientation:'landscape', fitToPage:true, fitToWidth:1, fitToHeight:0, margins:{left:0.5,right:0.5,top:0.5,bottom:0.5,header:0,footer:0} };
-
-  const ws1 = wb.addWorksheet('精算要約', { views:[{state:'frozen',ySplit:3}], pageSetup:A4P });
-  xlColWidths(ws1, [18,8,8,14,14,14]);
-  xlmTitle(ws1, 1, 'メリットツアー × 14hills — 現地精算表 (B2B精算)  ' + today(), COL);
-  xlmHeader(ws1, 2, ['施設','件数','人数','宿泊費(¥)','送迎費(¥)','合計(¥)']);
-  let r=3;
-  const accomList=['호텔','카라반'];
-  accomList.forEach((t,ai)=>{
-    const rows=sorted.filter(x=>x.accom===t); if(!rows.length)return;
-    xlmDataRow(ws1,r,[t,rows.length,rows.reduce((a,x)=>a+x.pax,0),rows.reduce((a,x)=>a+x.stay,0),rows.reduce((a,x)=>a+x.transport,0),rows.reduce((a,x)=>a+x.total,0)],ai%2===0,{numCols:[2,3,4,5,6],centerCols:[2,3],boldCols:[1]});
-    r++;
-  });
-  xlmTotalRow(ws1,r,['合計','',settl.reduce((a,x)=>a+x.pax,0),settl.reduce((a,x)=>a+x.stay,0),settl.reduce((a,x)=>a+x.transport,0),settl.reduce((a,x)=>a+x.total,0)]);
-
-  // ── 시트2: 精算明細 ──
-  const COL2 = 19;
-  const ws2 = wb.addWorksheet('精算明細', { views:[{state:'frozen',ySplit:3}], pageSetup:A4L });
-  xlColWidths(ws2, [5,12,8,10,16,22,11,11,6,5,16,12,12,12,12,12,22,22,22]);
-  xlmTitle(ws2, 1, '現地精算表 (B2B精算) — 明細  ' + today(), COL2);
-  xlmHeader(ws2, 2, HDRS.SETTLE);
-  r=3;
-  let prevAccom='';
-  sorted.forEach((rec,i)=>{
-    if(rec.accom!==prevAccom){
-      const grp=sorted.filter(x=>x.accom===rec.accom);
-      const gtot=grp.reduce((a,x)=>a+x.total,0);
-      xlmSection(ws2, r, '▌ '+rec.accom+'  —  '+grp.length+'件 / '+grp.reduce((a,x)=>a+x.pax,0)+'名 / ¥'+gtot.toLocaleString(), COL2); r++;
-      prevAccom=rec.accom;
-    }
-    const k=`settle_${rec.eventSeq}`;
-    xlmDataRow(ws2,r,[rec.no,rec.eventNo||'-',rec.status||'-',rec.memberType||'-',rec.repName,getEngName(rec.eventSeq),rec.dep,rec.arr,rec.nights,rec.pax,rec.accom,rec.roomType,rec.rate,rec.stay,rec.transport,rec.total,(manualData[k]||{}).remarks||'',(rec.raw&&rec.raw['비고'])||'',(rec.raw&&rec.raw['현지 비고'])||''],i%2===0,{numCols:[13,14,15,16],centerCols:[1,3,9,10],boldCols:[5]});
-    r++;
-  });
-  xlmTotalRow(ws2,r,['','','','','合計','','','','',settl.reduce((a,x)=>a+x.pax,0),'','','',settl.reduce((a,x)=>a+x.stay,0),settl.reduce((a,x)=>a+x.transport,0),settl.reduce((a,x)=>a+x.total,0),'','','']);
-
-  const fnSuffix = settleFilter.size === 0 ? '' : '_' + [...settleFilter].map(a=>accomEngName(a)).join('-');
-  await xlSave(wb, `現地精算表${fnSuffix}_${today()}.xlsx`);
-}
-
-async function _downloadTransfer(selectedDates){
-  const wb = new ExcelJS.Workbook();
-  wb.creator = '14hills'; wb.created = new Date();
-
-  // 날짜 목록: processed(팀 단위) 기준
-  const allDates = [...new Set([...processed.filter(r=>r.accom).map(r=>r.dep),...processed.filter(r=>r.accom).map(r=>r.arr)])].filter(Boolean).sort();
-  const dates = selectedDates ? allDates.filter(d=>selectedDates.includes(d)) : allDates;
-  const dateLabel = selectedDates && selectedDates.length
-    ? (selectedDates.length === 1
-        ? selectedDates[0]
-        : `${selectedDates[0].slice(5)}~${selectedDates[selectedDates.length-1].slice(5)}`)
-    : today();
-  const COLW_IN  = [5,12,14,20,16,20,6,20,16,16];
-  const COLW_OUT = [5,12,14,20,16,20,6,16,16,20];
-
-  const A4P = { paperSize:9, orientation:'portrait',  fitToPage:true, fitToWidth:1, fitToHeight:0, margins:{left:0.5,right:0.5,top:0.5,bottom:0.5,header:0,footer:0} };
-  const A4L = { paperSize:9, orientation:'landscape', fitToPage:true, fitToWidth:1, fitToHeight:0, margins:{left:0.5,right:0.5,top:0.5,bottom:0.5,header:0,footer:0} };
-
-  // 전체 요약 시트 (팀 pax 합계 기준)
-  const ws0 = wb.addWorksheet('全体要約', {views:[{state:'frozen',ySplit:3}], pageSetup:A4P});
-  xlColWidths(ws0, [14,14,14,10,14,14,10]);
-  xlTitle(ws0, 1, `送迎配車表 — 全日程要約  ${dateLabel}`, 7);
-  xlHeader(ws0, 2, ['日付','IN 仁川(TW287)','IN 金海(ZE967)','IN合計(名)','OUT 仁川(TW288)','OUT 金海(ZE968)','OUT合計(名)']);
-  let r0=3;
-  dates.forEach((d,i)=>{
-    const inTeams  = processed.filter(r=>r.accom && r.dep===d);
-    const outTeams = processed.filter(r=>r.accom && r.arr===d);
-    const getPax = (teams, flightKey, flightVal) => teams.filter(t=>{
-      const seq=String(t.eventSeq||'').trim();
-      const px=passengers.find(p=>String(p.eventSeq||'').trim()===seq);
-      return px && px[flightKey]===flightVal;
-    }).reduce((s,t)=>s+t.pax,0);
-    xlDataRow(ws0,r0,[d+getWD(d),
-      getPax(inTeams,'depFlight','TW287'), getPax(inTeams,'depFlight','ZE967'), inTeams.reduce((s,t)=>s+t.pax,0),
-      getPax(outTeams,'retFlight','TW288'), getPax(outTeams,'retFlight','ZE968'), outTeams.reduce((s,t)=>s+t.pax,0)
-    ],7,i%2===0,{numCols:[2,3,4,5,6,7]});
-    r0++;
-  });
-
-  // 날짜별 시트
-  dates.forEach(d=>{
-    const sname = d.slice(5).replace('-','.')+getWD(d);
-    const ws = wb.addWorksheet(sname.slice(0,30), { views:[{state:'frozen',ySplit:1}], pageSetup:A4L });
-
-    let r=1;
-    const inTeams  = processed.filter(t=>t.accom && t.dep===d);
-    const outTeams = processed.filter(t=>t.accom && t.arr===d);
-    const isInFirst = inTeams.length > 0;
-    const COL = HDRS.TRANSFER_IN.length; // IN/OUT 동일 (10)
-    xlColWidths(ws, isInFirst ? COLW_IN : COLW_OUT);
-
-    xlTitle(ws, r, `送迎配車表  ${d}${getWD(d)}`, COL); r++;
-
-    const addBlock = (isIn, teamList) => {
-      if(!teamList.length) return;
-      const label = isIn ? '▶ IN 入国' : '▶ OUT 出国';
-      const HDR = isIn ? HDRS.TRANSFER_IN : HDRS.TRANSFER_OUT;
-      xlColWidths(ws, isIn ? COLW_IN : COLW_OUT);
-
-      // 편명별 그룹 (passengers에서 편명 조회)
-      const byFlight = {};
-      teamList.forEach(t => {
-        const seq = String(t.eventSeq||'').trim();
-        const px = passengers.find(p=>String(p.eventSeq||'').trim()===seq);
-        const fn = px ? (isIn ? px.depFlight : px.retFlight) : '';
-        if(!fn) return;
-        if(!byFlight[fn]) byFlight[fn] = [];
-        byFlight[fn].push(t);
-      });
-
-      Object.keys(byFlight).sort().forEach(fn=>{
-        const g = byFlight[fn]; if(!g.length) return;
-        const k = `tr_${d}_${fn}`, md = manualData[k]||{};
-        const totalPax = g.reduce((s,t)=>s+t.pax,0);
-        xlSection(ws, r, `${label}  ${FLIGHT_LABELS[fn]||fn}  ${FLIGHT_TIMES[fn]||''}  計${totalPax}名`, COL, 'FF78350F','FFFFF7ED'); r++;
-
-        // 차량·경유지 정보행
-        ws.mergeCells(r,1,r,COL);
-        const infoCell=ws.getCell(r,1);
-        infoCell.value=`車両: ${md.vehicle||'—'}　ドライバー: ${md.driver||'—'}　ルート: ${md.route||'—'}　途中立寄り: ${md.stopover||'—'}`;
-        infoCell.font={size:9,color:{argb:'FF4A5A80'},name:'Meiryo'};
-        infoCell.fill={type:'pattern',pattern:'solid',fgColor:{argb:'FFFAFBFF'}};
-        infoCell.alignment={horizontal:'left',vertical:'middle',wrapText:false};
-        ws.getRow(r).height=14; r++;
-        xlHeader(ws,r,HDR,{height:15}); r++;
-
-        // DOM 순서 반영
-        const trTblId = `tr-tbl-${d}-${fn.replace(/\s/g,'')}`;
-        const trDomTbl = document.getElementById(trTblId);
-        let gOrdered;
-        if(trDomTbl){
-          const seen = new Set();
-          gOrdered = [...trDomTbl.querySelectorAll('tbody tr.draggable-row')]
-            .map(tr => g.find(t => String(t.eventSeq||'').trim() === String(tr.dataset.eventseq||'').trim()))
-            .filter(t => { if(t && !seen.has(t.eventSeq)){ seen.add(t.eventSeq); return true; } return false; });
-        } else {
-          const accomOrder = ['호텔','카라반'];
-          gOrdered = [];
-          accomOrder.forEach(ac => gOrdered.push(...g.filter(t=>t.accom===ac).sort((a,b)=>a.repName.localeCompare(b.repName))));
-        }
-
-        // 숙소 섹션 헤더 + 팀 행
-        let prevAc = '', no = 0;
-        gOrdered.forEach((t, ti)=>{
-          if(t.accom !== prevAc){
-            const c = xlAccomColor(t.accom);
-            const acTeams = gOrdered.filter(x=>x.accom===t.accom);
-            const acPax = acTeams.reduce((s,x)=>s+x.pax,0);
-            xlSection(ws,r,`　${t.accom}  ${acTeams.length}件 · ${acPax}名`,COL,c.fg,c.bg); r++;
-            prevAc = t.accom;
-          }
-          no++;
-          const seq = String(t.eventSeq||'').trim();
-          const repPx = passengers.find(p=>String(p.eventSeq||'').trim()===seq && p.isRep);
-          const engFull = repPx?.engFull || arrivalMap[seq]?.engFull || '(미등록)';
-          const grpCode = getRepGrpCode(seq);
-          const rk = `tr_row_${d}_${fn}_${t.eventSeq}`;
-          const rmd = manualData[rk]||{};
-          const depLabel = isIn ? '中部国際空港(NGO)' : accomJpName(t.accom||'-');
-          const arrLabel = isIn ? accomJpName(t.accom||'-') : '中部国際空港(NGO)';
-          const row = [no, t.eventNo||'-', grpCode, t.repName, t.repName, engFull, t.pax, depLabel, rmd.stopover||'', arrLabel];
-          xlDataRow(ws,r,row,COL,ti%2===0,{numCols:[7],boldCols:[4]});
-          r++;
-        });
-        ws.getRow(r).height=6; r++;
-      });
-    };
-
-    addBlock(true,  inTeams);
-    addBlock(false, outTeams);
-  });
-
-  await xlSave(wb, `送迎配車表_${dateLabel}.xlsx`);
-}
-
-
-async function _downloadDinner(selectedDates, selectedAccoms){
-  const _accomSet = selectedAccoms ? new Set(selectedAccoms) : null;
-  const wb = new ExcelJS.Workbook();
-  wb.creator = '14hills'; wb.created = new Date();
-
-  const allDinnerDates = getDinnerDates();
-  const dinnerDates = selectedDates ? allDinnerDates.filter(d=>selectedDates.includes(d)) : allDinnerDates;
-  const dateLabel = selectedDates && selectedDates.length
-    ? (selectedDates.length === 1
-        ? selectedDates[0]
-        : `${selectedDates[0].slice(5)}~${selectedDates[selectedDates.length-1].slice(5)}`)
-    : today();
-  const HDR = HDRS.DINNER;
-  const COLW= [5,12,16,22,10,18,6,8,30,24,24];
-  const COL = HDR.length;
-
-  dinnerDates.forEach(d=>{
-    const stayingTeams=processed.filter(r=>r.accom && (!_accomSet || _accomSet.has(r.accom))&&r.dep<=d&&r.arr>d);
-    const stayingSeqs=new Set(stayingTeams.map(r=>String(r.eventSeq||'').trim()));
-    const seqAccomMap={}; stayingTeams.forEach(r=>{seqAccomMap[String(r.eventSeq||'').trim()]=r.accom;});
-    const basePax=passengers.filter(p=>stayingSeqs.has(String(p.eventSeq||'').trim())).map(p=>({...p,accom:seqAccomMap[String(p.eventSeq||'').trim()]||p.accom}));
-
-    // DOM 순서 반영: 현재 표시 중인 날짜면 DOM 순서 사용
-    const accomOrder = ['호텔','카라반'];
-    let paxList = [];
-    accomOrder.forEach(ac => {
-      const tid = `dinner-tbl-${d}-${ac.replace(/[\s]/g,'')}`;
-      const domTbl = document.getElementById(tid);
-      if(domTbl){
-        const domPax = [...domTbl.querySelectorAll('tbody tr.draggable-row')].map(tr => {
-          return basePax.find(p => String(p.eventSeq||'').trim()===String(tr.dataset.eventseq||'').trim());
-        }).filter(Boolean);
-        paxList.push(...domPax);
-      } else {
-        paxList.push(...basePax.filter(p=>p.accom===ac).sort((a,b)=>a.repName.localeCompare(b.repName)||(b.isRep?1:0)-(a.isRep?1:0)||a.name.localeCompare(b.name)));
-      }
-    });
-
-    const sname=d.slice(5).replace('-','.')+getWD(d);
-    const ws=wb.addWorksheet(sname.slice(0,30), {views:[{state:'frozen',ySplit:3}], pageSetup:{paperSize:9,orientation:'landscape',fitToPage:true,fitToWidth:1,fitToHeight:0,margins:{left:0.5,right:0.5,top:0.5,bottom:0.5,header:0,footer:0}}});
-    xlColWidths(ws, COLW);
-
-    let r=1;
-    xlTitle(ws,r,`夕食名前版  ${d}${getWD(d)}  ${stayingTeams.length}チーム · ${paxList.filter(p=>p.isRep).length}テーブル`,COL); r++;
-    ws.getRow(r).height=6; r++; // spacer
-    xlHeader(ws,r,HDR); r++;
-
-    let prevAccom='', globalNo=0;
-    // 대표자(isRep)만 출력
-    const repPaxList = paxList.filter(p => p.isRep);
-    repPaxList.forEach((p,i)=>{
-      if(p.accom!==prevAccom){
-        const c=xlAccomColor(p.accom);
-        const teamCnt = repPaxList.filter(x=>x.accom===p.accom).length;
-        const paxCnt  = paxList.filter(x=>x.accom===p.accom).length;
-        xlSection(ws,r,'▌ '+p.accom+`  ${teamCnt}チーム · ${paxCnt}名`,COL,c.fg,c.bg); r++;
-        prevAccom=p.accom;
-      }
-      globalNo++;
-      const _xlDnTc=buildTagCodeMap()[String(p.eventSeq||'').trim()]||{};
-      const xlDnTagCode=makeTagCodeSafe(_xlDnTc.teamIdx||0, 0, _xlDnTc.accomPfx, _xlDnTc.memberCode, _xlDnTc.manualCode, _xlDnTc.pendingMember, _xlDnTc.eventSeq, _xlDnTc.year);
-      const teamRec=stayingTeams.find(rv=>String(rv.eventSeq||'').trim()===String(p.eventSeq||'').trim())||{};
-      const k=`dinner_${d}_${p.eventSeq}`, md=manualData[k]||{};
-      // 滞在日次 계산 (입국일 = 1日目)
-      let stayDay = '';
-      if(teamRec.dep){
-        const days = Math.round((parseLocalDate(d) - parseLocalDate(teamRec.dep)) / 86400000) + 1;
-        const totalNights = teamRec.dep && teamRec.arr
-          ? Math.round((parseLocalDate(teamRec.arr) - parseLocalDate(teamRec.dep)) / 86400000)
-          : 0;
-        const totalDays = totalNights + 1;
-        if(days >= 1 && days <= totalDays) stayDay = `${days}/${totalDays}日目`;
-      }
-      xlDataRow(ws,r,[globalNo,teamRec.eventNo||'-',xlDnTagCode,p.repName,
-        stayDay,
-        getEngName(p.eventSeq)||'',
-        teamRec.pax||'',
-        md.table||'',md.remarks||'',(teamRec.raw&&teamRec.raw['비고'])||'',(teamRec.raw&&teamRec.raw['현지 비고'])||''],
-        COL,globalNo%2===0,{boldCols:[4],numCols:[7]});
-      ws.getCell(r,4).font={bold:true,size:9,color:{argb:XL.FG_ACCENT},name:'Meiryo'};
-      r++;
-    });
-  });
-
-  await xlSave(wb, `夕食名前版_${dateLabel}.xlsx`);
-}
-
-// ─────────────────────────────────────────────────────────────
-// レストラン名札 (Restaurant Nameplate) 다운로드
-// A4 가로 1페이지 = 같은 팀 2장 (좌·우, 가운데 절취선)
-// 카드 사이즈: 132×174mm
-// ─────────────────────────────────────────────────────────────
-function downloadRestaurantNameplate(){
-  const dates = getDinnerDates();
-  if(!dates.length){ alert('데이터가 없습니다.'); return; }
-  showDatePickerModal('レストラン名札', dates, (sel,acc)=>_downloadRestaurantNameplate(sel,acc), null, {accomFilter:true});
-}
-
-async function _downloadRestaurantNameplate(selectedDates, selectedAccoms){
-  const _accomSet = selectedAccoms ? new Set(selectedAccoms) : null;
-  const wb = new ExcelJS.Workbook();
-  wb.creator = '14hills'; wb.created = new Date();
-
-  const tagMap = buildTagCodeMap();
-
-  const dateLabel = selectedDates.length === 1
-    ? selectedDates[0]
-    : `${selectedDates[0].slice(5)}~${selectedDates[selectedDates.length-1].slice(5)}`;
-
-  // ── 양면 책형 명패 (A4 가로 297×210mm, 가운데 접기) ──
-  // A4 가로에 카드 2장 (좌·우 동일 내용 = 책처럼 펼침/접음)
-  // 좌우 외곽 여백 8mm, 가운데 0mm → 카드 너비 약 140mm
-  // 상하 외곽 여백 8mm → 인쇄 가능 영역 194mm = 약 549pt
-  // ★ 카드 합계를 인쇄 영역에 정확히 맞춰서 1팀=1페이지 자동 분리, 침범 불가능
-
-  // 행 구성 (총 549pt = 194mm) — A4 가로 1페이지 인쇄 영역에 정확히 맞춤
-  // 행0: 상단 여백 (외곽선 없음) 12pt — 침범 방지용 최소
-  // 행1: 대표자 + 님 (외곽선 시작) 180pt
-  // 행2: 일행 160pt
-  // 행3: 인원수 105pt
-  // 행4: 체류기간 50pt
-  // 행5: 태그코드 (외곽선 끝) 60pt
-  // 행6: 하단 여백 (외곽선 없음) 12pt
-  // → 외곽선 영역(행 1-5): 555pt = 195.9mm (인쇄 가능 200mm 안에 4mm 여유)
-  const ROW_H = [12, 180, 160, 105, 50, 60, 12];
-  const TOTAL_ROWS = ROW_H.length;
-
-  // 열 구성: [카드좌] [절취선용 얇은 열] [카드우]
-  const COL_W = [78, 0.5, 78];
-
-  const FONT_NAME = 'Yu Gothic';
-
-  // ── ① 인쇄 안내 시트 (맨 앞에 배치) ──
-  const guideWs = wb.addWorksheet('🖨 인쇄 안내', {
-    pageSetup:{paperSize:9, orientation:'portrait', fitToPage:true, fitToWidth:1, fitToHeight:1, margins:{left:0.5,right:0.5,top:0.5,bottom:0.5,header:0,footer:0}}
-  });
-  guideWs.getColumn(1).width = 80;
-  guideWs.getRow(1).height = 30;
-  const gTitle = guideWs.getCell(1,1);
-  gTitle.value = '📋 レストラン名札 인쇄 안내';
-  gTitle.font = {name:FONT_NAME, size:16, bold:true, color:{argb:'FF000000'}};
-  gTitle.alignment = {horizontal:'left', vertical:'middle'};
-
-  const guideLines = [
-    '',
-    '✓ 본 파일은 1팀 = 1페이지로 자동 분리되어 있습니다.',
-    '',
-    '【인쇄 방법】',
-    '  1. 좌측 시트 탭에서 인쇄할 날짜를 선택합니다.',
-    '  2. Ctrl + P (또는 파일 → 인쇄) 를 누릅니다.',
-    '  3. "활성 시트 인쇄" 가 선택된 상태에서 [인쇄] 버튼을 누릅니다.',
-    '  4. 자동으로 1팀씩 한 페이지에 출력됩니다.',
-    '',
-    '【설정 확인 (이미 설정됨)】',
-    '  · 용지: A4',
-    '  · 방향: 가로 (Landscape)',
-    '  · 배율: 한 페이지에 시트 맞추기',
-    '  · 여백: 좁게',
-    '',
-    '【사용 방법】',
-    '  · 출력된 종이를 가운데 점선을 따라 접으면 양면 명패가 됩니다.',
-    '  · 책처럼 펼쳐서 양쪽에서 볼 수 있습니다.',
-    '',
-    '【여러 날짜 한꺼번에 인쇄】',
-    '  · Ctrl + P → "전체 통합 문서 인쇄" 선택 → 인쇄',
-  ];
-  guideLines.forEach((line, i) => {
-    const r = i + 2;
-    guideWs.getRow(r).height = 18;
-    const c = guideWs.getCell(r, 1);
-    c.value = line;
-    c.font = {name:FONT_NAME, size:11, bold: line.startsWith('【') || line.startsWith('✓'), color:{argb:'FF333333'}};
-    c.alignment = {horizontal:'left', vertical:'middle'};
-  });
-
-  // ── ② 날짜별 명패 시트 ──
-  selectedDates.forEach(date=>{
-    const stayingTeams = processed.filter(r => r.accom && (!_accomSet || _accomSet.has(r.accom)) && r.dep<=date && r.arr>date);
-    if(stayingTeams.length===0) return;
-
-    const dinnerTeams = stayingTeams;
-    if(dinnerTeams.length===0) return;
-
-    const accomOrder = ['호텔','카라반'];
-    dinnerTeams.sort((a,b)=>{
-      const ai = accomOrder.indexOf(a.accom), bi = accomOrder.indexOf(b.accom);
-      if(ai !== bi) return (ai===-1?99:ai) - (bi===-1?99:bi);
-      return (a.repName||'').localeCompare(b.repName||'');
-    });
-
-    const sname = date.slice(5).replace('-','.') + getWD(date);
-    const ws = wb.addWorksheet(sname.slice(0,30), {
-      pageSetup:{
-        paperSize:9, orientation:'landscape', fitToPage:true,
-        fitToWidth:1, fitToHeight:0,
-        horizontalCentered:true, verticalCentered:true,
-        margins:{left:0.31, right:0.31, top:0.20, bottom:0.20, header:0, footer:0}  // 좌우 8mm, 상하 5mm
-      },
-      properties: {defaultRowHeight: 15}
-    });
-
-    COL_W.forEach((w,i)=>{ ws.getColumn(i+1).width = w; });
-
-    let curRow = 1;
-    const pageBreakRows = [];  // 페이지 나누기 위치 수집
-    dinnerTeams.forEach((team, idx)=>{
-      const tc = tagMap[String(team.eventSeq||'').trim()] || {};
-      const tagCode = makeTagCodeSafe(tc.teamIdx||0, 0, tc.accomPfx, tc.memberCode, tc.manualCode, tc.pendingMember, tc.eventSeq, tc.year);
-      const accomColor = xlAccomColor(team.accom);
-
-      const fmtJP = (dStr) => {
-        if(!dStr) return '';
-        const m = parseInt(dStr.slice(5,7), 10);
-        const d = parseInt(dStr.slice(8,10), 10);
-        return `${m}月${d}日`;
-      };
-      const periodStr = `${fmtJP(team.dep)} 〜 ${fmtJP(team.arr)}`;
-      const repNm = (team.repName||'').trim();
-
-      ROW_H.forEach((h,i)=>{ ws.getRow(curRow+i).height = h; });
-
-      // 좌·우 카드 동일 렌더링
-      [1, 3].forEach(col => {
-        const isLeftCard = (col === 1);
-
-        // 행0: 상단 여백
-        const c0 = ws.getCell(curRow+0, col);
-        c0.value = '';
-
-        // 행1: 대표자 + 님
-        const c1 = ws.getCell(curRow+1, col);
-        c1.value = `${repNm} 님`;
-        c1.font = {name:FONT_NAME, size:110, bold:true, color:{argb:'FF000000'}};
-        c1.alignment = {horizontal:'center', vertical:'middle'};
-
-        // 행2: 일행
-        const c2 = ws.getCell(curRow+2, col);
-        c2.value = '일   행';
-        c2.font = {name:FONT_NAME, size:90, bold:true, color:{argb:'FF000000'}};
-        c2.alignment = {horizontal:'center', vertical:'middle'};
-
-        // 행3: 인원수
-        const c3 = ws.getCell(curRow+3, col);
-        c3.value = `${team.pax||0}명`;
-        c3.font = {name:FONT_NAME, size:65, bold:true, color:{argb:'FF000000'}};
-        c3.alignment = {horizontal:'center', vertical:'middle'};
-
-        // 행4: 체류 기간
-        const c4 = ws.getCell(curRow+4, col);
-        c4.value = periodStr;
-        c4.font = {name:FONT_NAME, size:22, bold:false, color:{argb:'FF333333'}};
-        c4.alignment = {horizontal:'center', vertical:'middle'};
-
-        // 행5: 태그코드 (숙소색)
-        const c5 = ws.getCell(curRow+5, col);
-        c5.value = tagCode;
-        c5.font = {name:FONT_NAME, size:30, bold:true, color:{argb:accomColor.fg}};
-        c5.alignment = {horizontal:'center', vertical:'middle'};
-
-        // 카드 외곽선:
-        // - 첫 행(0=상단 여백)과 마지막 행(6=하단 여백)은 외곽선 없음
-        //   → 페이지 경계 침범 시 빈 영역이라 안 보임
-        // - 외곽선은 행 1(님)~행 5(태그코드)에만 적용
-        for(let i=0; i<TOTAL_ROWS; i++){
-          const cell = ws.getCell(curRow+i, col);
-
-          // 첫 행 또는 마지막 행 (여백): 외곽선 없음
-          if(i === 0 || i === TOTAL_ROWS-1){
-            cell.border = {top:{style:'none'},bottom:{style:'none'},left:{style:'none'},right:{style:'none'}};
-            continue;
-          }
-
-          const isFirstBordered = (i===1);  // 행 1 = 카드 상단
-          const isLastBordered  = (i===TOTAL_ROWS-2);  // 행 5 = 카드 하단
-
-          const topBorder    = isFirstBordered ? {style:'medium', color:{argb:'FF000000'}} : undefined;
-          const bottomBorder = isLastBordered  ? {style:'medium', color:{argb:'FF000000'}} : undefined;
-          const outerBorder  = {style:'medium', color:{argb:'FF000000'}};
-          const innerBorder  = {style:'dashed', color:{argb:'FF000000'}};  // 절취선
-
-          cell.border = {
-            top:    topBorder,
-            bottom: bottomBorder,
-            left:   isLeftCard ? outerBorder : innerBorder,
-            right:  isLeftCard ? innerBorder : outerBorder,
-          };
-        }
-      });
-
-      // 가운데 얇은 열 (절취 가이드만)
-      for(let i=0; i<TOTAL_ROWS; i++){
-        const midCell = ws.getCell(curRow+i, 2);
-        midCell.value = '';
-      }
-
-      // 다음 카드 = 새 페이지 (페이지 나누기)
-      // 카드의 첫/마지막 행이 외곽선 없는 여백이라 침범해도 안 보임
-      if(idx < dinnerTeams.length - 1){
-        const breakRow = curRow + TOTAL_ROWS;
-        pageBreakRows.push(breakRow);
-        curRow = breakRow;
-      } else {
-        curRow += TOTAL_ROWS;
-      }
-    });
-
-    // ── 인쇄 자동화: 페이지 나누기 명시 + 인쇄 영역 설정 ──
-    pageBreakRows.forEach(r => {
-      ws.getRow(r).addPageBreak();
-    });
-    // 인쇄 영역 명시 (전체 카드 영역)
-    const lastRow = curRow - 1;
-    ws.pageSetup.printArea = `A1:C${lastRow}`;
-  });
-
-  if(wb.worksheets.length <= 1){  // 안내 시트만 있고 데이터 없음
-    alert('출력할 팀이 없습니다.\n(전 팀이 외식 처리되었거나 데이터 없음)');
-    return;
-  }
-
-  await xlSave(wb, `レストラン名札_${dateLabel}.xlsx`);
 }
 
 // ── ⑥ ネームタグ 빌드 ────────────────────────────────────────
@@ -4753,15 +3950,12 @@ function enhanceTableScroll(){
       topbar.appendChild(topinner);
       scroll.appendChild(topbar);
       scroll.appendChild(wrap);
-      // 페이드 2개
-      const fl = document.createElement('div'); fl.className = 'table-fade table-fade-l';
-      const fr = document.createElement('div'); fr.className = 'table-fade table-fade-r';
-      // 버튼 2개
+      // 좌우 이동 버튼 2개
       const bl = document.createElement('button'); bl.className = 'table-nav table-nav-l'; bl.type='button'; bl.innerHTML = '&#10094;'; bl.title='왼쪽으로';
       const br = document.createElement('button'); br.className = 'table-nav table-nav-r'; br.type='button'; br.innerHTML = '&#10095;'; br.title='오른쪽으로';
       bl.addEventListener('click', ()=>{ wrap.scrollBy({left:-Math.round(wrap.clientWidth*0.7), behavior:'smooth'}); });
       br.addEventListener('click', ()=>{ wrap.scrollBy({left: Math.round(wrap.clientWidth*0.7), behavior:'smooth'}); });
-      scroll.appendChild(fl); scroll.appendChild(fr); scroll.appendChild(bl); scroll.appendChild(br);
+      scroll.appendChild(bl); scroll.appendChild(br);
       // 상단바 ↔ 본문 스크롤 양방향 동기화 (무한루프 방지 플래그)
       let syncing = false;
       topbar.addEventListener('scroll', ()=>{ if(syncing){syncing=false;return;} syncing=true; wrap.scrollLeft = topbar.scrollLeft; }, {passive:true});
@@ -5219,267 +4413,6 @@ function renderNametag(date){
   syncUndoBtnForPrefix('nametag');
 }
 
-function downloadNametag(){
-  const dates = [...new Set(processed.filter(r=>r.accom&&r.dep).map(r=>r.dep.slice(0,10)))].sort();
-  if(!dates.length){ alert('데이터가 없습니다.'); return; }
-  showDatePickerModal('ネームタグ', dates, (sel,acc)=>_downloadNametag(sel,acc), null, {accomFilter:true});
-}
-
-async function _downloadNametag(selectedDates, selectedAccoms){
-  const _accomSet = selectedAccoms ? new Set(selectedAccoms) : null;
-  const wb = new ExcelJS.Workbook();
-  wb.creator = '14hills'; wb.created = new Date();
-
-  const procMap = {};
-  processed.filter(r=>r.accom && (!_accomSet || _accomSet.has(r.accom))).forEach(r=>{ procMap[String(r.eventSeq||'').trim()] = r; });
-  const seqPaxMap = {};
-  passengers.forEach(p=>{
-    const seq = String(p.eventSeq||'').trim();
-    if(!procMap[seq]) return;
-    if(!seqPaxMap[seq]) seqPaxMap[seq]=[];
-    seqPaxMap[seq].push(p);
-  });
-
-  const tagMap = buildTagCodeMap();
-
-  // selectedDates 기반으로 데이터 직접 구성 (DOM 비의존)
-  // 현재 화면에 보이는 날짜 DOM 순서 반영 (해당 날짜만)
-  const selSet = new Set(selectedDates);
-  const seqOrder = [];
-  const seen = new Set();
-
-  selectedDates.forEach(date => {
-    const accomOrder = ['호텔','카라반'];
-    const originKeys = ['ICN','PUS','CJJ'];
-    // 출발지 × 숙박지 순서로 DOM 탐색 (새 ID 패턴: nametag-tbl-{date}-{key}-{accom})
-    originKeys.forEach(key => {
-      accomOrder.forEach(ac => {
-        const tid = `nametag-tbl-${date}-${key}-${ac.replace(/[\s]/g,'')}`;
-        const domTbl = document.getElementById(tid);
-        if(domTbl){
-          [...domTbl.querySelectorAll('tbody tr.draggable-row')]
-            .map(tr => String(tr.dataset.eventseq||'').trim())
-            .forEach(seq => { if(!seen.has(seq)&&procMap[seq]){ seen.add(seq); seqOrder.push(seq); } });
-        }
-      });
-    });
-    // DOM에서 못찾은 seq는 데이터 기반 정렬로 보완 (출발지 → 숙박지 → teamAlpha 순)
-    accomOrder.forEach(ac => {
-      Object.keys(seqPaxMap)
-        .filter(seq => {
-          const rec = procMap[seq];
-          return rec && rec.accom===ac && (rec.dep||'').slice(0,10)===date && !seen.has(seq);
-        })
-        .sort((a,b) => {
-          const pa = passengers.find(p=>String(p.eventSeq||'').trim()===a);
-          const pb = passengers.find(p=>String(p.eventSeq||'').trim()===b);
-          const oa = pa?.origin||''; const ob = pb?.origin||'';
-          const od = (o=>o.includes('부산')||o==='PUS'?1:0);
-          if(od(oa)!==od(ob)) return od(oa)-od(ob);
-          return (tagMap[a]?.teamIdx||0) - (tagMap[b]?.teamIdx||0);
-        })
-        .forEach(seq => { if(!seen.has(seq)){ seen.add(seq); seqOrder.push(seq); } });
-    });
-  });
-
-  const dateLabel = selectedDates.length === 1
-    ? selectedDates[0]
-    : `${selectedDates[0].slice(5)}~${selectedDates[selectedDates.length-1].slice(5)}`;
-
-
-  // ── 시트1: 목록 (관리용) ──
-  const HDR = HDRS.NAMETAG;
-  const COLW = [5,16,16,22,13,13,6,6,16];
-  const COL = HDR.length;
-  const A4L = {paperSize:9,orientation:'landscape',fitToPage:true,fitToWidth:1,fitToHeight:0,margins:{left:0.5,right:0.5,top:0.5,bottom:0.5,header:0,footer:0}};
-
-  const ws0 = wb.addWorksheet('タグ全体リスト', {views:[{state:'frozen',ySplit:3}], pageSetup:A4L});
-  xlColWidths(ws0, COLW);
-  let r=1;
-  xlTitle(ws0,r,`ネームタグ — 全体リスト  ${dateLabel}`,COL); r++;
-  xlHeader(ws0,r,HDR); r++;
-  let no=0;
-  let prevOriginKey = '';
-  let prevAccom = '';
-  seqOrder.forEach(seq=>{
-    const rec = procMap[seq];
-    const paxList = seqPaxMap[seq];
-    if(!rec||!paxList) return;
-    const nights = rec.arr&&rec.dep ? Math.round((parseLocalDate(rec.arr)-parseLocalDate(rec.dep))/86400000) : 0;
-    const tc = tagMap[seq]||{};
-    const c = xlAccomColor(rec.accom);
-    const repPax = paxList.find(p=>p.isRep);
-    const rawOrigin = repPax?.depFlight?.startsWith('ZE') ? '부산'
-      : repPax?.origin || rec.raw?.['출발지'] || '';
-    const originKey = (rawOrigin.includes('부산')||rawOrigin.includes('김해')) ? 'PUS'
-                    : rawOrigin.includes('청주') ? 'CJJ' : 'ICN';
-    const originLabel = originKey === 'PUS' ? '✈ 釜山 — 金海(PUS)'
-                      : originKey === 'CJJ' ? '✈ 清州(CJJ)' : '✈ ソウル — 仁川(ICN)';
-    const originDark = originKey==='PUS' ? 'FF92400E' : originKey==='CJJ' ? 'FF155E45' : 'FF1E3A8A';
-    const originLight= originKey==='PUS' ? 'FFFEF3C7' : originKey==='CJJ' ? 'FFD1FAE5' : 'FFD6E4F7';
-
-    // 출발지 섹션 헤더
-    if(originKey !== prevOriginKey){
-      prevOriginKey = originKey;
-      prevAccom = '';
-      xlSection(ws0, r, originLabel, COL, originDark, originLight);
-      r++;
-    }
-    // 숙박지 섹션 헤더
-    if(rec.accom !== prevAccom){
-      prevAccom = rec.accom;
-      const accomC = xlAccomColor(rec.accom);
-      xlSection(ws0, r, `　${accomEngName(rec.accom)}`, COL, accomC.fg, accomC.bg);
-      r++;
-    }
-    paxList.forEach((p,i)=>{
-      no++;
-      const tagCode = makeTagCodeSafe(tc.teamIdx||0, i, tc.accomPfx, tc.memberCode, tc.manualCode, tc.pendingMember, tc.eventSeq, tc.year);
-      const engFull = p.engFull||'';
-      xlDataRow(ws0,r,[no,tagCode,p.name,engFull,p.depFlight||'-',p.retFlight||'-',nights,p.isRep?rec.pax:'',accomEngName(rec.accom)],COL,no%2===0,{numCols:[7,8]});
-      ws0.getCell(r,2).font={bold:true,size:9,color:{argb:c.fg},name:'Meiryo'};
-      ws0.getCell(r,2).fill={type:'pattern',pattern:'solid',fgColor:{argb:c.bg}};
-      ws0.getCell(r,2).alignment={horizontal:'center',vertical:'middle'};
-      if(p.isRep) ws0.getCell(r,3).font={bold:true,size:9,color:{argb:XL.FG_ACCENT},name:'Meiryo'};
-      r++;
-    });
-  });
-
-  // ── 시트2~3: 스티커 양식 — Askul AR9-0796 라벨 (70×33.9mm, 24면) ──
-  // 배치: 3열 × 8행 = 24면/페이지
-  // 70mm ≈ 27 chars (Excel 열너비), 33.9mm ≈ 96pt (행높이)
-  const STICKER_W = 27;
-  const STICKER_H = 96;
-  const COLS_PER_ROW = 3;
-
-  // ICN/PUS 분리
-  const stickerOriginKey = (seq)=>{
-    const rec=procMap[seq]; const paxList=seqPaxMap[seq];
-    if(!rec||!paxList) return null;
-    const rawO = paxList[0]?.depFlight?.startsWith('ZE') ? '부산'
-      : paxList[0]?.origin || rec.raw?.['출발지'] || '';
-    if(rawO.includes('부산')||rawO.includes('김해')) return 'PUS';
-    if(rawO.includes('청주')) return 'CJJ';
-    return 'ICN';
-  };
-  const stickerGroups = [
-    { key:'ICN', label:'スティッカー印刷(ICN)', seqs: seqOrder.filter(seq=>stickerOriginKey(seq)==='ICN') },
-    { key:'PUS', label:'スティッカー印刷(PUS)', seqs: seqOrder.filter(seq=>stickerOriginKey(seq)==='PUS') },
-    { key:'CJJ', label:'スティッカー印刷(CJJ)', seqs: seqOrder.filter(seq=>stickerOriginKey(seq)==='CJJ') },
-  ].filter(g=>g.seqs.length>0);
-
-  stickerGroups.forEach(({key, label, seqs})=>{
-  const ws1 = wb.addWorksheet(label, {
-    pageSetup:{paperSize:9,orientation:'portrait',fitToPage:false,
-      margins:{left:0,right:0,top:0.508,bottom:0.508,header:0,footer:0}}  // Askul AR9-0796: 상하12.9mm/좌우0mm
-  });
-  // Askul AR9-0796 24면: 3열 (70mm × 3 = 210mm)
-  [1,2,3].forEach(col=>{ ws1.getColumn(col).width = STICKER_W; });
-
-  const allPax = [];
-  seqs.forEach(seq=>{
-    const rec = procMap[seq];
-    const paxList = seqPaxMap[seq];
-    if(!rec||!paxList) return;
-    const nights = rec.arr&&rec.dep ? Math.round((parseLocalDate(rec.arr)-parseLocalDate(rec.dep))/86400000) : 0;
-    const tc = tagMap[seq]||{};
-    paxList.forEach((p,i)=>{ allPax.push({p, rec, nights, tc, paxIdx:i}); });
-  });
-
-  // 3칸씩 배치
-  const BORDER_STICKER = {
-    top:{style:'thin',color:{argb:'FFCCCCCC'}},
-    left:{style:'thin',color:{argb:'FFCCCCCC'}},
-    bottom:{style:'thin',color:{argb:'FFCCCCCC'}},
-    right:{style:'thin',color:{argb:'FFCCCCCC'}}
-  };
-
-  // 스티커: 행 분리 구조 (Askul AR9-0796 70×33.9mm 24면, 칸 높이 약 96pt)
-  // 행0: 숙박지 + N박N일  (높이 10) ← 6pt 폰트
-  // 행1: 태그코드          (높이 37) ← 29pt 폰트 수용
-  // 행2: 한글 이름 + 영문   (높이 19) ← 한글 10pt
-  // 행3: IN 항공편         (높이 15)
-  // 행4: OUT 항공편        (높이 15)
-  // → 합계 96pt = 33.9mm (라벨 정확히 매칭)
-  // 페이지당 24칸(3열×8행), 세로 96pt × 8행 = 768pt = 271mm
-  // A4 세로 297mm - 상하 여백 25.8mm = 271mm 영역 → 8행이 딱 맞음
-  const ROW_H = [10, 37, 19, 15, 15];
-  const ROWS  = ROW_H.length; // 5
-
-  const BDR_T = {style:'thin', color:{argb:'FFDDDDDD'}};
-  const BDR_OUT= {style:'medium', color:{argb:'FF8BAED4'}};
-
-  allPax.forEach(({p, rec, nights, tc, paxIdx}, idx)=>{
-    const colIdx  = (idx % COLS_PER_ROW) + 1;
-    const rowBase = Math.floor(idx / COLS_PER_ROW);
-    const rStart  = rowBase * ROWS + 1;
-
-    const tagCode  = makeTagCodeSafe(tc.teamIdx||0, paxIdx, tc.accomPfx, tc.memberCode, tc.manualCode, tc.pendingMember, tc.eventSeq, tc.year);
-    const nd       = `${nights}N${nights+1}D`;
-    const c        = xlAccomColor(rec.accom);
-    const engName  = accomEngName(rec.accom);
-    const engFull  = p.engFull||'';
-    const depFmt   = rec.dep ? rec.dep.slice(5).replace('-','/') : '-';
-    const arrFmt   = rec.arr ? rec.arr.slice(5).replace('-','/') : '-';
-    const depFlight= p.depFlight||'-';
-    const retFlight= p.retFlight||'-';
-    const depPort  = depFlight.startsWith('TW')?'ICN':'PUS';
-    const retPort  = retFlight.startsWith('TW')?'ICN':'PUS';
-
-    // 행 높이 설정
-    ROW_H.forEach((h,i)=>{ ws1.getRow(rStart+i).height = h; });
-
-    const setCell = (ri, val, opts={}) => {
-      const cell = ws1.getCell(rStart+ri, colIdx);
-      cell.value = val;
-      cell.font  = {name:'Meiryo', size:opts.sz||9, bold:opts.bold||false,
-                    color:{argb:opts.fg||'FF1A2540'}};
-      cell.fill  = {type:'pattern', pattern:'solid',
-                    fgColor:{argb:opts.bg||'FFFFFFFF'}};
-      // 태그코드/한글이름은 가운데 정렬, 나머지는 왼쪽
-      const isCenter = (ri===1 || ri===2);
-      cell.alignment = {horizontal:isCenter?'center':'left', vertical:'middle',
-                        wrapText:false, indent:isCenter?0:1};
-      const isTop = ri===0, isBot = ri===ROWS-1;
-      const BDR_C = {style:'medium', color:{argb:c.fg}};
-      cell.border = {
-        top:    isTop ? BDR_C : BDR_T,
-        left:   BDR_C,
-        bottom: isBot ? BDR_C : BDR_T,
-        right:  BDR_C,
-      };
-    };
-
-    // 행0: 숙박지명 + N박N일
-    setCell(0, `${engName}   ${nd}`,
-      {sz:6, bold:true, fg:c.fg});
-
-    // 행1: 태그코드 (29pt)
-    setCell(1, tagCode,
-      {sz:29, bold:true, fg:c.fg});
-
-    // 행2: 한글 이름 + 영문명 (10pt)
-    setCell(2, `${p.name}  ${engFull?'('+engFull+')':''}`,
-      {sz:10, bold:true, fg:'FF000000'});
-
-    // 행3: IN
-    setCell(3, `IN : ${depPort}  ${depFlight}  ${depFmt}`,
-      {sz:7, bold:true, fg:'FF1A2540'});
-
-    // 행4: OUT
-    setCell(4, `OUT: ${retPort}  ${retFlight}  ${arrFmt}`,
-      {sz:7, bold:true, fg:'FF1A2540'});
-  }); // allPax.forEach 끝
-
-  // 페이지당 24면(3열×8행=24칸 = 40행)이 끝나면 페이지 구분
-  // (Excel은 자동으로 fitToPage 안 했기 때문에 행 높이 합계로 페이지가 결정됨)
-  // 각 칸 높이 96pt × 8행 = 768pt = 271mm (A4 세로 297mm - 상단12.9 - 하단12.9 = 271.2mm 안에 들어감)
-
-  }); // stickerGroups.forEach 끝
-
-  await xlSave(wb, `네임택_${dateLabel}.xlsx`);
-}
-
 
 // ── ⑦ 空港カバー 빌드 ────────────────────────────────────────
 
@@ -5631,7 +4564,7 @@ function labelPrintConfirm(){
 
 function generateAndPrintLabels(selectedDates, originFilter, startSlot, selectedAccoms){
   if(window.SB14&&SB14.log) SB14.log('print',{kind:'nametag', days:(selectedDates||[]).length});
-  // 데이터 수집 (_downloadNametag와 동일 로직, 출발지/숙소 필터 추가)
+  // 데이터 수집 (출발지/숙소 필터 적용)
   const accomSet = selectedAccoms ? new Set(selectedAccoms) : null;
   const procMap = {};
   processed.filter(r=>r.accom && (!accomSet || accomSet.has(r.accom)))
@@ -6812,308 +5745,6 @@ function printDispatch(seq){
   w.document.close();
 }
 
-// ── xlsx 다운로드 (1행사 = 1시트, 시트 내 페이지 구분으로 앞·뒤 2페이지) ──
-async function downloadDispatchXlsx(){
-  if(!processed.length || !processed.some(r => r.accom)){
-    alert('데이터가 없습니다. 먼저 파일을 분석해주세요.'); return;
-  }
-  const data = collectDispatchData().filter(dispatchPass);  // 화면 표시분만
-  if(!data.length){ alert('대상 행사가 없습니다. (검색·필터 확인)'); return; }
-  const masked = dispatchMaskOn;
-
-  const wb = new ExcelJS.Workbook();
-  wb.creator = '14hills'; wb.created = new Date();
-  const A4P = { paperSize:9, orientation:'portrait', fitToPage:true, fitToWidth:1, fitToHeight:0, margins:{left:0.35,right:0.35,top:0.4,bottom:0.4,header:0,footer:0} };
-  const FONT = 'Yu Gothic';
-  const BD = {style:'thin', color:{argb:'FF555555'}};
-  const B4 = {top:BD, left:BD, bottom:BD, right:BD};
-  const TH_BG = {type:'pattern', pattern:'solid', fgColor:{argb:'FFF0F2F6'}};
-
-  // 셀 헬퍼
-  const put = (ws, r, c, v, o={}) => {
-    const x = ws.getCell(r, c);
-    x.value = v;
-    if(!o.noBorder) x.border = B4;
-    x.font = {name:FONT, size:o.sz||9, bold:!!o.b, color:{argb:o.fg||'FF1A2030'}};
-    x.alignment = {horizontal:o.h||'left', vertical:'middle', wrapText:!!o.wrap};
-    if(o.th){ x.fill = TH_BG; x.font = {name:FONT, size:o.sz||8.5, bold:true, color:{argb:'FF1A2030'}}; if(!o.h) x.alignment.horizontal='center'; }
-    return x;
-  };
-  // 한 행 전체에 테두리만 (병합 전 처리)
-  const borderRow = (ws, r, c1, c2) => { for(let c=c1; c<=c2; c++){ ws.getCell(r,c).border = B4; } };
-
-  // ── ① 인쇄 안내 시트 ──
-  const guideWs = wb.addWorksheet('🖨 인쇄 안내', {
-    pageSetup:{paperSize:9, orientation:'portrait', fitToPage:true, fitToWidth:1, fitToHeight:1, margins:{left:0.5,right:0.5,top:0.5,bottom:0.5,header:0,footer:0}}
-  });
-  guideWs.getColumn(1).width = 86;
-  guideWs.getRow(1).height = 30;
-  const gT = guideWs.getCell(1,1);
-  gT.value = '📋 現地手配書 인쇄 안내';
-  gT.font = {name:FONT, size:16, bold:true};
-  gT.alignment = {horizontal:'left', vertical:'middle'};
-  const guideLines = [
-    '',
-    `✓ 1행사 = 1시트, 시트 내부에서 앞면(手配書) / 뒷면(現地発生分 記入表) 2페이지로 자동 분리됩니다.`,
-    `✓ 총 ${data.length}행사 · 개인정보 마스킹 ${masked ? 'ON (생년월일까지 표기)' : 'OFF (여권번호·전화번호 포함)'}`,
-    '',
-    '【인쇄 방법 — 전체 일괄】',
-    '  1. Ctrl + P (또는 파일 → 인쇄) 를 누릅니다.',
-    '  2. "전체 통합 문서 인쇄"를 선택합니다.',
-    '  3. 프린터 설정에서 양면 인쇄(긴 가장자리 제본)를 선택 후 인쇄합니다.',
-    '  4. 모든 시트가 짝수(2) 페이지이므로 행사별 앞·뒤가 자동으로 맞춰집니다.',
-    '',
-    '【인쇄 방법 — 개별 행사】',
-    '  · 해당 시트 탭 선택 → Ctrl + P → "활성 시트 인쇄" → 양면 인쇄.',
-    '',
-    '【설정 확인 (이미 설정됨)】',
-    '  · 용지: A4 / 방향: 세로 / 배율: 가로 한 페이지에 맞추기',
-    '',
-    '【뒷면 記入表 사용법】',
-    '  · 현지에서 발생한 추가 항목(라운딩 추가 · EV카트 · 식음료 · 연박 · 송영 · 기타)을 손으로 기입합니다.',
-    '  · 정산 시 운영 앱의 ⑤ 現地精算表에 반영하세요.',
-  ];
-  guideLines.forEach((line, i) => {
-    const r = i + 2;
-    guideWs.getRow(r).height = 18;
-    const c = guideWs.getCell(r, 1);
-    c.value = line;
-    c.font = {name:FONT, size:11, bold: line.startsWith('【') || line.startsWith('✓'), color:{argb:'FF333333'}};
-    c.alignment = {horizontal:'left', vertical:'middle'};
-  });
-
-  // ── ② 행사별 시트 ──
-  // 열 폭 (고객 표 10열 기준; 다른 표는 병합으로 대응)
-  const COLW = [4.5, 7, 11, 11, 13, 5.5, 12, 13, 14, 12];
-  const usedNames = new Set(['🖨 인쇄 안내']);
-
-  data.forEach(d => {
-    const rec = d.rec;
-    let base = `${(rec.dep||'').slice(5)} ${rec.repName||d.seq}`.replace(/[\\\/\?\*\[\]:'"]/g,'').slice(0,27) || d.seq;
-    let nm = base, k = 2;
-    while(usedNames.has(nm)){ nm = base.slice(0,24) + '(' + (k++) + ')'; }
-    usedNames.add(nm);
-
-    const ws = wb.addWorksheet(nm, {pageSetup:A4P});
-    COLW.forEach((w,i) => { ws.getColumn(i+1).width = w; });
-
-    let r = 1;
-
-    // ── 앞면: 手配書 ──
-    ws.getRow(r).height = 26;
-    ws.mergeCells(r,1,r,6);
-    put(ws, r, 1, '現地手配書', {sz:16, b:true, fg:'FF1E3A5F', noBorder:true});
-    ws.mergeCells(r,7,r,10);
-    put(ws, r, 7, d.tagCode, {sz:15, b:true, h:'right', fg:'FF1E3A5F', noBorder:true});
-    r++;
-    ws.getRow(r).height = 14;
-    ws.mergeCells(r,1,r,6);
-    put(ws, r, 1, `イベント番号 ${rec.eventNo||'-'} ・ ${d.prodName}`, {sz:8.5, fg:'FF555555', noBorder:true});
-    ws.mergeCells(r,7,r,10);
-    put(ws, r, 7, `発行日 ${today()} ・ 14hills運営システム`, {sz:8, h:'right', fg:'FF777777', noBorder:true});
-    r += 2;
-
-    // 개요 (라벨 A / 값 B:E 병합 / 라벨 F / 값 G:J 병합 — 2열 4행)
-    const ov = [
-      ['出発日', `${rec.dep||''} ${getWD(rec.dep)}`, '到着日', `${rec.arr||''} ${getWD(rec.arr)}`],
-      ['期間',   `${rec.nights}泊${Number(rec.nights)+1}日`, '人数', `${rec.pax}名`],
-      ['代表者', rec.repName||'-', '会員権区分', rec.memberType||'-'],
-      ['出発地', `${d.port} (${d.portName})`, 'チーム', rec.teamName||'-'],
-    ];
-    ov.forEach(row => {
-      ws.getRow(r).height = 18;
-      borderRow(ws, r, 1, 10);
-      put(ws, r, 1, row[0], {th:true});
-      ws.mergeCells(r,2,r,5); put(ws, r, 2, row[1], {h:'center', b: row[0]==='代表者'||row[0]==='人数'});
-      put(ws, r, 6, row[2], {th:true});
-      ws.mergeCells(r,7,r,10); put(ws, r, 7, row[3], {h:'center'});
-      r++;
-    });
-    r++;
-
-    // 항공정보
-    ws.getRow(r).height = 16;
-    ws.mergeCells(r,1,r,10);
-    put(ws, r, 1, '✈ 航空情報', {b:true, sz:10, fg:'FF1E3A5F', noBorder:true});
-    r++;
-    ws.getRow(r).height = 16; borderRow(ws, r, 1, 10);
-    ws.mergeCells(r,1,r,2); put(ws, r, 1, '区分', {th:true});
-    put(ws, r, 3, '便名', {th:true});
-    put(ws, r, 4, '日付', {th:true});
-    put(ws, r, 5, '出発時間', {th:true});
-    ws.mergeCells(r,6,r,7); put(ws, r, 6, '出発地', {th:true});
-    put(ws, r, 8, '到着地', {th:true});
-    ws.mergeCells(r,9,r,10); put(ws, r, 9, '到着時間', {th:true});
-    r++;
-    [['往路', d.depFlight||'-', rec.dep||'', d.depTime, d.portName, '中部(NGO)', d.locArrTime],
-     ['復路', d.retFlight||'-', rec.arr||'', d.retTime, '中部(NGO)', d.portName, d.korArrTime||'']].forEach(row => {
-      ws.getRow(r).height = 17; borderRow(ws, r, 1, 10);
-      ws.mergeCells(r,1,r,2); put(ws, r, 1, row[0], {h:'center'});
-      put(ws, r, 3, row[1], {h:'center', b:true});
-      put(ws, r, 4, row[2], {h:'center'});
-      put(ws, r, 5, row[3], {h:'center'});
-      ws.mergeCells(r,6,r,7); put(ws, r, 6, row[4], {h:'center'});
-      put(ws, r, 8, row[5], {h:'center'});
-      ws.mergeCells(r,9,r,10); put(ws, r, 9, row[6], {h:'center'});
-      r++;
-    });
-    r++;
-
-    // 숙박정보
-    ws.getRow(r).height = 16;
-    ws.mergeCells(r,1,r,10);
-    put(ws, r, 1, '🏨 宿泊情報', {b:true, sz:10, fg:'FF1E3A5F', noBorder:true});
-    r++;
-    ws.getRow(r).height = 16; borderRow(ws, r, 1, 10);
-    ws.mergeCells(r,1,r,3); put(ws, r, 1, '施設', {th:true});
-    ws.mergeCells(r,4,r,5); put(ws, r, 4, '部屋タイプ', {th:true});
-    put(ws, r, 6, 'チェックイン', {th:true, sz:7.5});
-    put(ws, r, 7, 'チェックアウト', {th:true, sz:7.5});
-    put(ws, r, 8, '泊数', {th:true});
-    ws.mergeCells(r,9,r,10); put(ws, r, 9, '部屋数', {th:true});
-    r++;
-    ws.getRow(r).height = 18; borderRow(ws, r, 1, 10);
-    ws.mergeCells(r,1,r,3); put(ws, r, 1, d.accomJp, {h:'center', b:true});
-    ws.mergeCells(r,4,r,5); put(ws, r, 4, dispatchRoomTypeJp(rec.roomType), {h:'center'});
-    put(ws, r, 6, rec.dep||'', {h:'center'});
-    put(ws, r, 7, rec.arr||'', {h:'center'});
-    put(ws, r, 8, `${rec.nights}泊`, {h:'center'});
-    ws.mergeCells(r,9,r,10); put(ws, r, 9, d.roomCnt, {h:'center'});
-    r++;
-    r++;
-
-    // 고객정보
-    ws.getRow(r).height = 16;
-    ws.mergeCells(r,1,r,10);
-    put(ws, r, 1, `👤 顧客情報${masked ? '  🔒 個人情報保護 — 生年月日まで表記' : ''}`, {b:true, sz:10, fg:'FF1E3A5F', noBorder:true});
-    r++;
-    ws.getRow(r).height = 16; borderRow(ws, r, 1, 10);
-    put(ws, r, 1, 'No', {th:true});
-    put(ws, r, 2, '区分', {th:true});
-    put(ws, r, 3, '氏名', {th:true});
-    put(ws, r, 4, '英文姓', {th:true});
-    put(ws, r, 5, '英文名', {th:true});
-    put(ws, r, 6, '性別', {th:true});
-    put(ws, r, 7, '生年月日', {th:true});
-    if(masked){
-      ws.mergeCells(r,8,r,10); put(ws, r, 8, '備考', {th:true});
-    } else {
-      put(ws, r, 8, '旅券番号', {th:true});
-      put(ws, r, 9, '電話番号', {th:true});
-      put(ws, r, 10, '備考', {th:true});
-    }
-    r++;
-    if(d.paxList.length){
-      d.paxList.forEach((p, i) => {
-        ws.getRow(r).height = 17; borderRow(ws, r, 1, 10);
-        const g = (p.gender==='M'||p.gender==='남') ? '男' : (p.gender==='F'||p.gender==='여') ? '女' : (p.gender||'');
-        put(ws, r, 1, i+1, {h:'center'});
-        put(ws, r, 2, p.isRep ? '代表' : '', {h:'center', b:true});
-        put(ws, r, 3, p.name||'', {b:true});
-        put(ws, r, 4, p.engSur||'');
-        put(ws, r, 5, p.engGiven||'');
-        put(ws, r, 6, g, {h:'center'});
-        put(ws, r, 7, p.bday||'', {h:'center'});
-        if(masked){
-          ws.mergeCells(r,8,r,10); put(ws, r, 8, '');
-        } else {
-          put(ws, r, 8, p.passport||'', {h:'center'});
-          put(ws, r, 9, p.phone||'', {h:'center'});
-          put(ws, r, 10, '');
-        }
-        r++;
-      });
-    } else {
-      ws.getRow(r).height = 17; borderRow(ws, r, 1, 10);
-      ws.mergeCells(r,1,r,10);
-      put(ws, r, 1, `名簿未登録 — 代表: ${rec.repName||'-'} 計${rec.pax}名`, {h:'center', fg:'FF777777'});
-      r++;
-    }
-    r++;
-
-    // 골프 정보 (코스만; 일자별 라운드 상세는 향후 별도 골프 수배서)
-    ws.getRow(r).height = 16;
-    ws.mergeCells(r,1,r,10);
-    put(ws, r, 1, '⛳ ゴルフ情報', {b:true, sz:10, fg:'FF1E3A5F', noBorder:true});
-    r++;
-    ws.getRow(r).height = 17; borderRow(ws, r, 1, 10);
-    ws.mergeCells(r,1,r,3); put(ws, r, 1, 'ゴルフ場', {th:true});
-    ws.mergeCells(r,4,r,10); put(ws, r, 4, dispatchCourseSummary(d), {b:true});
-    r++;
-    r++;
-
-    // 参考事項
-    ws.getRow(r).height = 16;
-    ws.mergeCells(r,1,r,10);
-    put(ws, r, 1, '📝 参考事項', {b:true, sz:10, fg:'FF1E3A5F', noBorder:true});
-    r++;
-    ws.getRow(r).height = 56; borderRow(ws, r, 1, 10);
-    ws.mergeCells(r,1,r,10);
-    const noteSegs = dispatchNoteSegments(rec, d.memo);
-    put(ws, r, 1, noteSegs.length
-      ? { richText: noteSegs.map(s => ({ text:s.t, font:{name:FONT, size:9, bold:s.b, color:{argb:'FF1A2030'}} })) }
-      : '', {wrap:true});
-
-    // ── 페이지 구분: 앞면 끝 ──
-    ws.getRow(r).addPageBreak();
-    r += 2;
-
-    // ── 뒷면: 現地発生分 記入表 ──
-    ws.getRow(r).height = 24;
-    ws.mergeCells(r,1,r,6);
-    put(ws, r, 1, '現地発生分 記入表', {sz:14, b:true, fg:'FF1E3A5F', noBorder:true});
-    ws.mergeCells(r,7,r,10);
-    put(ws, r, 7, d.tagCode, {sz:13, b:true, h:'right', fg:'FF1E3A5F', noBorder:true});
-    r++;
-    ws.getRow(r).height = 14;
-    ws.mergeCells(r,1,r,10);
-    put(ws, r, 1, `イベント番号 ${rec.eventNo||'-'} ・ 代表 ${rec.repName||'-'} ・ ${(rec.dep||'').slice(5)}〜${(rec.arr||'').slice(5)} ・ ${rec.pax}名`, {sz:8.5, fg:'FF555555', noBorder:true});
-    r++;
-    ws.getRow(r).height = 16; borderRow(ws, r, 1, 10);
-    ws.mergeCells(r,1,r,10);
-    put(ws, r, 1, '区分: ① ラウンド追加  ② 飲食  ③ 延泊  ④ 送迎  ⑤ その他 — 該当番号に○', {th:true, h:'left', sz:9});
-    r++;
-
-    // 기입표 헤더: 日付 A:B / 区分 C / 内容 D:F / 数量 G / 単価 H / 金額 I / 担当 J
-    ws.getRow(r).height = 16; borderRow(ws, r, 1, 10);
-    ws.mergeCells(r,1,r,2); put(ws, r, 1, '日付', {th:true});
-    put(ws, r, 3, '区分', {th:true});
-    ws.mergeCells(r,4,r,6); put(ws, r, 4, '内容', {th:true});
-    put(ws, r, 7, '数量', {th:true});
-    put(ws, r, 8, '単価(¥)', {th:true});
-    put(ws, r, 9, '金額(¥)', {th:true});
-    put(ws, r, 10, '担当', {th:true});
-    r++;
-    for(let i=0; i<12; i++){
-      ws.getRow(r).height = 34; borderRow(ws, r, 1, 10);
-      ws.mergeCells(r,1,r,2); put(ws, r, 1, '');
-      put(ws, r, 3, '①②③④⑤⑥', {h:'center', sz:7.5, fg:'FF888888'});
-      ws.mergeCells(r,4,r,6); put(ws, r, 4, '');
-      put(ws, r, 7, ''); put(ws, r, 8, ''); put(ws, r, 9, ''); put(ws, r, 10, '');
-      r++;
-    }
-    // 합계
-    ws.getRow(r).height = 24; borderRow(ws, r, 1, 10);
-    ws.mergeCells(r,1,r,8);
-    put(ws, r, 1, '合計', {th:true, h:'right', sz:11});
-    put(ws, r, 9, '', {b:true});
-    put(ws, r, 10, '', {th:true});
-    r += 2;
-    // 확인란
-    ws.getRow(r).height = 30; borderRow(ws, r, 1, 10);
-    ws.mergeCells(r,1,r,2); put(ws, r, 1, '記入者(現場)', {th:true});
-    ws.mergeCells(r,3,r,4); put(ws, r, 3, '');
-    ws.mergeCells(r,5,r,6); put(ws, r, 5, '確認者', {th:true});
-    put(ws, r, 7, '');
-    put(ws, r, 8, '記入日', {th:true});
-    ws.mergeCells(r,9,r,10); put(ws, r, 9, '　　年　月　日', {h:'center', fg:'FF888888'});
-  });
-
-  const maskTag = masked ? '' : '_全体表記';
-  await xlSave(wb, `現地手配書${maskTag}_${today()}.xlsx`);
-}
-
-
 // ── ⑧ 現地予約 빌드 ─────────────────────────────────────
 function buildLocal(){
   const thead = document.getElementById('local-thead');
@@ -7178,56 +5809,6 @@ function buildLocal(){
       <td style="text-align:right;font-family:var(--mono)">${r.amount?'¥'+r.amount.toLocaleString():'-'}</td>
     </tr>`;
   }).join('');
-}
-
-async function downloadLocal(){
-  if(!localBookings.length){
-    alert('現地予約 데이터가 없습니다.');
-    return;
-  }
-  const wb = new ExcelJS.Workbook();
-  wb.creator = '14hills'; wb.created = new Date();
-
-  const sorted = [...localBookings].sort((a,b)=>
-    (a.dep||'').localeCompare(b.dep||'') ||
-    (a.arr||'').localeCompare(b.arr||'') ||
-    (a.repName||'').localeCompare(b.repName||'')
-  );
-
-  const A4L = { paperSize:9, orientation:'landscape', fitToPage:true, fitToWidth:1, fitToHeight:0, margins:{left:0.5,right:0.5,top:0.5,bottom:0.5,header:0,footer:0} };
-  const COL = HDRS.LOCAL.length; // 12
-  const ws = wb.addWorksheet('現地予約', { views:[{state:'frozen',ySplit:3}], pageSetup:A4L });
-  xlColWidths(ws, [5,8,12,18,28,11,11,7,7,7,20,14]);
-  xlTitle(ws, 1, '現地予約 リスト  ' + today(), COL);
-  xlHeader(ws, 2, HDRS.LOCAL);
-
-  let r=3;
-  sorted.forEach((rec,i)=>{
-    xlDataRow(ws, r, [
-      i+1,
-      rec.status||'-',
-      rec.eventNo||'-',
-      rec.repName||'-',
-      rec.prodName||'-',
-      rec.dep||'-',
-      rec.arr||'-',
-      rec.nights ? rec.nights+'박' : '-',
-      rec.pax||0,
-      rec.cancCnt||0,
-      rec.remark||'',
-      rec.amount||0
-    ], COL, i%2===0, {numCols:[9,10,12], numFmt:'#,##0', boldCols:[4]});
-    // 区分 셀 색상
-    { const sc=xlStatusColor(rec.status||'견적'); const sc2=ws.getCell(r,2); sc2.font={bold:true,size:9,color:{argb:sc.fg},name:'Meiryo'}; sc2.fill={type:'pattern',pattern:'solid',fgColor:{argb:sc.bg}}; sc2.alignment={horizontal:'center',vertical:'middle'}; }
-    r++;
-  });
-
-  const totalPax = sorted.reduce((a,x)=>a+(x.pax||0),0);
-  const totalCanc = sorted.reduce((a,x)=>a+(x.cancCnt||0),0);
-  const totalAmt = sorted.reduce((a,x)=>a+(x.amount||0),0);
-  xlTotalRow(ws, r, ['','','','合計','','','','', totalPax, totalCanc, '', totalAmt], COL);
-
-  await xlSave(wb, `現地予約_${today()}.xlsx`);
 }
 
 function gotoSection(name){
