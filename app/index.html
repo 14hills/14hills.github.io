@@ -822,6 +822,7 @@ let arrivalMap = {};    // eventSeq → {engFull, memberType, memberNo, eventNo}
 // merit_sessions_index: ['2025-03','2025-05', ...] 전체 목록
 
 let currentSession = null;  // 현재 활성 세션 'YYYY-MM'
+let monthData = {};         // 이번 분석에 포함된 월별 스냅샷: ym → {processed, passengers} (멀티월 한 번에 업로드 대응)
 
 const SESSION_INDEX_KEY = 'merit_sessions_index';
 function getSessionIndex(){ try{ const d=localStorage.getItem(SESSION_INDEX_KEY); return d?JSON.parse(d):[]; }catch(e){ return []; } }
@@ -925,6 +926,38 @@ function activateSession(ym){
   renderSessionBar();
 }
 
+// 출발월(YYYY-MM)
+function _ymOf(d){ return String(d||'').slice(0,7); }
+// 특정 월의 수기입력/차감 (활성월은 메모리, 그 외는 localStorage)
+function _manualFor(ym){ if(ym===currentSession) return manualData; try{ return JSON.parse(localStorage.getItem(manualKeyOf(ym))||'{}'); }catch(e){ return {}; } }
+function _dedFor(ym){ if(ym===currentSession) return deductions; try{ return JSON.parse(localStorage.getItem(dedKeyOf(ym))||'[]'); }catch(e){ return []; } }
+
+// 멀티월 분리: 분석된 processed/passengers를 출발월별로 나눠 monthData에 저장하고
+//  모든 월을 세션 인덱스에 등록. 화면은 활성 월(현 세션 우선, 없으면 가장 이른 달)만 표시.
+//  반환: 감지된 월 배열(정렬)
+function buildMonthSessions(){
+  const months = [...new Set(processed.map(r=>_ymOf(r.dep)).filter(Boolean))].sort();
+  monthData = {};
+  months.forEach(m=>{
+    monthData[m] = {
+      processed:  processed.filter(r=>_ymOf(r.dep)===m),
+      passengers: (typeof passengers!=='undefined'?passengers:[]).filter(p=>_ymOf(p.dep)===m)
+    };
+  });
+  // 한 번에 올린 모든 월을 세션 인덱스에 등록(전부 인식되게)
+  const idx = getSessionIndex();
+  months.forEach(m=>{ if(!idx.includes(m)) idx.push(m); });
+  saveSessionIndex(idx);
+  // 활성 월: 현재 세션이 이번 분석에 포함되면 유지, 아니면 가장 이른 달
+  const active = (currentSession && months.includes(currentSession)) ? currentSession : (months[0]||currentSession);
+  if(active && monthData[active]){
+    processed  = monthData[active].processed;
+    passengers = monthData[active].passengers;
+    activateSession(active);
+  }
+  return months;
+}
+
 // 세션 삭제
 function deleteSession(ym, e){
   e.stopPropagation();
@@ -979,23 +1012,33 @@ function _cloudDt(s){ if(!s) return ''; try{ const d=new Date(s); const p=n=>Str
 
 async function cloudSaveSession(){
   if(!_sbReady()){ _cloudToast('클라우드 연결이 없습니다. 로그인을 확인하세요.', true); return; }
-  if(!currentSession || !processed || !processed.length){ _cloudToast('저장할 세션이 없습니다. 먼저 파일을 분석하세요.', true); return; }
+  // 멀티월이면 분석된 전 월을 저장(없으면 현재 세션 1개)
+  const targets = (monthData && Object.keys(monthData).length) ? Object.keys(monthData).sort() : (currentSession ? [currentSession] : []);
+  if(!targets.length || !processed || !processed.length){ _cloudToast('저장할 세션이 없습니다. 먼저 파일을 분석하세요.', true); return; }
   const btn = document.getElementById('btn-cloud-save'); const old = btn?btn.textContent:'';
   if(btn){ btn.disabled=true; btn.textContent='저장 중…'; }
   try{
     const c = SB14.client();
     let email=''; try{ const m=await SB14.me(); email=(m&&m.email)||''; }catch(e){}
-    const snap = { v:1, processed: processed, passengers: (typeof passengers!=='undefined'?passengers:[]), manualData: manualData, deductions: deductions };
-    const payload = {
-      ym: currentSession, data: snap,
-      groups: processed.filter(r=>r.accom).length,
-      pax: processed.reduce((s,r)=>s+(Number(r.pax)||0),0),
-      updated_email: email, updated_at: new Date().toISOString()
-    };
-    const { error } = await c.from('sessions').upsert(payload, { onConflict:'ym' });
-    if(error){ _cloudToast('클라우드 저장 실패: '+error.message, true); return; }
-    if(window.SB14&&SB14.log) SB14.log('cloud_save',{ym:currentSession, groups:payload.groups, pax:payload.pax});
-    _cloudToast('☁ '+currentSession+' 세션을 클라우드에 저장했습니다.');
+    const nowIso = new Date().toISOString();
+    let ok=0, failMsg='';
+    for(const ym of targets){
+      const md = monthData[ym];
+      const pr = md ? md.processed : processed;
+      const px = md ? md.passengers : (typeof passengers!=='undefined'?passengers:[]);
+      const snap = { v:1, processed: pr, passengers: px, manualData: _manualFor(ym), deductions: _dedFor(ym) };
+      const payload = {
+        ym, data: snap,
+        groups: pr.filter(r=>r.accom).length,
+        pax: pr.reduce((s,r)=>s+(Number(r.pax)||0),0),
+        updated_email: email, updated_at: nowIso
+      };
+      const { error } = await c.from('sessions').upsert(payload, { onConflict:'ym' });
+      if(error){ failMsg = error.message; } else { ok++; }
+    }
+    if(window.SB14&&SB14.log) SB14.log('cloud_save',{months:targets.length, saved:ok});
+    if(ok) _cloudToast('☁ '+ok+'개월 세션을 클라우드에 저장했습니다'+(targets.length>1?' ('+targets.join(', ')+')':'')+'.');
+    if(failMsg) _cloudToast('일부 저장 실패: '+failMsg, true);
     try{ renderCloudDataBar(); }catch(e){}
   } finally { if(btn){ btn.disabled=false; btn.textContent=old; } }
 }
@@ -1068,6 +1111,7 @@ async function cloudLoadSession(ym){
   manualData  = (snap.manualData && typeof snap.manualData==='object') ? snap.manualData : {};
   deductions  = Array.isArray(snap.deductions)  ? snap.deductions  : [];
   currentSession = ym;
+  monthData = {};   // 클라우드 단일월 로드 → 메모리상 멀티월 캐시 무효화
   // 로컬에도 반영(세션 인덱스·수기·차감)
   const idx = getSessionIndex(); if(!idx.includes(ym)){ idx.push(ym); saveSessionIndex(idx); }
   try{ localStorage.setItem(manualKeyOf(ym), JSON.stringify(manualData)); }catch(e){}
@@ -1088,6 +1132,22 @@ async function cloudLoadSession(ym){
 // 세션 전환 (저장된 세션으로 수기 데이터만 전환)
 function switchSession(ym){
   if(ym === currentSession) return;
+  // 이번 분석에 포함된 월이면 재업로드 없이 즉시 데이터 전환
+  if(monthData && monthData[ym]){
+    if(currentSession){ saveManual(); saveDed(); }
+    processed  = monthData[ym].processed;
+    passengers = monthData[ym].passengers;
+    activateSession(ym);
+    teamColorMap = {}; teamColorIdx = 0;
+    if(typeof applyTeamTags==='function') applyTeamTags();
+    ['nametag','dispatch','dinner','settle','transfer'].forEach(t =>{
+      const el = document.getElementById('nav-'+t); if(el) el.classList.remove('locked');
+    });
+    const eb = document.getElementById('session-switch-banner'); if(eb) eb.remove();
+    renderAll();
+    gotoSection('nametag');
+    return;
+  }
   activateSession(ym);
   // ファイルアップロード 탭으로 이동 + 안내 배너 표시
   ['nametag','dispatch','dinner','settle','transfer'].forEach(t =>{
@@ -1724,6 +1784,12 @@ function analyze(){
       if(av.eventNo   && av.eventNo   !== '-') p.eventNo   = av.eventNo;
     }
   });
+
+  // ── 멀티월 분리: 출발월별로 세션 등록 + 활성 월만 화면에 표시 ──
+  const _months = buildMonthSessions();
+  if(_months.length > 1){
+    _cloudToast('📅 '+_months.length+'개월('+_months.join(', ')+') 데이터를 월별 세션으로 분리 등록했습니다. 상단 세션바에서 월을 전환하세요.');
+  }
 
   // 탭 잠금 해제 (14hills: 네임택·수배서·저녁·정산 4탭만)
   ['nametag','dispatch','dinner','settle','transfer'].forEach(t =>{
@@ -6095,7 +6161,7 @@ document.body.classList.add('light');
 
 function resetApp(){
   if(!confirm('초기화하면 업로드한 데이터와 수기 입력이 모두 삭제됩니다.\n그룹코드 참조테이블은 유지됩니다. 계속하시겠어요?')) return;
-  resData=null; resMerged=[]; resPending=0; resFileCount=0; ilhaengData=null; ilhaengMerged=[]; ilhaengPending=0; ilhaengFileCount=0; arrivalData=null; arrivalMerged=[]; arrivalPending=0; arrivalFileCount=0; arrivalMap={}; processed=[]; localBookings=[]; passengers=[]; manualData={}; Object.keys(dragHistory).forEach(k=>delete dragHistory[k]);
+  resData=null; resMerged=[]; resPending=0; resFileCount=0; ilhaengData=null; ilhaengMerged=[]; ilhaengPending=0; ilhaengFileCount=0; arrivalData=null; arrivalMerged=[]; arrivalPending=0; arrivalFileCount=0; arrivalMap={}; processed=[]; localBookings=[]; passengers=[]; manualData={}; monthData={}; Object.keys(dragHistory).forEach(k=>delete dragHistory[k]);
   ['inp1','inp2'].forEach(id=>{const el=document.getElementById(id);if(el)el.value='';});
   ['dot1','dot2'].forEach(id=>{const el=document.getElementById(id);if(el)el.classList.add('empty');});
   ['drop1','drop2'].forEach(id=>{const el=document.getElementById(id);if(el)el.classList.remove('uploaded');});
