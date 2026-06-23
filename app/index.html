@@ -1097,6 +1097,18 @@ async function renderCloudDataBar(){
   bar.style.display = 'flex';
 }
 
+// 다른 PC/새 사용자: 화면에 데이터가 없으면 가장 최근(최종 수정) 세션을 자동 불러오기
+async function autoLoadLatestSession(){
+  if(!_sbReady()) return;
+  if(processed && processed.length) return;   // 이미 작업 중이면 건드리지 않음
+  try{
+    const c = SB14.client();
+    const { data, error } = await c.from('sessions').select('ym,updated_at').order('updated_at',{ascending:false}).limit(1);
+    if(error || !data || !data.length) return;
+    await cloudLoadSession(data[0].ym);
+  }catch(e){}
+}
+
 async function cloudLoadSession(ym){
   if(!_sbReady()) return;
   const c = SB14.client();
@@ -1790,6 +1802,8 @@ function analyze(){
   if(_months.length > 1){
     _cloudToast('📅 '+_months.length+'개월('+_months.join(', ')+') 데이터를 월별 세션으로 분리 등록했습니다. 상단 세션바에서 월을 전환하세요.');
   }
+  // 분석 결과를 클라우드에 자동 저장(로그인 상태일 때 전 월 저장 → 다른 PC에서 바로 보임)
+  if(_sbReady()){ try{ cloudSaveSession(); }catch(e){} }
 
   // 탭 잠금 해제 (14hills: 네임택·수배서·저녁·정산 4탭만)
   ['nametag','dispatch','dinner','settle','transfer'].forEach(t =>{
@@ -6322,6 +6336,7 @@ function resetApp(){
       statusBtn(acc);
       if(acc){ applyAreaGate(acc);
         try{ renderCloudDataBar(); }catch(e){}
+        try{ autoLoadLatestSession(); }catch(e){}
         if(acc.role==='admin'){ var b=document.getElementById('sb-status-btn'); if(b && !document.getElementById('sb-admin-link')){ var a=document.createElement('a'); a.id='sb-admin-link'; a.href='../admin/'; a.className='ghost-btn'; a.textContent='⚙ 관리'; a.style.marginLeft='4px'; a.title='마스터 관리 페이지'; b.parentNode.insertBefore(a,b.nextSibling); } }
       }
     });
