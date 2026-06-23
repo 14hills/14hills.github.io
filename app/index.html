@@ -186,6 +186,8 @@ tr:hover td{background:var(--surface2)}
 .tr-section td{background:var(--surface3)!important;font-weight:700;font-size:10px;color:var(--text2)}
 .num{text-align:right;font-family:var(--mono)}
 .num-center{text-align:center;font-family:var(--mono)}
+/* 비고·현지비고 칸 — 내용 다 보이게 넉넉히(표는 가로 스크롤 허용) */
+.bigo-col{min-width:200px;max-width:320px;white-space:normal;font-size:10px;color:var(--text2);vertical-align:top;line-height:1.45}
 
 /* ════════════════════════════════════════════════════════════════ */
 /* 컬럼 정렬 통일 — 헤더와 값 정렬 일치 (식별 코드/숫자: center, 텍스트: left, 금액: right) */
@@ -1819,8 +1821,8 @@ function buildSettle(){
       <td class="num">${r.transport?'¥'+r.transport.toLocaleString():'-'}</td>
       <td class="num" style="font-weight:700;color:var(--accent2)">${r.total?'¥'+r.total.toLocaleString():'-'}</td>
       <td><input class="editable wide" value="${rem}" onchange="saveField('${k}','remarks',this.value)" placeholder="비고"></td>
-      <td style="font-size:10px;color:var(--text2)">${(r.raw&&r.raw['비고'])||''}</td>
-      <td style="font-size:10px;color:var(--text2)">${(r.raw&&r.raw['현지 비고'])||''}</td>
+      <td class="bigo-col">${(r.raw&&r.raw['비고'])||''}</td>
+      <td class="bigo-col">${(r.raw&&r.raw['현지 비고'])||''}</td>
     </tr>`;
   }).join('');
   document.getElementById('settle-tbody').innerHTML = rows +
@@ -2504,8 +2506,8 @@ function renderDinner(date){
         <td class="num-center"><strong>${p.isExtra?(p.pax||1):(teamRec.pax||'')}</strong></td>
         <td><input class="editable narrow" value="${md.table||''}" onchange="saveField('${k}','table',this.value)" placeholder="T-1"></td>
         <td><input class="editable wide" value="${md.remarks||''}" onchange="saveField('${k}','remarks',this.value)" placeholder="参考事項 · メモ"></td>
-        <td style="font-size:10px;color:var(--text2)">${p.isExtra?'':((teamRec.raw&&teamRec.raw['비고'])||'')}</td>
-        <td style="font-size:10px;color:var(--text2)">${p.isExtra?'':((teamRec.raw&&teamRec.raw['현지 비고'])||'')}</td>
+        <td class="bigo-col">${p.isExtra?'':((teamRec.raw&&teamRec.raw['비고'])||'')}</td>
+        <td class="bigo-col">${p.isExtra?'':((teamRec.raw&&teamRec.raw['현지 비고'])||'')}</td>
         <td style="text-align:center">${actionCell}</td>
       </tr>`;
     });
