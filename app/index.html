@@ -518,8 +518,11 @@ tr.draggable-row td:first-child::before{content:'⠿';color:var(--text3);margin-
   </div>
   <div class="card">
     <div class="card-title">Transfer Assignment Sheet — 送迎配車表</div>
-    <div class="btn-row" style="margin-top:0;margin-bottom:.75rem">
+    <div class="btn-row" style="margin-top:0;margin-bottom:.75rem;align-items:center;gap:8px;flex-wrap:wrap">
       <button class="btn-dl" onclick="downloadTransfer()">⬇ 送迎配車表 다운로드</button>
+      <label style="font-size:11px;color:var(--text2);display:inline-flex;align-items:center;gap:4px">정원 <input id="bus-cap" type="number" value="45" min="1" style="width:52px;padding:4px 6px;border:1px solid var(--border);border-radius:5px;text-align:center;font-size:12px"></label>
+      <label style="font-size:11px;color:var(--text2);display:inline-flex;align-items:center;gap:4px">출발시간 <input id="bus-deptime" type="text" value="07:00" style="width:58px;padding:4px 6px;border:1px solid var(--border);border-radius:5px;text-align:center;font-size:12px"></label>
+      <button class="btn-dl" onclick="printBoardingList()" style="background:var(--green-dim);color:var(--green2);border-color:var(--green)">🖨 탑승명단 A3 인쇄</button>
       <button class="btn-undo" id="undo-btn-transfer-top" onclick="undoTransfer()" title="되돌릴 내용 없음">↩ 되돌리기</button>
     </div>
     <div id="transfer-date-filter" class="date-filter"></div>
@@ -9417,6 +9420,87 @@ function resetApp(){
   }
   if(document.readyState==='loading') document.addEventListener('DOMContentLoaded',boot); else boot();
 })();
+</script>
+
+<!-- ── 송영 탑승명단 A3 인쇄 (차량별·기사용) ──────────────────── -->
+<script>
+// 귀국(출국)일별 그룹 → 정원 기준 호차 자동분할 → A3 인쇄
+function _blEsc(s){return String(s==null?'':s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));}
+function _blFlightColor(fn){ fn=(fn||'').toUpperCase(); return fn.startsWith('LJ')?'#2f7d34':fn.startsWith('OZ')?'#1f5fb0':fn.startsWith('KE')?'#b0432e':'#333'; }
+function _blAirline(fn){ fn=(fn||'').toUpperCase(); return fn.startsWith('LJ')?'진에어':fn.startsWith('OZ')?'아시아나':fn.startsWith('KE')?'대한항공':''; }
+function _blOrigin(fn){ fn=(fn||'').toUpperCase(); return fn.startsWith('OZ')?'인천':(fn.startsWith('LJ')||fn.startsWith('KE'))?'부산':''; }
+function _blRet(r){
+  const seq=String(r.eventSeq||'').trim();
+  const p=(typeof passengers!=='undefined'?passengers:[]).find(x=>String(x.eventSeq||'').trim()===seq);
+  return (p&&p.retFlight)||String((r.raw&&(r.raw['귀국편']||r.raw['출발편']))||'').trim()||'';
+}
+function printBoardingList(){
+  if(typeof processed==='undefined' || !processed.length){ alert('데이터가 없습니다. 먼저 파일을 분석해주세요.'); return; }
+  const cap=Math.max(1, parseInt((document.getElementById('bus-cap')||{}).value)||45);
+  const deptime=(((document.getElementById('bus-deptime')||{}).value)||'07:00').trim();
+  const dates=[...new Set(processed.filter(r=>r.accom&&r.arr).map(r=>r.arr))].sort();
+  if(!dates.length){ alert('귀국일 데이터가 없습니다.'); return; }
+  let pages='';
+  dates.forEach(date=>{
+    let groups=processed.filter(r=>r.accom&&r.arr===date)
+      .map(r=>({code:r.group||'-',rep:r.repName||'',pax:Number(r.pax)||0,ret:_blRet(r)}))
+      .filter(g=>g.pax>0)
+      .sort((a,b)=>(a.ret||'').localeCompare(b.ret||'')||(a.code||'').localeCompare(b.code||''));
+    if(!groups.length) return;
+    const cars=[]; let cur=[],sum=0;
+    groups.forEach(g=>{ if(sum+g.pax>cap && cur.length){ cars.push(cur); cur=[]; sum=0; } cur.push(g); sum+=g.pax; });
+    if(cur.length) cars.push(cur);
+    const flights=[...new Set(groups.map(g=>g.ret).filter(Boolean))];
+    const totalPax=groups.reduce((s,g)=>s+g.pax,0);
+    const airlines=[...new Set(flights.map(_blAirline).filter(Boolean))].join('/');
+    const origins=[...new Set(flights.map(_blOrigin).filter(Boolean))].join('/');
+    const wd=['日','月','火','水','木','金','土'][(new Date(date+'T00:00:00')).getDay()]||'';
+    cars.forEach((car,ci)=>{
+      const carPax=car.reduce((s,g)=>s+g.pax,0);
+      const rows=car.map(g=>`<tr><td class="g">${_blEsc(g.code)}</td><td class="nm">${_blEsc(g.rep)}</td><td class="pr">${g.pax}</td><td class="rm" style="color:${_blFlightColor(g.ret)}">${_blEsc(g.ret)}</td></tr>`).join('');
+      pages+=`<div class="page">
+        <div class="bl-hd">
+          <div class="bl-air">${_blEsc(airlines)}</div>
+          <div class="bl-mid"><div class="bl-org">${_blEsc(origins)}</div><div class="bl-fl">이용편명<br><b>${_blEsc(flights.join('/'))}</b></div></div>
+          <div class="bl-ret">귀국안내<br>귀국일 <b>${_blEsc(date.slice(5).replace('-','/'))}(${wd})</b></div>
+        </div>
+        <div class="bl-dep">공항행 호텔출발시간 <b>${_blEsc(deptime)}</b></div>
+        <div class="bl-car"><b>${ci+1}호차</b></div>
+        <div class="bl-cnt">탑승명단 <b>${carPax}명</b> <span>(귀국일 총 ${totalPax}명)</span></div>
+        <table class="bl"><thead><tr><th>GROUP</th><th>NAME</th><th>PER</th><th>REMARK</th></tr></thead><tbody>${rows}</tbody></table>
+      </div>`;
+    });
+  });
+  if(!pages){ alert('탑승명단 대상이 없습니다.'); return; }
+  const html=`<!DOCTYPE html><html lang="ko"><head><meta charset="utf-8"><title>탑승명단 ${new Date().toISOString().slice(0,10)}</title>
+<style>
+  @page{size:A3 portrait;margin:12mm}
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:'Malgun Gothic','Apple SD Gothic Neo',sans-serif;color:#111;-webkit-print-color-adjust:exact;print-color-adjust:exact;background:#e9ecef}
+  .toolbar{position:sticky;top:0;background:#475569;color:#fff;padding:10px 16px;display:flex;gap:12px;align-items:center;z-index:9}
+  .toolbar button{background:#fff;color:#475569;border:0;border-radius:6px;padding:7px 16px;font-weight:700;cursor:pointer}
+  .page{width:297mm;min-height:420mm;background:#fff;margin:14px auto;padding:16mm;box-shadow:0 2px 10px rgba(0,0,0,.18);page-break-after:always}
+  .bl-hd{display:flex;justify-content:space-between;align-items:flex-start;border-bottom:3px solid #111;padding-bottom:8px}
+  .bl-air{font-size:18pt;font-weight:800}
+  .bl-mid{text-align:center}.bl-org{font-size:30pt;font-weight:900;line-height:1}.bl-fl{font-size:12pt;margin-top:4px}
+  .bl-ret{text-align:right;font-size:12pt}
+  .bl-dep{text-align:center;font-size:15pt;margin-top:10px}.bl-dep b{color:#c0392b;font-size:20pt}
+  .bl-car{text-align:center;font-size:34pt;font-weight:900;margin:6px 0}
+  .bl-cnt{text-align:center;font-size:13pt;margin-bottom:10px}
+  table.bl{width:100%;border-collapse:collapse;font-size:15pt}
+  table.bl th{background:#eef1f5;border:1.5px solid #111;padding:8px;font-size:12pt}
+  table.bl td{border:1.5px solid #111;padding:9px 8px;text-align:center}
+  table.bl td.g{font-weight:800;letter-spacing:.04em}
+  table.bl td.nm{font-size:18pt;font-weight:800}
+  table.bl td.pr{font-weight:800}
+  table.bl td.rm{font-weight:800}
+  @media print{.toolbar{display:none}.page{margin:0;box-shadow:none}body{background:#fff}}
+</style></head><body>
+<div class="toolbar"><b>🚌 탑승명단 (A3)</b><button onclick="window.print()">🖨 인쇄</button><button onclick="window.close()">닫기</button><span style="font-size:12px;opacity:.85">정원 ${cap}명 기준 호차 분할</span></div>
+${pages}</body></html>`;
+  const w=window.open('','_blank'); if(!w){ alert('팝업이 차단되었습니다. 허용 후 다시 시도하세요.'); return; }
+  w.document.write(html); w.document.close();
+}
 </script>
 </body>
 </html>
