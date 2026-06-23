@@ -110,6 +110,15 @@ body{background:var(--bg);color:var(--text);font-family:var(--sans);min-height:1
 .session-chip{display:flex;align-items:center;gap:4px;padding:3px 8px;border-radius:20px;border:1px solid var(--border);background:var(--surface2);color:var(--text2);font-size:10px;font-family:var(--mono);cursor:pointer;transition:all .15s;white-space:nowrap;flex-shrink:0}
 .session-chip:hover{border-color:var(--accent);color:var(--accent2)}
 .session-chip.active{background:var(--accent-dim);border-color:var(--accent);color:var(--accent2);font-weight:700}
+.cloud-actions{margin-left:auto;display:flex;gap:6px;flex-shrink:0;padding-left:10px}
+.cloud-btn{font-family:var(--mono);font-size:10px;font-weight:700;padding:4px 10px;border-radius:6px;border:1px solid var(--accent);background:var(--surface);color:var(--accent2);cursor:pointer;white-space:nowrap;transition:all .15s}
+.cloud-btn:hover:not(:disabled){background:var(--accent);color:#fff}
+.cloud-btn:disabled{opacity:.5;cursor:not-allowed}
+.cloud-item{display:grid;grid-template-columns:auto 1fr auto;gap:10px;align-items:center;padding:9px 11px;border:1px solid var(--border);border-radius:8px;margin-bottom:6px;cursor:pointer;transition:all .15s}
+.cloud-item:hover{border-color:var(--accent);background:var(--accent-dim)}
+.cloud-item .ci-ym{font-family:var(--mono);font-weight:700;font-size:13px;color:var(--accent2)}
+.cloud-item .ci-meta{font-size:11px;color:var(--text2)}
+.cloud-item .ci-by{font-size:10px;color:var(--text3);text-align:right;font-family:var(--mono);line-height:1.4}
 .session-chip-del{font-size:10px;color:var(--text3);cursor:pointer;padding:0 1px;line-height:1;transition:color .15s}
 .session-chip-del:hover{color:var(--red2)}
 .session-empty{font-size:10px;color:var(--text3);font-family:var(--mono)}
@@ -385,6 +394,10 @@ tr.draggable-row td:first-child::before{content:'⠿';color:var(--text3);margin-
   <span class="session-label">세션:</span>
   <div class="session-chips" id="session-chips">
     <span class="session-empty">분석 후 자동 저장됩니다</span>
+  </div>
+  <div class="cloud-actions">
+    <button class="cloud-btn" id="btn-cloud-save" type="button" onclick="cloudSaveSession()" title="현재 세션을 클라우드에 저장(공유)">☁ 저장</button>
+    <button class="cloud-btn" id="btn-cloud-open" type="button" onclick="cloudOpenPicker()" title="클라우드에서 세션 불러오기">☁ 불러오기</button>
   </div>
 </div>
 
@@ -957,6 +970,103 @@ function renderSessionBar(){
       <span class="session-chip-del" onclick="deleteSession('${ym}',event)" title="삭제">✕</span>
     </div>`;
   }).join('');
+}
+
+// ════════════════════════════════════════════════════════════════
+//  클라우드(Supabase) 세션 동기화 — 월 세션 스냅샷 저장/불러오기
+//  (sql/05_session_sync.sql 의 sessions 테이블 사용 · 다중 PC 공유)
+// ════════════════════════════════════════════════════════════════
+function _sbReady(){ try{ return !!(window.SB14 && SB14.client && SB14.client()); }catch(e){ return false; } }
+function _cloudToast(msg, isErr){
+  const t = document.createElement('div');
+  t.textContent = msg;
+  t.style.cssText = 'position:fixed;bottom:22px;left:50%;transform:translateX(-50%);z-index:9500;'
+    + 'background:'+(isErr?'#fbeeeb':'var(--accent-dim,#E8ECF1)')+';color:'+(isErr?'#8a2a1c':'var(--accent2,#374151)')+';'
+    + 'border:1px solid '+(isErr?'#e3bdb4':'var(--accent,#475569)')+';border-radius:9px;padding:10px 18px;'
+    + 'font-size:13px;font-weight:700;box-shadow:0 6px 18px rgba(0,0,0,.16)';
+  document.body.appendChild(t);
+  setTimeout(()=>{ t.style.transition='.3s'; t.style.opacity='0'; setTimeout(()=>t.remove(),300); }, 2600);
+}
+function _cloudDt(s){ if(!s) return ''; try{ const d=new Date(s); const p=n=>String(n).padStart(2,'0'); return `${d.getFullYear()}-${p(d.getMonth()+1)}-${p(d.getDate())} ${p(d.getHours())}:${p(d.getMinutes())}`; }catch(e){ return ''; } }
+
+async function cloudSaveSession(){
+  if(!_sbReady()){ _cloudToast('클라우드 연결이 없습니다. 로그인을 확인하세요.', true); return; }
+  if(!currentSession || !processed || !processed.length){ _cloudToast('저장할 세션이 없습니다. 먼저 파일을 분석하세요.', true); return; }
+  const btn = document.getElementById('btn-cloud-save'); const old = btn?btn.textContent:'';
+  if(btn){ btn.disabled=true; btn.textContent='저장 중…'; }
+  try{
+    const c = SB14.client();
+    let email=''; try{ const m=await SB14.me(); email=(m&&m.email)||''; }catch(e){}
+    const snap = { v:1, processed: processed, passengers: (typeof passengers!=='undefined'?passengers:[]), manualData: manualData, deductions: deductions };
+    const payload = {
+      ym: currentSession, data: snap,
+      groups: processed.filter(r=>r.accom).length,
+      pax: processed.reduce((s,r)=>s+(Number(r.pax)||0),0),
+      updated_email: email, updated_at: new Date().toISOString()
+    };
+    const { error } = await c.from('sessions').upsert(payload, { onConflict:'ym' });
+    if(error){ _cloudToast('클라우드 저장 실패: '+error.message, true); return; }
+    if(window.SB14&&SB14.log) SB14.log('cloud_save',{ym:currentSession, groups:payload.groups, pax:payload.pax});
+    _cloudToast('☁ '+currentSession+' 세션을 클라우드에 저장했습니다.');
+  } finally { if(btn){ btn.disabled=false; btn.textContent=old; } }
+}
+
+async function cloudOpenPicker(){
+  if(!_sbReady()){ _cloudToast('클라우드 연결이 없습니다. 로그인을 확인하세요.', true); return; }
+  const c = SB14.client();
+  const { data, error } = await c.from('sessions').select('ym,groups,pax,updated_email,updated_at').order('ym',{ascending:false});
+  if(error){ _cloudToast('클라우드 목록 실패: '+error.message, true); return; }
+  const rows = data || [];
+  const E = (window.SB14&&SB14.esc) || (s=>String(s==null?'':s));
+  const existing = document.getElementById('cloud-modal-bg'); if(existing) existing.remove();
+  const bg = document.createElement('div'); bg.id='cloud-modal-bg'; bg.className='dl-modal-bg';
+  const items = rows.length ? rows.map(r=>`
+    <div class="cloud-item" onclick="cloudLoadSession('${E(r.ym)}')">
+      <div class="ci-ym">${E(r.ym)}${r.ym===currentSession?' <span style="font-size:9px;color:var(--accent2)">● 현재</span>':''}</div>
+      <div class="ci-meta">${r.groups||0}팀 · ${r.pax||0}명</div>
+      <div class="ci-by">${E(r.updated_email||'')}<br><span style="opacity:.7">${_cloudDt(r.updated_at)}</span></div>
+    </div>`).join('') : '<div style="color:var(--text3);font-size:12px;padding:18px;text-align:center">저장된 클라우드 세션이 없습니다.<br>분석 후 [☁ 저장]을 먼저 눌러주세요.</div>';
+  bg.innerHTML = `<div class="dl-modal" style="max-width:460px">
+    <div class="dl-modal-head">
+      <div class="dl-modal-title">☁ 클라우드 세션 불러오기</div>
+      <button onclick="document.getElementById('cloud-modal-bg').remove()" style="background:none;border:none;color:var(--text3);font-size:18px;cursor:pointer;line-height:1;padding:2px 6px">✕</button>
+    </div>
+    <div class="dl-modal-body">
+      <div style="font-size:11px;color:var(--text3);margin-bottom:10px;line-height:1.55">불러오면 현재 화면의 분석 데이터가 선택한 세션으로 교체됩니다. (엑셀 재업로드 불필요)</div>
+      ${items}
+    </div></div>`;
+  bg.addEventListener('click', e=>{ if(e.target===bg) bg.remove(); });
+  document.body.appendChild(bg);
+}
+
+async function cloudLoadSession(ym){
+  if(!_sbReady()) return;
+  const c = SB14.client();
+  const { data, error } = await c.from('sessions').select('data').eq('ym',ym).single();
+  if(error || !data){ _cloudToast('불러오기 실패: '+(error?error.message:'데이터 없음'), true); return; }
+  const snap = data.data || {};
+  const bg = document.getElementById('cloud-modal-bg'); if(bg) bg.remove();
+  // 현재 세션 보존 후 교체
+  if(currentSession && currentSession!==ym){ saveManual(); saveDed(); }
+  processed   = Array.isArray(snap.processed)   ? snap.processed   : [];
+  passengers  = Array.isArray(snap.passengers)  ? snap.passengers  : [];
+  manualData  = (snap.manualData && typeof snap.manualData==='object') ? snap.manualData : {};
+  deductions  = Array.isArray(snap.deductions)  ? snap.deductions  : [];
+  currentSession = ym;
+  // 로컬에도 반영(세션 인덱스·수기·차감)
+  const idx = getSessionIndex(); if(!idx.includes(ym)){ idx.push(ym); saveSessionIndex(idx); }
+  try{ localStorage.setItem(manualKeyOf(ym), JSON.stringify(manualData)); }catch(e){}
+  try{ localStorage.setItem(dedKeyOf(ym),    JSON.stringify(deductions)); }catch(e){}
+  // 팀 색상·태그 재구성
+  teamColorMap = {}; teamColorIdx = 0;
+  if(typeof applyTeamTags==='function') applyTeamTags();
+  // 탭 잠금 해제
+  ['nametag','dispatch','dinner','settle','transfer'].forEach(t =>{ const el=document.getElementById('nav-'+t); if(el) el.classList.remove('locked'); });
+  renderSessionBar();
+  renderAll();
+  if(window.SB14&&SB14.log) SB14.log('cloud_load',{ym:ym, groups:processed.filter(r=>r.accom).length, pax:processed.reduce((s,r)=>s+(Number(r.pax)||0),0)});
+  gotoSection('dispatch');
+  _cloudToast('☁ '+ym+' 세션을 클라우드에서 불러왔습니다.');
 }
 
 // 세션 전환 (저장된 세션으로 수기 데이터만 전환)

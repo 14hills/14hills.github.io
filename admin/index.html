@@ -63,6 +63,7 @@
   .actbadge{display:inline-block;font-size:10.5px;font-weight:800;border-radius:5px;padding:2px 8px;white-space:nowrap;color:#fff}
   .ab-login{background:#2f7d4f} .ab-logout{background:#8a948f} .ab-analyze{background:#374151}
   .ab-download{background:#475569} .ab-print{background:#9a7322} .ab-set_access{background:#1F2937} .ab-request{background:#6d5cae}
+  .ab-cloud_save{background:#2563eb} .ab-cloud_load{background:#0e7490}
   table.users td.lgwhen{font-size:11.5px;color:var(--muted);white-space:nowrap;font-family:var(--mono)}
   table.users td.lgdet{font-size:12px;color:var(--text2);word-break:break-all}
   #toast{position:fixed;bottom:22px;left:50%;transform:translateX(-50%);z-index:200;display:flex;flex-direction:column;gap:8px;align-items:center}
@@ -256,7 +257,7 @@ async function handleReq(id,act){
 }
 
 // ── 활동 로그 ──
-const ACT_LABEL={login:'로그인',logout:'로그아웃',analyze:'데이터 분석',download:'다운로드',print:'인쇄',set_access:'권한 변경',request:'가입요청 처리'};
+const ACT_LABEL={login:'로그인',logout:'로그아웃',analyze:'데이터 분석',download:'다운로드',print:'인쇄',cloud_save:'클라우드 저장',cloud_load:'클라우드 불러오기',set_access:'권한 변경',request:'가입요청 처리'};
 const PRINT_KIND={dispatch:'現地手配書',nametag:'ネームタグ',dinner_restaurant:'レストラン名札',dinner_order:'夕食オーダー',transfer_boarding:'탑승명단',transfer_arrival:'空港到着者名簿'};
 let logRows=[];
 function fmtDetail(action,d){
@@ -266,6 +267,7 @@ function fmtDetail(action,d){
     if(action==='download') return esc(d.file||'');
     if(action==='print') return esc((PRINT_KIND[d.kind]||d.kind||'')+(d.days?(' · '+d.days+'일'):'')+(d.count?(' · '+d.count+'건'):'')+(d.single?' · 단건':''));
     if(action==='analyze') return esc((d.session?('세션 '+d.session):'')+(d.rows!=null?(' · '+d.rows+'행'):'')+(d.pax!=null?(' · '+d.pax+'명'):''));
+    if(action==='cloud_save'||action==='cloud_load') return esc((d.ym?('세션 '+d.ym):'')+(d.groups!=null?(' · '+d.groups+'팀'):'')+(d.pax!=null?(' · '+d.pax+'명'):''));
     if(action==='set_access') return esc('역할 '+(ROLE_LABEL[d.role]||d.role||'')+' · '+((d.areas&&d.areas.length)?('카드 '+d.areas.map(a=>AREA_LABEL[a]||a).join(', ')):'카드 없음'));
     if(action==='request'){ const M={approved:'처리완료',rejected:'거절',delete:'삭제'}; return esc((M[d.act]||d.act||'')+(d.id?(' · #'+String(d.id).slice(0,8)):'')); }
     return esc(JSON.stringify(d));
