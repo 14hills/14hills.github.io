@@ -6205,10 +6205,13 @@ function printBoardingList(){
   const dates=[...new Set(processed.filter(r=>r.accom&&r.arr).map(r=>r.arr))].sort();
   if(!dates.length){ alert('귀국일 데이터가 없습니다.'); return; }
   if(window.SB14&&SB14.log) SB14.log('print',{kind:'transfer_boarding', days:dates.length});
+  const tagMap=buildTagCodeMap();
   let pages='';
   dates.forEach(date=>{
     let groups=processed.filter(r=>r.accom&&r.arr===date)
-      .map(r=>({code:r.group||'-',rep:r.repName||'',pax:Number(r.pax)||0,ret:_blRet(r)}))
+      .map(r=>{ const seq=String(r.eventSeq||'').trim(); const tc=tagMap[seq]||{};
+        const tagBase=makeTagCodeSafe(tc.teamIdx||0,0,tc.accomPfx,tc.memberCode,tc.manualCode,tc.pendingMember,tc.eventSeq,tc.year).replace(/-\d+$/,'');
+        return {code:tagBase||(r.group||'-'),rep:r.repName||'',pax:Number(r.pax)||0,ret:_blRet(r)}; })
       .filter(g=>g.pax>0)
       .sort((a,b)=>(a.ret||'').localeCompare(b.ret||'')||(a.code||'').localeCompare(b.code||''));
     if(!groups.length) return;
@@ -6287,6 +6290,7 @@ function _arTime(seq,which){
 function printArrivalRoster(){
   if(typeof processed==='undefined' || !processed.length){ alert('데이터가 없습니다. 먼저 파일을 분석해주세요.'); return; }
   const pax=(typeof passengers!=='undefined'?passengers:[]);
+  const tagMap=buildTagCodeMap();
   const dates=[...new Set(processed.filter(r=>r.accom&&r.dep).map(r=>r.dep))].sort();
   if(!dates.length){ alert('입국일 데이터가 없습니다.'); return; }
   if(window.SB14&&SB14.log) SB14.log('print',{kind:'transfer_arrival', days:dates.length});
@@ -6308,10 +6312,12 @@ function printArrivalRoster(){
         if(g.arr) retDates.add(g.arr);
         const span=(i===0)?` rowspan="${list.length}"`:'';
         const first=(i===0);
+        const _tc=tagMap[g.seq]||{};
+        const tagCode=makeTagCodeSafe(_tc.teamIdx||0, i, _tc.accomPfx, _tc.memberCode, _tc.manualCode, _tc.pendingMember, _tc.eventSeq, _tc.year);
         body+=`<tr>
           <td class="c">${no}</td>
           ${first?`<td class="c"${span}>${_arEsc(p.depFlight||'')}</td><td class="c"${span}>${_arEsc(_arTime(g.seq,'arr'))}</td><td${span}></td>`:''}
-          <td class="rg">${_arEsc(g.code)}-${i+1}</td>
+          <td class="rg">${_arEsc(tagCode)}</td>
           <td class="en">${_arEsc(p.engFull||'')}</td>
           <td class="kr">${_arEsc(p.name||'')}</td>
           <td class="c">${_arGender(p.gender)}</td>
