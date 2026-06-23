@@ -188,6 +188,16 @@ tr:hover td{background:var(--surface2)}
 .num-center{text-align:center;font-family:var(--mono)}
 /* 비고·현지비고 칸 — 내용 다 보이게 넉넉히(표는 가로 스크롤 허용) */
 .bigo-col{min-width:200px;max-width:320px;white-space:normal;font-size:10px;color:var(--text2);vertical-align:top;line-height:1.45}
+/* 홈 상단 — 클라우드 등록된 데이터 바 */
+.cloud-data-bar{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:14px;padding:9px 13px;background:var(--green-dim);border:1px solid var(--green);border-radius:10px}
+.cdb-label{display:flex;align-items:center;gap:6px;font-size:12.5px;font-weight:800;color:var(--green2);white-space:nowrap}
+.cdb-chips{display:flex;gap:8px;flex-wrap:wrap}
+.cdb-chip{display:flex;align-items:center;gap:8px;background:#fff;border:1px solid var(--green);border-radius:8px;padding:5px 11px;font-size:11.5px;cursor:pointer;transition:background .15s,border-color .15s}
+.cdb-chip:hover{background:var(--green-dim);border-color:var(--green2)}
+.cdb-chip.active{background:var(--green-dim);box-shadow:0 0 0 1.5px var(--green2) inset}
+.cdb-ym{font-weight:800;color:var(--green2)}
+.cdb-meta{color:var(--text2)}
+.cdb-cnt{font-weight:700;color:var(--text)}
 
 /* ════════════════════════════════════════════════════════════════ */
 /* 컬럼 정렬 통일 — 헤더와 값 정렬 일치 (식별 코드/숫자: center, 텍스트: left, 금액: right) */
@@ -401,6 +411,7 @@ tr.draggable-row td:first-child::before{content:'⠿';color:var(--text3);margin-
 
 <!-- ── UPLOAD ───────────────────────────────────────────── -->
 <div class="section active" id="sec-upload">
+  <div id="cloud-data-bar" class="cloud-data-bar" style="display:none"></div>
   <div class="card">
     <div class="card-title" data-i18n="up_cardTitle">ファイルアップロード</div>
     <div class="upload-grid" style="align-items:stretch">
@@ -985,6 +996,7 @@ async function cloudSaveSession(){
     if(error){ _cloudToast('클라우드 저장 실패: '+error.message, true); return; }
     if(window.SB14&&SB14.log) SB14.log('cloud_save',{ym:currentSession, groups:payload.groups, pax:payload.pax});
     _cloudToast('☁ '+currentSession+' 세션을 클라우드에 저장했습니다.');
+    try{ renderCloudDataBar(); }catch(e){}
   } finally { if(btn){ btn.disabled=false; btn.textContent=old; } }
 }
 
@@ -1016,6 +1028,32 @@ async function cloudOpenPicker(){
   document.body.appendChild(bg);
 }
 
+// 홈 상단 '등록된 데이터' 바 — 클라우드 sessions 목록을 칩으로 표시(클릭 시 불러오기)
+async function renderCloudDataBar(){
+  const bar = document.getElementById('cloud-data-bar');
+  if(!bar) return;
+  if(!_sbReady()){ bar.style.display='none'; return; }
+  let rows = [];
+  try{
+    const c = SB14.client();
+    const { data, error } = await c.from('sessions').select('ym,groups,pax,updated_email,updated_at').order('ym',{ascending:false});
+    if(error){ bar.style.display='none'; return; }
+    rows = data || [];
+  }catch(e){ bar.style.display='none'; return; }
+  if(!rows.length){ bar.style.display='none'; return; }
+  const E = (window.SB14&&SB14.esc) || (s=>String(s==null?'':s));
+  const who = em => { em=String(em||''); const i=em.indexOf('@'); return E(i>0?em.slice(0,i):em) || '—'; };
+  const shortDt = s => { const d=_cloudDt(s); return d ? d.slice(5).replace('-','/') : ''; };  // MM/DD HH:MM
+  const chips = rows.map(r=>`
+    <div class="cdb-chip${r.ym===currentSession?' active':''}" onclick="cloudLoadSession('${E(r.ym)}')" title="${E(r.ym)} 세션 불러오기">
+      <span class="cdb-ym">${E(r.ym)}</span>
+      <span class="cdb-meta">${who(r.updated_email)} · ${shortDt(r.updated_at)}</span>
+      <span class="cdb-cnt">${r.groups||0}팀 ${Number(r.pax||0).toLocaleString()}명</span>
+    </div>`).join('');
+  bar.innerHTML = `<span class="cdb-label">📅 등록된 데이터</span><div class="cdb-chips">${chips}</div>`;
+  bar.style.display = 'flex';
+}
+
 async function cloudLoadSession(ym){
   if(!_sbReady()) return;
   const c = SB14.client();
@@ -1041,6 +1079,7 @@ async function cloudLoadSession(ym){
   ['nametag','dispatch','dinner','settle','transfer'].forEach(t =>{ const el=document.getElementById('nav-'+t); if(el) el.classList.remove('locked'); });
   renderSessionBar();
   renderAll();
+  try{ renderCloudDataBar(); }catch(e){}
   if(window.SB14&&SB14.log) SB14.log('cloud_load',{ym:ym, groups:processed.filter(r=>r.accom).length, pax:processed.reduce((s,r)=>s+(Number(r.pax)||0),0)});
   gotoSection('nametag');
   _cloudToast('☁ '+ym+' 세션을 클라우드에서 불러왔습니다.');
@@ -6216,6 +6255,7 @@ function resetApp(){
     SB14.guard({title:'14hills 운영 통합 시스템'}).then(function(acc){
       statusBtn(acc);
       if(acc){ applyAreaGate(acc);
+        try{ renderCloudDataBar(); }catch(e){}
         if(acc.role==='admin'){ var b=document.getElementById('sb-status-btn'); if(b && !document.getElementById('sb-admin-link')){ var a=document.createElement('a'); a.id='sb-admin-link'; a.href='../admin/'; a.className='ghost-btn'; a.textContent='⚙ 관리'; a.style.marginLeft='4px'; a.title='마스터 관리 페이지'; b.parentNode.insertBefore(a,b.nextSibling); } }
       }
     });
