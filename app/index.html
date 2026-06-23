@@ -6273,7 +6273,17 @@ ${pages}</body></html>`;
 // 입국(도착)일별 개인 → 記号(그룹코드)별 묶음 → A3 인쇄
 function _arEsc(s){return String(s==null?'':s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));}
 function _arGender(g){ g=String(g||'').trim().toUpperCase(); if(g==='남'||g==='M'||g==='남자') return '男'; if(g==='여'||g==='F'||g==='여자') return '女'; return _arEsc(g); }
-function _arTime(seq,which){ try{ const a=arrivalMap[String(seq||'').trim()]; if(!a) return ''; return which==='arr'?(a.locArrTime||''):(a.retTime||a.depTime||''); }catch(e){ return ''; } }
+// 현지도착(arr)·현지출발(ret) 시각: 일행별예약(passengers)의 現地到着/現地出発 우선 → 없으면 현지도착 파일(arrivalMap)
+function _arTime(seq,which){
+  const s=String(seq||'').trim();
+  try{
+    const pax=(typeof passengers!=='undefined'?passengers:[]).filter(p=>String(p.eventSeq||'').trim()===s);
+    const rep=pax.find(p=>p.isRep) || pax[0];
+    if(rep){ const t = (which==='arr') ? rep.locArrTime : rep.retDepTime; if(t) return t; }
+  }catch(e){}
+  try{ const a=arrivalMap[s]; if(a) return which==='arr'?(a.locArrTime||''):(a.retTime||a.depTime||''); }catch(e){}
+  return '';
+}
 function printArrivalRoster(){
   if(typeof processed==='undefined' || !processed.length){ alert('데이터가 없습니다. 먼저 파일을 분석해주세요.'); return; }
   const pax=(typeof passengers!=='undefined'?passengers:[]);
@@ -6283,10 +6293,10 @@ function printArrivalRoster(){
   const WD=['日','月','火','水','木','金','土'];
   let pages='';
   dates.forEach(date=>{
-    // 그 입국일 그룹(코드순)
+    // 그 입국일 그룹 — 現地到着時刻 순(일행별예약 기준) → 같은 시각이면 그룹코드순
     const grps=processed.filter(r=>r.accom&&r.dep===date)
-      .map(r=>({seq:String(r.eventSeq||'').trim(),code:r.group||'-',arr:r.arr||''}))
-      .sort((a,b)=>(a.code||'').localeCompare(b.code||''));
+      .map(r=>{ const seq=String(r.eventSeq||'').trim(); return {seq,code:r.group||'-',arr:r.arr||'',arrTime:_arTime(seq,'arr')}; })
+      .sort((a,b)=>((a.arrTime||'~~').localeCompare(b.arrTime||'~~'))||(a.code||'').localeCompare(b.code||''));
     if(!grps.length) return;
     let no=0, body='', totalPax=0;
     const retDates=new Set();
