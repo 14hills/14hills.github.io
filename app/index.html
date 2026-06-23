@@ -2838,6 +2838,13 @@ function teamBadge(teamName){
   const c = getTeamColor(teamName);
   return `<span class="tag tag-team" style="background:${c.bg};border:1px solid ${c.border};color:${c.text};margin-left:4px">팀:${teamName}</span>`;
 }
+// 인쇄물용 팀뱃지 — .tag 클래스 의존 없이 인라인 스타일만(별도 창 인쇄 대응)
+function teamBadgePrint(teamName){
+  if(!teamName) return '';
+  const c = getTeamColor(teamName);
+  const t = String(teamName).replace(/[&<>]/g,ch=>({'&':'&amp;','<':'&lt;','>':'&gt;'}[ch]));
+  return `<span style="display:inline-block;background:${c.bg};color:${c.text};border:1px solid ${c.border};border-radius:3px;padding:0 4px;font-size:7.5pt;font-weight:700;margin-left:3px;white-space:nowrap;vertical-align:middle;-webkit-print-color-adjust:exact;print-color-adjust:exact">팀:${t}</span>`;
+}
 
 // 팀명 파싱: 비고 또는 그룹코드에서 "팀:xxx" 추출 (대소문자/공백 허용)
 function parseTeamName(rawGroup, rawRemark){
@@ -4839,8 +4846,8 @@ function generateAndPrintLabels(selectedDates, originFilter, startSlot, selected
       return `${m[1].padStart(2,'0')}/${m[2].padStart(2,'0')}`;
     };
     const _g = String(c.gender||'').trim().toUpperCase();
-    const sexMark = (_g==='남'||_g==='M'||_g==='남자') ? '男' : (_g==='여'||_g==='F'||_g==='여자') ? '女' : '';
-    const sexCls  = sexMark==='男' ? 'lp-sex-m' : sexMark==='女' ? 'lp-sex-f' : '';
+    const sexMark = (_g==='남'||_g==='M'||_g==='남자') ? 'M' : (_g==='여'||_g==='F'||_g==='여자') ? 'F' : '';
+    const sexCls  = sexMark==='M' ? 'lp-sex-m' : sexMark==='F' ? 'lp-sex-f' : '';
     return `<div class="lp-cell">
       <div class="lp-body">
         <div class="lp-r1" style="color:${c.tagColor}">${c.tagCode}</div>
@@ -4907,9 +4914,9 @@ function generateAndPrintLabels(selectedDates, originFilter, startSlot, selected
   .lp-r2-eng { font-size: 7.5pt; color: #6b7a90; font-weight: 500; }
   .lp-r3, .lp-r4 { font-size: 8.5pt; text-align: center; font-family: 'Consolas', 'Menlo', monospace; color: #1a2540; line-height: 1.35; }
   .lp-r5 { display:flex; align-items:center; justify-content:center; gap:2.5mm; margin-bottom:1.3mm; line-height:1; }
-  .lp-sex { display:inline-flex; align-items:center; justify-content:center; min-width:5.2mm; height:5.2mm; border-radius:50%; font-size:8.5pt; font-weight:800; color:#fff; }
-  .lp-sex-m { background:#1d4ed8; } /* 男 파랑 */
-  .lp-sex-f { background:#be185d; } /* 女 자홍 */
+  .lp-sex { display:inline-flex; align-items:center; justify-content:center; min-width:4.6mm; height:4.6mm; border-radius:50%; font-size:7.5pt; font-weight:800; border:0.5pt solid currentColor; }
+  .lp-sex-m { color:#5b6b86; } /* M 차분한 블루그레이 */
+  .lp-sex-f { color:#8a6070; } /* F 차분한 로즈그레이 */
   .lp-team { font-size:8.5pt; font-weight:700; color:#1a2540; }
   @media print {
     html, body { background: #fff; }
@@ -5199,6 +5206,7 @@ function generateAndPrintDinnerOrder(selectedDates, selectedAccoms){
         if(days >= 1 && days <= totalDays) stayDay = `${days}日目`;
       }
       const repName = p.isExtra ? (p.repName||p.name||'') : (p.repName||'');
+      const teamBadgeHtml = (!p.isExtra && teamRec.teamName) ? teamBadgePrint(teamRec.teamName) : '';
       const rowPus = p.isExtra ? false : !!seqIsPus[String(p.eventSeq||'').trim()];
       const originCode = p.isExtra ? '' : (rowPus ? 'PUS' : 'ICN');
       return `<tr>
@@ -5206,7 +5214,7 @@ function generateAndPrintDinnerOrder(selectedDates, selectedAccoms){
         <td class="c date-c">${depD}</td>
         <td class="c date-c">${arrD}</td>
         <td class="c orig ${rowPus?'pus':'icn'}">${originCode}</td>
-        <td class="kor">${repName}</td>
+        <td class="kor">${repName}${teamBadgeHtml}</td>
         <td class="eng">${engShow}</td>
         <td class="c grp">${grpCode}</td>
         <td class="c"></td>
