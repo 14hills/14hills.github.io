@@ -42,14 +42,25 @@
 > 미연결(키 미입력) 상태에서는 **기존처럼 엑셀 업로드+localStorage**로 그대로 동작합니다.
 > 키를 넣은 순간부터 **로그인 게이트**가 활성화됩니다.
 
+## 6. 역할(RBAC) 적용 — 마스터/관리담당/일반
+1. **SQL Editor**에서 **`sql/03_roles_settings.sql`** 실행 (profiles·설정값·활동로그 + RLS)
+2. 3단계에서 만든 운영자 계정으로 **앱에 한 번 로그인**(또는 Users에서 생성) → `profiles`에 자동 행 생성(기본 `operator`)
+3. **본인을 마스터로 지정** (SQL Editor에서 1회):
+   ```sql
+   update public.profiles set role='master' where email='YOUR_EMAIL';
+   ```
+4. 이후 **마스터가 `/admin/`(마스터 페이지)에서** 다른 운영자의 역할(`manager`/`operator`)을 부여
+   - **master**: 전체(운영·역할관리·세션데이터·설정값·로그)
+   - **manager(관리담당)**: 운영·세션데이터·설정값·로그(보기)
+   - **operator(일반)**: `/app/` 운영 기능만
+
 ## 보안 메모
 - 프론트에는 **Publishable key(구 anon)만** 사용(공개돼도 RLS로 보호). `Secret key`(구 service_role)는 서버 전용.
 - ℹ️ Supabase가 키 명칭을 바꿈: `anon` → **Publishable key**, `service_role` → **Secret key**. (RLS의 역할명 `anon`/`authenticated`는 그대로)
-- 현재 RLS는 *로그인 사용자 전체 접근*(내부 운영 전제). 사용자별 분리가 필요하면
-  `groups.user_id` 등 소유자 컬럼 + 정책으로 확장(요청 시 적용).
+- **연결정보는 코드에 내장** 예정(Publishable key는 공개 가능) → 사용자는 **설정 없이 로그인만**. (Phase 2 적용 시 현 연결설정 패널은 마스터 전용/제거)
 - 비밀번호 분실 시 Supabase Authentication에서 재설정.
 
-## 다음 (Phase 2 — 데이터 동기화)
-- 현재 세션의 그룹·고객·수배·저녁·정산을 **Supabase에 저장 / 불러오기** 버튼 연결
-- 월(ym) 세션 단위 업서트(중복 방지: `groups(ym,event_seq)` 유니크)
-- 충돌/변경 감지(기존 스냅샷 로직과 연계)
+## 다음 (Phase 2 — 멀티페이지 + 동기화)
+- `/assets/sb.js`(연결 내장·인증·역할) → `/app/`(로그인 전용) · `/admin/`(마스터 페이지)
+- 세션(ym) 그룹·고객·수배·저녁·정산 **저장/불러오기** + 변경 감지 연계
+- 설정값(요율·메뉴)·활동로그를 마스터 페이지에서 관리
