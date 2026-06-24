@@ -570,7 +570,7 @@ tr.draggable-row td:first-child::before{content:'⠿';color:var(--text3);margin-
       <ul>
         <li><b>귀국일</b> 기준 · <b>인천 → 부산 순</b> 정렬</li>
         <li>그룹 · 대표자 · 인원 · <b>귀국지(ICN/PUS)</b> · 귀국편</li>
-        <li>정원(기본 <b>45명</b>) 기준 <b>호차 자동분할</b></li>
+        <li><b>차량 정원</b>으로 <b>호차 자동분할</b> — 한 대면 숫자 하나(<span class="kc">45</span>), 여러 대면 콤마(<span class="kc">25,25,20</span> = 3대)</li>
         <li>요약: "인천으로 X명 · 부산으로 Y명 · 총 Z명 귀국"</li>
       </ul>
       <h4>요금</h4>
@@ -585,7 +585,7 @@ tr.draggable-row td:first-child::before{content:'⠿';color:var(--text3);margin-
   </div>
   <div class="card">
     <div class="card-title">Transfer Assignment Sheet — 送迎配車表</div>
-    <div class="btn-row" style="margin-top:0;margin-bottom:.75rem;align-items:center;gap:8px;flex-wrap:wrap">      <label style="font-size:11px;color:var(--text2);display:inline-flex;align-items:center;gap:4px">정원 <input id="bus-cap" type="number" value="45" min="1" style="width:52px;padding:4px 6px;border:1px solid var(--border);border-radius:5px;text-align:center;font-size:12px"></label>
+    <div class="btn-row" style="margin-top:0;margin-bottom:.75rem;align-items:center;gap:8px;flex-wrap:wrap">      <label style="font-size:11px;color:var(--text2);display:inline-flex;align-items:center;gap:4px" title="한 대면 숫자 하나(45), 여러 대면 콤마로 각 정원(예 25,25,20)">차량 정원 <input id="bus-cap" type="text" value="45" placeholder="45 또는 25,25,20" style="width:118px;padding:4px 6px;border:1px solid var(--border);border-radius:5px;text-align:center;font-size:12px"><span style="font-size:10px;color:var(--text3)">여러 대면 콤마</span></label>
       <label style="font-size:11px;color:var(--text2);display:inline-flex;align-items:center;gap:4px">출발시간 <input id="bus-deptime" type="text" value="07:00" style="width:58px;padding:4px 6px;border:1px solid var(--border);border-radius:5px;text-align:center;font-size:12px"></label>
       <button class="btn-dl" onclick="printArrivalRoster()" style="background:var(--amber-dim);color:var(--amber2);border-color:var(--amber)">🛬 입국팀 도착명단 A3 <span style="font-weight:500;opacity:.75">(到着者名簿)</span></button>
       <button class="btn-dl" onclick="printBoardingList()" style="background:var(--green-dim);color:var(--green2);border-color:var(--green)">🛫 귀국팀 탑승명단 A3</button>
@@ -6565,7 +6565,11 @@ function _blRet(r){
 }
 function printBoardingList(){
   if(typeof processed==='undefined' || !processed.length){ alert('데이터가 없습니다. 먼저 파일을 분석해주세요.'); return; }
-  const cap=Math.max(1, parseInt((document.getElementById('bus-cap')||{}).value)||45);
+  // 차량 정원: 한 대면 숫자 하나(45), 여러 대면 콤마(예 25,25,20) → 대별 정원 배열
+  const _capRaw=String((document.getElementById('bus-cap')||{}).value||'45').trim();
+  const _caps=_capRaw.split(/[,\s]+/).map(x=>parseInt(x,10)).filter(n=>n>0);
+  const capList=_caps.length?_caps:[45];
+  const capLabel=capList.length>1?capList.join('·')+'인승':capList[0]+'명';
   const deptime=(((document.getElementById('bus-deptime')||{}).value)||'07:00').trim();
   const dates=[...new Set(processed.filter(r=>r.accom&&r.arr).map(r=>r.arr))].sort();
   if(!dates.length){ alert('귀국일 데이터가 없습니다.'); return; }
@@ -6581,8 +6585,8 @@ function printBoardingList(){
       .filter(g=>g.pax>0)
       .sort((a,b)=>_blOriginRank(a.oc)-_blOriginRank(b.oc) || (a.ret||'').localeCompare(b.ret||'') || (a.code||'').localeCompare(b.code||''));
     if(!groups.length) return;
-    const cars=[]; let cur=[],sum=0;
-    groups.forEach(g=>{ if(sum+g.pax>cap && cur.length){ cars.push(cur); cur=[]; sum=0; } cur.push(g); sum+=g.pax; });
+    const cars=[]; let cur=[],sum=0,ci0=0;
+    groups.forEach(g=>{ const curCap=capList[Math.min(ci0,capList.length-1)]; if(sum+g.pax>curCap && cur.length){ cars.push(cur); cur=[]; sum=0; ci0++; } cur.push(g); sum+=g.pax; });
     if(cur.length) cars.push(cur);
     const flights=[...new Set(groups.map(g=>g.ret).filter(Boolean))];
     const totalPax=groups.reduce((s,g)=>s+g.pax,0);
@@ -6604,8 +6608,8 @@ function printBoardingList(){
           <div class="bl-ret">귀국안내<br>귀국일 <b>${_blEsc(date.slice(5).replace('-','/'))}(${wd})</b></div>
         </div>
         <div class="bl-dep">공항행 호텔출발시간 <b>${_blEsc(deptime)}</b></div>
-        <div class="bl-car"><b>${ci+1}호차</b></div>
-        <div class="bl-cnt">이 호차 탑승 <b>${carPax}명</b> &nbsp;|&nbsp; <span class="bl-dest">${destSummary}</span></div>
+        <div class="bl-car"><b>${ci+1}호차</b>${capList.length>1?` <span style="font-size:14pt;color:#555">(${capList[Math.min(ci,capList.length-1)]}인승)</span>`:''}</div>
+        <div class="bl-cnt">이 호차 탑승 <b>${carPax}명</b>${capList.length>1?` / 정원 ${capList[Math.min(ci,capList.length-1)]}`:''} &nbsp;|&nbsp; <span class="bl-dest">${destSummary}</span></div>
         <table class="bl"><thead><tr><th>그룹</th><th>대표자</th><th>인원</th><th>귀국지</th><th>귀국편</th></tr></thead><tbody>${rows}</tbody></table>
       </div>`;
     });
@@ -6619,8 +6623,8 @@ function printBoardingList(){
   .toolbar{position:sticky;top:0;background:#475569;color:#fff;padding:10px 16px;display:flex;gap:12px;align-items:center;z-index:9}
   .toolbar button{background:#fff;color:#475569;border:0;border-radius:6px;padding:7px 16px;font-weight:700;cursor:pointer}
   .page{width:297mm;min-height:420mm;background:#fff;margin:14px auto;padding:16mm;box-shadow:0 2px 10px rgba(0,0,0,.18);page-break-after:always}
-  .dir-banner{text-align:center;font-size:15pt;font-weight:800;color:#fff;border-radius:7px;padding:6px 0;margin-bottom:12px;letter-spacing:.08em}
-  .dir-out{background:#2f7d34}
+  .dir-banner{text-align:center;font-size:15pt;font-weight:800;border-radius:7px;padding:5px 0;margin-bottom:12px;letter-spacing:.08em;border:2.5px solid currentColor}
+  .dir-out{color:#2f7d34}
   .bl-hd{display:flex;justify-content:space-between;align-items:flex-start;border-bottom:3px solid #111;padding-bottom:8px}
   .bl-air{font-size:18pt;font-weight:800}
   .bl-mid{text-align:center}.bl-org{font-size:30pt;font-weight:900;line-height:1}.bl-fl{font-size:12pt;margin-top:4px}
@@ -6639,7 +6643,7 @@ function printBoardingList(){
   table.bl td.rm{font-weight:800}
   @media print{.toolbar{display:none}.page{margin:0;box-shadow:none}body{background:#fff}}
 </style></head><body>
-<div class="toolbar"><b>🛫 귀국팀 · 탑승명단 (A3)</b><button onclick="window.print()">🖨 인쇄</button><button onclick="window.close()">닫기</button><span style="font-size:12px;opacity:.85">정원 ${cap}명 기준 호차 분할</span></div>
+<div class="toolbar"><b>🛫 귀국팀 · 탑승명단 (A3)</b><button onclick="window.print()">🖨 인쇄</button><button onclick="window.close()">닫기</button><span style="font-size:12px;opacity:.85">차량 ${capLabel} 기준 호차 분할</span></div>
 ${pages}</body></html>`;
   const w=window.open('','_blank'); if(!w){ alert('팝업이 차단되었습니다. 허용 후 다시 시도하세요.'); return; }
   w.document.write(html); w.document.close();
@@ -6722,8 +6726,8 @@ function printArrivalRoster(){
   .toolbar{position:sticky;top:0;background:#475569;color:#fff;padding:10px 16px;display:flex;gap:12px;align-items:center;z-index:9}
   .toolbar button{background:#fff;color:#475569;border:0;border-radius:6px;padding:7px 16px;font-weight:700;cursor:pointer}
   .page{width:420mm;min-height:297mm;background:#fff;margin:14px auto;padding:12mm;box-shadow:0 2px 10px rgba(0,0,0,.18);page-break-after:always}
-  .dir-banner{text-align:center;font-size:14pt;font-weight:800;color:#fff;border-radius:7px;padding:5px 0;margin-bottom:8px;letter-spacing:.08em}
-  .dir-in{background:#c77f0a}
+  .dir-banner{text-align:center;font-size:14pt;font-weight:800;border-radius:7px;padding:5px 0;margin-bottom:8px;letter-spacing:.08em;border:2.5px solid currentColor}
+  .dir-in{color:#c77f0a}
   .ar-title{text-align:center;font-size:22pt;font-weight:800;letter-spacing:.1em}
   .ar-sub{text-align:center;font-size:13pt;margin:4px 0 10px}
   table.ar{width:100%;border-collapse:collapse;font-size:11pt}
