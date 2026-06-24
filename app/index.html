@@ -2131,6 +2131,7 @@ function filterTransfer(date, el){
 function renderTransfer(date){
   if(!date) return;
   const container = document.getElementById('transfer-content');
+  const tagMap = buildTagCodeMap();   // 렌더당 1회(행마다 재계산 방지 — 드래그 랙 해결)
 
   // 입국: dep == date, 출국: arr == date
   const inListBase  = processed.filter(r => r.dep === date);
@@ -2297,7 +2298,7 @@ function renderTransfer(date){
             const repNameCell = ti === 0
               ? `<strong>${r.repName||r.name}</strong>${agencyBadge}${teamBadgeHtml}${extraBadge}`
               : `<span style="color:var(--text3);padding-left:12px">↳ ${r.repName||r.name}</span>${extraBadge}`;
-            const _tc = r.isExtra ? {} : (buildTagCodeMap()[String(r.eventSeq||'').trim()]||{});
+            const _tc = r.isExtra ? {} : (tagMap[String(r.eventSeq||'').trim()]||{});
             const grpCode = r.isExtra ? '—' : makeTagCodeSafe(_tc.teamIdx||0, 0, _tc.accomPfx, _tc.memberCode, _tc.manualCode, _tc.pendingMember, _tc.eventSeq, _tc.year);
             const repBadge = r.isExtra ? '' : `<span class="tag" style="background:#ECEFE6;color:#5A6356;margin-left:4px;font-size:9px">REP</span>`;
             const rk = r.isExtra ? `tr_row_${date}_${fn}_extra_${r.extraId}` : `tr_row_${date}_${fn}_${r.eventSeq}`;
@@ -2622,6 +2623,7 @@ function saveDinnerVisitors(date){
 function renderDinner(date){
   if(!date) return;
   const container = document.getElementById('dinner-content');
+  const tagMap = buildTagCodeMap();   // 렌더당 1회(행마다 재계산 방지 — 드래그 랙 해결)
 
   const stayingTeams = processed.filter(r => r.accom && r.dep <= date && r.arr > date);
   const stayingSeqs = new Set(stayingTeams.map(r => String(r.eventSeq||'').trim()));
@@ -2724,9 +2726,9 @@ function renderDinner(date){
             ? `<span class="tag" style="background:var(--green-dim);color:var(--green2);margin-left:4px;font-size:9px">🆕 現地新規</span>`
             : `<span class="tag" style="background:var(--amber-dim);color:var(--amber2);margin-left:4px;font-size:9px">👥 現地合流</span>`)
         : '';
-      const _dnTc = p.isExtra ? {} : (buildTagCodeMap()[String(p.eventSeq||'').trim()]||{});
+      const _dnTc = p.isExtra ? {} : (tagMap[String(p.eventSeq||'').trim()]||{});
       const grpCode = p.isExtra ? '—' : makeTagCodeSafe(_dnTc.teamIdx||0, 0, _dnTc.accomPfx, _dnTc.memberCode, _dnTc.manualCode, _dnTc.pendingMember, _dnTc.eventSeq, _dnTc.year);
-      const excludedStyle = p._excluded ? 'opacity:.35;text-decoration:line-through' : '';
+      const excludedStyle = p._excluded ? 'text-decoration:line-through;color:var(--red2);opacity:.7' : '';
       const extraRowStyle = p.isExtra ? 'background:rgba(100,117,72,.06)' : '';
       const trStyle = [excludedStyle, extraRowStyle].filter(Boolean).join(';');
 
