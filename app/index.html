@@ -5714,15 +5714,11 @@ function openDispatchInputModal(seq){
         <button onclick="document.getElementById('dispatch-input-modal-bg').remove()" style="background:none;border:none;color:var(--text3);font-size:18px;cursor:pointer;line-height:1;padding:2px 6px">✕</button>
       </div>
       <div class="dl-modal-body">
-        <div style="font-size:11px;font-weight:600;color:var(--text2);margin-bottom:6px">🏨 部屋数 <span style="font-size:10px;font-weight:400;color:var(--text3)">— 비워두면 자동 계산 (현재: ${d.roomCnt})</span></div>
-        <input type="text" id="dispatch-room-inp" value="${(man.roomCnt||'')}" placeholder="例: 3室 (2人1室) + 1室"
-          style="width:100%;background:var(--surface2);border:1px solid var(--border);border-radius:5px;padding:6px 9px;font-size:11px;color:var(--text);outline:none;margin-bottom:14px">
-
-        <div style="font-size:11px;font-weight:600;color:var(--text2);margin-bottom:6px">📝 現地メモ (참고사항 추가) <span style="font-size:10px;font-weight:400;color:var(--text3)">— 엠클릭 비고 아래에 함께 인쇄됩니다</span></div>
-        <textarea id="dispatch-memo-inp" rows="3" placeholder="例: レイトチェックアウト希望 / アレルギー: えび"
+        <div style="font-size:11px;font-weight:600;color:var(--text2);margin-bottom:6px">📝 現地メモ (참고사항 추가) <span style="font-size:10px;font-weight:400;color:var(--text3)">— 現地メモ 칸에 함께 인쇄됩니다</span></div>
+        <textarea id="dispatch-memo-inp" rows="4" placeholder="例: レイトチェックアウト希望 / アレルギー: えび"
           style="width:100%;background:var(--surface2);border:1px solid var(--border);border-radius:5px;padding:6px 9px;font-size:11px;color:var(--text);outline:none;resize:vertical;font-family:var(--sans)">${(man.memo||'')}</textarea>
 
-        <div style="font-size:10px;color:var(--text3);margin-top:10px">💾 저장 시 현재 월 세션(localStorage)에 보관되며, 인쇄·Excel 모두 자동 반영됩니다.</div>
+        <div style="font-size:10px;color:var(--text3);margin-top:10px">💾 저장 시 현재 월 세션(localStorage)에 보관되며, 수배서 인쇄에 자동 반영됩니다.</div>
       </div>
       <div class="dl-modal-foot">
         <button class="btn-dl" onclick="document.getElementById('dispatch-input-modal-bg').remove()" style="font-size:11px">취소</button>
@@ -5736,10 +5732,11 @@ function openDispatchInputModal(seq){
 function saveDispatchInput(seq){
   const bg = document.getElementById('dispatch-input-modal-bg');
   if(!bg) return;
-  const roomCnt = String((bg.querySelector('#dispatch-room-inp')||{}).value||'').trim();
   const memo = String((bg.querySelector('#dispatch-memo-inp')||{}).value||'').trim();
   const key = 'dispatch_' + String(seq||'').trim();
-  const teeoff = (manualData[key] && manualData[key].teeoff) || {};  // 기존 티오프 보존 (모달 입력 제거됨)
+  const prev = manualData[key] || {};
+  const teeoff = prev.teeoff || {};           // 기존 티오프 보존 (모달 입력 제거됨)
+  const roomCnt = prev.roomCnt || '';         // 방수 입력 메뉴 제거 → 기존값만 보존(신규 입력 없음)
   if(Object.keys(teeoff).length || roomCnt || memo){
     manualData[key] = { teeoff, roomCnt, memo };
   } else {
