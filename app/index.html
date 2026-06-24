@@ -198,6 +198,19 @@ tr:hover td{background:var(--surface2)}
 .cdb-ym{font-weight:800;color:var(--green2)}
 .cdb-meta{color:var(--text2)}
 .cdb-cnt{font-weight:700;color:var(--text)}
+/* 인앱 설명서(접이식) — 각 화면 상단 */
+.help-box{border:1px solid var(--border);background:var(--surface2);border-radius:10px;margin-bottom:14px;overflow:hidden}
+.help-box>summary{cursor:pointer;list-style:none;padding:9px 14px;font-size:12.5px;font-weight:800;color:var(--accent2);display:flex;align-items:center;gap:7px;user-select:none}
+.help-box>summary::-webkit-details-marker{display:none}
+.help-box>summary::after{content:'▾';margin-left:auto;font-size:11px;opacity:.65}
+.help-box[open]>summary::after{content:'▴'}
+.help-box .help-body{padding:6px 16px 14px;font-size:12px;color:var(--text2);line-height:1.65;border-top:1px solid var(--border)}
+.help-box .help-body h4{font-size:11.5px;color:var(--accent2);margin:11px 0 4px;font-weight:800;letter-spacing:.02em}
+.help-box .help-body h4:first-child{margin-top:2px}
+.help-box .help-body ul{margin:3px 0 3px 0;padding-left:17px}
+.help-box .help-body li{margin:3px 0}
+.help-box .help-body .kc{font-family:var(--mono);background:var(--surface);border:1px solid var(--border);border-radius:4px;padding:0 5px;font-weight:700;font-size:11px;color:var(--text)}
+.help-box .help-body b{color:var(--text)}
 
 /* ════════════════════════════════════════════════════════════════ */
 /* 컬럼 정렬 통일 — 헤더와 값 정렬 일치 (식별 코드/숫자: center, 텍스트: left, 금액: right) */
@@ -412,6 +425,25 @@ tr.draggable-row td:first-child::before{content:'⠿';color:var(--text3);margin-
 <!-- ── UPLOAD ───────────────────────────────────────────── -->
 <div class="section active" id="sec-upload">
   <div id="cloud-data-bar" class="cloud-data-bar" style="display:none"></div>
+  <details class="help-box">
+    <summary>ℹ️ 시작 가이드 — 데이터 등록 · 월별 세션 · 클라우드</summary>
+    <div class="help-body">
+      <h4>흐름</h4>
+      엠클릭 엑셀 2종(<b>예약 리스트</b> + <b>일행별 예약</b>) 업로드 → <b>데이터 분석 시작</b> → 5개 모듈(네임택·송영·수배서·저녁·정산)에서 인쇄.
+      <h4>월별 세션</h4>
+      <ul>
+        <li>여러 달(예 6~9월)을 한 번에 올려도 <b>출발월별로 자동 분리·등록</b>됩니다.</li>
+        <li>상단 「📅 등록된 데이터」 칩 또는 세션바에서 <b>월 전환</b>(재업로드 불필요).</li>
+      </ul>
+      <h4>클라우드 · 로그인</h4>
+      <ul>
+        <li>분석을 마치면 <b>자동 클라우드 저장</b> → 다른 PC에서 접속 시 <b>최신 세션 자동 로드</b>.</li>
+        <li><b>로그인 필수</b> — 계정은 로그인 화면에서 발급 요청 → 관리자 승인.</li>
+      </ul>
+      <h4>태그코드</h4>
+      모든 산출물의 식별코드 <span class="kc">MI-A-01</span> = 요일(火K/木M/日N) + 출발지(인천I/부산P) − 팀(A·B…) − 개인번호. 자세한 건 <b>네임택</b> 설명 참조.
+    </div>
+  </details>
   <div class="card">
     <div class="card-title" data-i18n="up_cardTitle">ファイルアップロード</div>
     <div class="upload-grid" style="align-items:stretch">
@@ -447,6 +479,28 @@ tr.draggable-row td:first-child::before{content:'⠿';color:var(--text3);margin-
 
 <!-- ── ⑦ 現地精算表 ───────────────────────────────────── -->
 <div class="section" id="sec-settle">
+  <details class="help-box">
+    <summary>ℹ️ 현지 정산표 설명 — B2B 정산은 어떻게 계산?</summary>
+    <div class="help-body">
+      <h4>무엇</h4>
+      현지 거래처 <b>B2B 정산</b> (메리트투어 → 14hills). 내부 정산과 별개.
+      <h4>요율 (통화 JPY)</h4>
+      <ul>
+        <li>체재비 <b>¥15,000</b> / 박·인</li>
+        <li>왕복 송영비 <b>¥12,000</b> / 인</li>
+        <li>※ 그린피·카트·식사는 <b>현지정산 항목 아님</b></li>
+      </ul>
+      <h4>계산</h4>
+      <ul>
+        <li>숙박비 = 인원 × 박수 × 15,000</li>
+        <li>송영비 = 인원 × 12,000</li>
+        <li>합계 = 숙박비 + 송영비</li>
+        <li><b>실정산액 = 총액 − 차감</b> (싱글차지 선납·쿠폰·포인트 등)</li>
+      </ul>
+      <h4>御請求書</h4>
+      청구서 출력/PDF로 발행.
+    </div>
+  </details>
   <div id="diff-banner-wrap"></div>
   <div id="settle-total-box" class="settle-total-box" style="display:none">
     <div><div style="font-size:11px;color:var(--text2);font-weight:600">총 지급액 (메리트투어 → 14hills · B2B 정산)</div><div style="font-size:11px;color:var(--text3);font-family:var(--mono);margin-top:3px" id="settle-sub"></div></div>
@@ -501,6 +555,28 @@ tr.draggable-row td:first-child::before{content:'⠿';color:var(--text3);margin-
 
 <!-- ── ③ 送迎配車表 ────────────────────────────────────── -->
 <div class="section" id="sec-transfer">
+  <details class="help-box">
+    <summary>ℹ️ 송영 설명 — 입국팀 / 귀국팀 두 가지 명단</summary>
+    <div class="help-body">
+      <h4>무엇</h4>
+      공항(中部国際空港 NGO·나고야) ↔ 14hills 송영. <b>입국팀</b>과 <b>귀국팀</b> 두 종류를 따로 인쇄합니다.
+      <h4>🛬 입국팀 — 到着者名簿 (amber)</h4>
+      <ul>
+        <li>일본 <b>입국(도착)일</b> = 한국 출국일 기준</li>
+        <li><b>현지도착 시각 순</b>으로 정렬 (일행별예약의 現地到着 시각)</li>
+        <li>入国便 · 到着時刻 · 태그코드 · 性別 표기</li>
+      </ul>
+      <h4>🛫 귀국팀 — 탑승명단 (green)</h4>
+      <ul>
+        <li><b>귀국일</b> 기준 · <b>인천 → 부산 순</b> 정렬</li>
+        <li>그룹 · 대표자 · 인원 · <b>귀국지(ICN/PUS)</b> · 귀국편</li>
+        <li>정원(기본 <b>45명</b>) 기준 <b>호차 자동분할</b></li>
+        <li>요약: "인천으로 X명 · 부산으로 Y명 · 총 Z명 귀국"</li>
+      </ul>
+      <h4>요금</h4>
+      왕복 송영비 <b>¥12,000/인</b> (숙박 포함 건) · 이동 약 2시간(휴게소 1회).
+    </div>
+  </details>
   <div class="rule-box">
     <strong>🚌 송영 운영 안내:</strong> 中部国際空港セントレア(NGO·나고야) ↔ 14hills &nbsp;·&nbsp;
     이동 <strong>약 2시간</strong>(휴게소 1회 경유) &nbsp;·&nbsp;
@@ -524,6 +600,24 @@ tr.draggable-row td:first-child::before{content:'⠿';color:var(--text3);margin-
 
 <!-- ── ⑤ 夕食名前版 ────────────────────────────────────── -->
 <div class="section" id="sec-dinner">
+  <details class="help-box">
+    <summary>ℹ️ 저녁 명단표 설명 — 식수 집계는 어떻게?</summary>
+    <div class="help-body">
+      <h4>무엇</h4>
+      일자별 체류 인원을 팀/테이블 단위로 배치. レストラン名札 · 夕食オーダー A3 인쇄.
+      <h4>식수 집계 로직 (날짜별)</h4>
+      <ul>
+        <li><b>조식(朝食)</b> = 전날 묵은 인원 (입국일 &lt; 그날 ≤ 귀국일)</li>
+        <li><b>중식(昼食)</b>: 중간 체류일 ○ / 입국일 — 서울(ICN) ○(가츠카레)·부산(PUS) ✕ / 귀국일 — 부산 ○(먹고 출발)·서울 ✕</li>
+        <li><b>석식(夕食)</b> = 그날 체류 전원</li>
+        <li>「日本」행 = 일본 고객(비지터) 수기 식수 → 합계에 가산</li>
+      </ul>
+      <h4>표기</h4>
+      태그코드 · 滞在日次(N/총 日目) · 테이블No · <b>팀뱃지</b>(팀명 있으면 인쇄 포함) · 참고사항(예약/현지 비고).
+      <h4>메뉴</h4>
+      요일별 기본·업그레이드·추가 메뉴는 아래 안내 박스 참조.
+    </div>
+  </details>
   <div class="rule-box">
     <strong>🍽 저녁 메뉴 (요일별 제공 · 夕食メニュー)</strong><br>
     일요일 삼겹살 · 월요일 포틴힐즈 정식요리(会席料理) · 화요일 해물전골 · 수요일 닭고기 완자전골 · 목요일 돼지샤브샤브 · 금요일 불고기 · 토요일 해물 순두부찌개<br>
@@ -559,6 +653,26 @@ tr.draggable-row td:first-child::before{content:'⠿';color:var(--text3);margin-
 
 <!-- ── ① ネームタグ ─────────────────────────────────────────── -->
 <div class="section" id="sec-nametag">
+  <details class="help-box">
+    <summary>ℹ️ 네임택 설명 — 태그코드는 어떻게 읽나요?</summary>
+    <div class="help-body">
+      <h4>무엇</h4>
+      고객 1인 = 라벨 1장. <b>A-one 28466</b> 라벨시트(18면·53.3×42.3mm)에 맞춰 인쇄합니다(시작 칸 지정 가능).
+      <h4>태그코드 — <span class="kc">MI-A-01</span> 읽는 법</h4>
+      <ul>
+        <li><b>① 요일</b> = 입국 송영 요일(일본 입국 = 한국 출국일): 火 <span class="kc">K</span> · 木 <span class="kc">M</span> · 日 <span class="kc">N</span></li>
+        <li><b>② 출발지</b>: 인천 <span class="kc">I</span> · 부산 <span class="kc">P</span> · 청주 <span class="kc">C</span> · 대구 <span class="kc">T</span></li>
+        <li><b>③ 팀</b>: 같은 요일+출발지 묶음에서 A·B·C… (출/귀국 사이클마다 리셋 → 코드 재사용)</li>
+        <li><b>④ 개인번호</b>: 01·02… 일행 순번</li>
+      </ul>
+      예) <span class="kc">MI-A-01</span> = 목·인천 A팀 1번 &nbsp;·&nbsp; <span class="kc">KP-B-02</span> = 화·부산 B팀 2번
+      <h4>라벨 표기</h4>
+      <ul>
+        <li>성별 <b>M/F</b> · <b>同行 N名</b>(그 팀 총원)</li>
+        <li>태그코드 <b>글자색 = 출발지별</b>: 인천 파랑 · 부산 청록 · 청주 호박 · 대구 보라</li>
+      </ul>
+    </div>
+  </details>
   <div class="rule-box">
     <strong>🏷 네임택 안내:</strong> APIS 등록 탑승객 기준으로 자동 생성 · 미등록 고객은 <span style="color:var(--text3)">(미등록)</span> 표시 &nbsp;·&nbsp;
     입국일 날짜 칩으로 일자별 확인 · 「🖨 ネームタグ 인쇄」로 A-one 28466 라벨시트(18면·53.3×42.3mm)에 맞춰 미리보기→인쇄
@@ -578,6 +692,24 @@ tr.draggable-row td:first-child::before{content:'⠿';color:var(--text3);margin-
 
 <!-- ── ③ 現地手配書 ───────────────────────────────────── -->
 <div class="section" id="sec-dispatch">
+  <details class="help-box">
+    <summary>ℹ️ 현지 수배서 설명 — 앞면·뒷면, 객실 변경</summary>
+    <div class="help-body">
+      <h4>무엇</h4>
+      행사 1건 = <b>양면 1장</b>(현지 호텔·거래처·스태프용). 「🖨 미리보기」로 A4 양면 인쇄.
+      <h4>앞면</h4>
+      행사·항공·숙박·고객명단·골프장 + <b>参考事項</b>(엠클릭 예약 비고·현지비고) / <b>現地メモ</b>(현장 기입).
+      <h4>뒷면 — 現地発生分 記入表</h4>
+      현장에서 발생한 추가분을 손으로 기입. 区分: ① ラウンド追加 ② 飲食 ③ 宿泊(연박·객실변경) ④ 送迎 ⑤ ルームチャージ(정원미달 추가요금) ⑥ その他.
+      <h4>객실 변경 (예약과 다르게 현장 배정)</h4>
+      <ul>
+        <li>「📝 입력」 → <b>実際の客室</b> 선택 (예: 카라반 예약 → 패밀리룸/트윈)</li>
+        <li>표·인쇄에 <b>예약 객실 취소선 → 변경 객실 + 現地変更</b> 으로 표시(메리트 예약 원본은 보존)</li>
+      </ul>
+      <h4>마스킹</h4>
+      개인정보(여권·전화번호) 숨김 토글 — 기본 ON(생년월일까지만 표기).
+    </div>
+  </details>
   <div class="rule-box">
     <strong>📋 現地手配書 일괄 생성:</strong> 엠클릭에서 행사별 수배서를 건건이 열어 다운로드할 필요 없이, 현재 월 세션의 <strong>전체 행사 수배서</strong>를 한 번에 생성합니다. <strong>1행사 = 2페이지 고정</strong> — 앞면은 手配書(행사·항공·숙박·고객·라운딩 정보), 뒷면은 <strong>現地発生分 記入表</strong>입니다. 프린터에서 <strong>양면 인쇄(긴 가장자리 제본)</strong>를 선택하면 앞·뒤가 자동으로 맞춰집니다. 현지에서 발생한 추가 항목은 뒷면에 기입 후 ⑤ 現地精算表에 반영하세요.
   </div>
