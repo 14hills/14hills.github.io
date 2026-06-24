@@ -226,12 +226,12 @@ tr:hover td{background:var(--surface2)}
 #nametag-content table td:nth-child(9)   /* 施設 */
 { text-align: center; }
 
-/* ③ 송영 [No, イベント番号, タグコード, 予約者, 氏名, 英文名, 人数, 出発地, 途中立寄り, 到着地, 操作] */
+/* ③ 송영 [No, イベント番号, タグコード, 予約者, 氏名, 英文名, 人数, 出発地, 到着地, 操作] */
 #transfer-content table td:nth-child(1),  /* No */
 #transfer-content table td:nth-child(2),  /* イベント番号 */
 #transfer-content table td:nth-child(3),  /* タグコード */
 #transfer-content table td:nth-child(7),  /* 人数 */
-#transfer-content table td:nth-child(11)  /* 操作 */
+#transfer-content table td:nth-child(10)  /* 操作 */
 { text-align: center; }
 
 /* ④ 저녁 [No, イベント番号, タグコード, 予約者, 滞在日次, 英文名, 人数, テーブルNo, 参考事項, 予約備考, 現地備考, 操作] */
@@ -608,7 +608,7 @@ tr.draggable-row td:first-child::before{content:'⠿';color:var(--text3);margin-
       <h4>식수 집계 로직 (날짜별)</h4>
       <ul>
         <li><b>조식(朝食)</b> = 전날 묵은 인원 (입국일 &lt; 그날 ≤ 귀국일)</li>
-        <li><b>중식(昼食)</b>: 중간 체류일 ○ / 입국일 — 서울(ICN) ○(가츠카레)·부산(PUS) ✕ / 귀국일 — 부산 ○(먹고 출발)·서울 ✕</li>
+        <li><b>중식(昼食)</b>: 중간 체류일 ○(주방 점심) / 입국일 — 서울(ICN)은 <b>샌드위치(간편식)</b> → 「入国サンド」로 별도 표기(점심 합계 미가산)·부산(PUS) ✕ / 귀국일 — 부산 ○(먹고 출발)·서울 ✕</li>
         <li><b>석식(夕食)</b> = 그날 체류 전원</li>
         <li>「日本」행 = 일본 고객(비지터) 수기 식수 → 합계에 가산</li>
       </ul>
@@ -751,8 +751,8 @@ tr.draggable-row td:first-child::before{content:'⠿';color:var(--text3);margin-
 // ════════════════════════════════════════════════════════════════
 const HDRS = {
   SETTLE: ['No','イベント番号','区分','会員権区分','代表者名','英文名','出発日','到着日','泊数','人数','施設','部屋タイプ','料金(¥/人/泊)','宿泊費(¥)','送迎費(¥)','合計(¥)','備考','予約備考','現地備考'],
-  TRANSFER_IN:  ['No','イベント番号','タグコード','予約者(チーム)','氏名','英文名','人数','出発地','途中立寄り','到着地','操作'],
-  TRANSFER_OUT: ['No','イベント番号','タグコード','予約者(チーム)','氏名','英文名','人数','出発地','途中立寄り','到着地','操作'],
+  TRANSFER_IN:  ['No','イベント番号','タグコード','予約者(チーム)','氏名','英文名','人数','出発地','到着地','操作'],
+  TRANSFER_OUT: ['No','イベント番号','タグコード','予約者(チーム)','氏名','英文名','人数','出発地','到着地','操作'],
   DINNER: ['No','イベント番号','タグコード','予約者(チーム)','滞在日次','英文名','人数','テーブルNo','参考事項','予約備考','現地備考','操作'],
   NAMETAG: ['No','タグコード','名前','英文名','入国便','帰国便','泊数','人数','施設'],
   LOCAL: ['No','区分','イベント番号','代表者名','商品名','出発日','到着日','泊数','人数','取消','備考','販売金額(¥)'],
@@ -2251,17 +2251,11 @@ function renderTransfer(date){
         <div style="font-size:12px;font-weight:700;color:var(--accent2);margin-bottom:.5rem;padding:6px 10px;background:var(--surface3);border-radius:6px">
           ${FLIGHT_LABELS[fn]||fn} &nbsp; ${FLIGHT_TIMES[fn]||''} — ${totalPax}名
         </div>
-        <div style="display:grid;grid-template-columns:1fr 1fr 1fr 1fr 1fr;gap:8px;margin-bottom:.75rem;padding:0 2px">
-          <div><div style="font-size:9px;color:var(--text3);margin-bottom:3px">車両タイプ</div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:.75rem;padding:0 2px">
+          <div><div style="font-size:9px;color:var(--text3);margin-bottom:3px">車両タイプ <span style="color:var(--accent3)">(인쇄 반영)</span></div>
             <input class="editable" value="${md.vehicle||''}" onchange="saveField('${k}','vehicle',this.value)" placeholder="マイクロバス / 大型バス..."></div>
-          <div><div style="font-size:9px;color:var(--text3);margin-bottom:3px">ドライバー</div>
+          <div><div style="font-size:9px;color:var(--text3);margin-bottom:3px">ドライバー <span style="color:var(--accent3)">(인쇄 반영)</span></div>
             <input class="editable" value="${md.driver||''}" onchange="saveField('${k}','driver',this.value)" placeholder="名前"></div>
-          <div><div style="font-size:9px;color:var(--text3);margin-bottom:3px">ルート</div>
-            <input class="editable wide" value="${md.route||''}" onchange="saveField('${k}','route',this.value)" placeholder="${isIn?'中部空港→14hills...':'14hills→中部空港...'}"></div>
-          <div><div style="font-size:9px;color:var(--text3);margin-bottom:3px">途中立寄り <span style="color:var(--accent3)">(경유지)</span></div>
-            <input class="editable wide" value="${md.stopover||''}" onchange="saveField('${k}','stopover',this.value)" placeholder="例: スーパー / コンビニ / 温泉..."></div>
-          <div><div style="font-size:9px;color:var(--text3);margin-bottom:3px">備考</div>
-            <input class="editable wide" value="${md.remarks||''}" onchange="saveField('${k}','remarks',this.value)" placeholder="参考事項"></div>
         </div>
         <div class="table-wrap"><table id="tr-tbl-${date}-${fn.replace(/\s/g,'')}"><thead>${hdrHtml(hdr)}</thead><tbody>`;
 
@@ -2275,7 +2269,7 @@ function renderTransfer(date){
 
         const tag = accomTag(accomName);
         const accomPax = accomRows.filter(r=>!r._excluded).reduce((s,r)=>s+(r.pax||1),0);
-        html += `<tr class="tr-section"><td colspan="11"><span class="tag ${tag}">${accomEngName(accomName)}</span> &nbsp; ${accomRows.length}件 · ${accomPax}名</td></tr>`;
+        html += `<tr class="tr-section"><td colspan="10"><span class="tag ${tag}">${accomEngName(accomName)}</span> &nbsp; ${accomRows.length}件 · ${accomPax}名</td></tr>`;
 
         // 예약자명 기준 팀 묶음
         const teamMap = {};
@@ -2333,7 +2327,6 @@ function renderTransfer(date){
               <td style="font-family:var(--mono);font-size:10px">${r.isExtra?(r.engFull||''):getEngNameLocal(r.eventSeq)}</td>
               <td class="num-center">${r.pax||1}</td>
               <td style="font-size:10px">${depLabel}</td>
-              <td><input class="editable" value="${rmd.stopover||''}" onchange="saveField('${rk}','stopover',this.value)" placeholder="例: スーパー立寄り"></td>
               <td style="font-size:10px">${arrLabel}</td>
               <td style="text-align:center">${actionCell}</td>
             </tr>`;
@@ -2344,7 +2337,7 @@ function renderTransfer(date){
       // 미지정 숙소(추가 명단 중 4숙소 미해당)
       const unaccomRows = grp.filter(r => r.isExtra && !accomOrder.includes(r.accom));
       if(unaccomRows.length){
-        html += `<tr class="tr-section"><td colspan="11" style="background:var(--amber-dim)"><span style="font-weight:700;color:var(--amber2)">独立 (追加명단)</span></td></tr>`;
+        html += `<tr class="tr-section"><td colspan="10" style="background:var(--amber-dim)"><span style="font-weight:700;color:var(--amber2)">独立 (追加명단)</span></td></tr>`;
         unaccomRows.forEach(r => {
           if(r._excluded && !showExcluded) return;
           no++;
@@ -2368,7 +2361,6 @@ function renderTransfer(date){
             <td style="font-family:var(--mono);font-size:10px">${r.engFull||''}</td>
             <td class="num-center">${r.pax||1}</td>
             <td style="font-size:10px">${depLabel}</td>
-            <td><input class="editable" value="${rmd.stopover||''}" onchange="saveField('${rk}','stopover',this.value)" placeholder="例: スーパー立寄り"></td>
             <td style="font-size:10px">${arrLabel}</td>
             <td style="text-align:center">${actionCell}</td>
           </tr>`;
@@ -5284,7 +5276,7 @@ function generateAndPrintDinnerOrder(selectedDates, selectedAccoms){
 
   // 팀별 출발지(부산 여부) — 대표 승객 origin 우선 → 일반 승객 origin 보완
   //  · 부산편(ZE)은 늦은 시간대 → 입국일 점심 없음 / 귀국일은 점심 먹고 출발
-  //  · 서울편(TW)은 이른 시간대 → 입국일 점심(가츠카레) / 귀국일 점심 없음
+  //  · 서울편(TW)은 이른 시간대 → 입국일 점심은 샌드위치(간편식, 별도 집계) / 귀국일 점심 없음
   const seqIsPus = {};
   const _isPus = (o) => { const u=String(o||'').toUpperCase(); return String(o||'').includes('부산')||String(o||'').includes('김해')||u==='PUS'||u==='BUS'||u==='PNS'; };
   passengers.filter(p=>p.isRep).forEach(p=>{ const seq=String(p.eventSeq||'').trim(); if(seq) seqIsPus[seq]=_isPus(p.origin); });
@@ -5384,23 +5376,23 @@ function generateAndPrintDinnerOrder(selectedDates, selectedAccoms){
     // 그 날짜의 조식·중식 인원 합계
     //  · 조식(朝食) = 전날 밤 묵은 인원(그 날 아침 식사자, 출발일 손님 포함)  dep < date && arr >= date
     //  · 중식(昼食) = 출발지·방향별로 분리 집계(아래 규칙)
-    //     - 중간 체류일      : 점심 O
-    //     - 입국일 서울(ICN) : 점심 O(가츠카레)  → lunchArrICN 로 분리
+    //     - 중간 체류일      : 점심 O (주방 점심)            → lunchContinue
+    //     - 입국일 서울(ICN) : 점심은 샌드위치(간편식)        → lunchArrSand 로 별도 표기(본 합계 미가산)
     //     - 입국일 부산(PUS) : 점심 X(저녁부터)  → 제외
     //     - 귀국일 부산(PUS) : 점심 O(먹고 출발) → 継続에 합산
     //     - 귀국일 서울(ICN) : 점심 X(오전 출발) → 제외
     const sumPax = (rs) => rs.reduce((s,r)=>s+(parseInt(r.pax,10)||0),0);
     const breakfastN = sumPax(processed.filter(r => r.accom && (!_accomSet || _accomSet.has(r.accom)) && r.dep <  date && r.arr >= date));
-    let lunchContinue = 0, lunchArrICN = 0;
+    let lunchContinue = 0, lunchArrSand = 0;
     processed.forEach(r => {
       if(!r.accom || (_accomSet && !_accomSet.has(r.accom))) return;
       const pax = parseInt(r.pax,10)||0; if(!pax) return;
       const isPus = !!seqIsPus[String(r.eventSeq||'').trim()];
-      if(r.dep < date && r.arr > date) lunchContinue += pax;        // 중간 체류일
-      else if(r.dep === date){ if(!isPus) lunchArrICN += pax; }     // 입국일: 서울만 점심(가츠카레)
+      if(r.dep < date && r.arr > date) lunchContinue += pax;        // 중간 체류일: 주방 점심
+      else if(r.dep === date){ if(!isPus) lunchArrSand += pax; }    // 입국일 서울: 샌드위치(별도 집계)
       else if(r.arr === date){ if(isPus)  lunchContinue += pax; }   // 귀국일: 부산만 점심
     });
-    const lunchN = lunchContinue + lunchArrICN;
+    const lunchN = lunchContinue;   // 본 점심(주방) 합계 — 입국 샌드위치는 미가산
     // 일본 고객(비지터) 수기 식수 (날짜별 저장)
     const dv = manualData['dinnerVisitors_'+date] || {};
     const dvB = parseInt(dv.b,10)||0, dvL = parseInt(dv.l,10)||0, dvD = parseInt(dv.d,10)||0;
@@ -5432,7 +5424,7 @@ function generateAndPrintDinnerOrder(selectedDates, selectedAccoms){
       <table class="do-mealsum">
         <thead><tr><th class="ms-rowh"></th><th>朝食</th><th>昼食</th><th>夕食</th></tr></thead>
         <tbody>
-          <tr class="ms-resv"><td class="ms-rowh">予約</td><td>${breakfastN}</td><td>${lunchN}${lunchArrICN?`<span class="ms-sub">入国${lunchArrICN}</span>`:''}</td><td>${paxCnt}</td></tr>
+          <tr class="ms-resv"><td class="ms-rowh">予約</td><td>${breakfastN}</td><td>${lunchN}${lunchArrSand?`<span class="ms-sub">入国サンド ${lunchArrSand}</span>`:''}</td><td>${paxCnt}</td></tr>
           <tr class="ms-jp"><td class="ms-rowh">日本</td><td>${dvB||''}</td><td>${dvL||''}</td><td>${dvD||''}</td></tr>
           <tr class="ms-total"><td class="ms-rowh">合計</td><td>${breakfastN+dvB}</td><td>${lunchN+dvL}</td><td>${paxCnt+dvD}</td></tr>
         </tbody>
@@ -5470,10 +5462,11 @@ function generateAndPrintDinnerOrder(selectedDates, selectedAccoms){
   .do-meta { font-size: 11pt; text-align: right; color: #555; line-height: 1.4; }
   .do-table { width: 100%; border-collapse: collapse; table-layout: fixed; }
   .do-table th {
-    background: #1A2540; color: #fff;
-    font-size: 12pt; font-weight: 700;
+    background: #fff; color: #1A2540;
+    font-size: 12pt; font-weight: 800;
     padding: 4mm 1mm; text-align: center;
-    border: 0.5pt solid #1A2540;
+    border: 0.5pt solid #b8c0d0;
+    border-bottom: 2.5pt solid #1A2540;
     letter-spacing: 1pt;
   }
   .do-table td {
@@ -5491,16 +5484,15 @@ function generateAndPrintDinnerOrder(selectedDates, selectedAccoms){
   .do-table td.orig.icn { color: #1A4D8F; }
   .do-table td.orig.pus { color: #B45309; }
   .do-table td.grp { font-family: 'Consolas', monospace; font-size: 11pt; font-weight: 700; }
-  .do-table tbody tr:nth-child(even) td { background: #f4f6fa; }
   .do-mealsum { margin-top: 5mm; border-collapse: collapse; }
   .do-mealsum th, .do-mealsum td { border: 1.5pt solid #1A2540; padding: 2mm 9mm; text-align: center; }
-  .do-mealsum th { font-size: 15pt; font-weight: 800; color: #fff; background: #1A2540; letter-spacing: 2pt; }
+  .do-mealsum th { font-size: 15pt; font-weight: 800; color: #1A2540; background: #fff; letter-spacing: 2pt; border-bottom: 2.5pt solid #1A2540; }
   .do-mealsum td { font-size: 19pt; font-weight: 700; color: #1A2540; }
-  .do-mealsum .ms-rowh { font-size: 14pt; font-weight: 800; background: #f4f6fa; letter-spacing: 2pt; }
+  .do-mealsum .ms-rowh { font-size: 14pt; font-weight: 800; background: #fff; letter-spacing: 2pt; }
   .do-mealsum .ms-sub { display: block; font-size: 10pt; font-weight: 700; color: #B45309; letter-spacing: 0.5pt; margin-top: 1mm; }
   .do-mealsum .ms-jp td { color: #1A4D8F; }
-  .do-mealsum .ms-total td { font-size: 30pt; font-weight: 800; color: #1A4D8F; background: #eaf0fa; }
-  .do-mealsum .ms-total .ms-rowh { color: #1A2540; background: #dde6f5; font-size: 18pt; }
+  .do-mealsum .ms-total td { font-size: 30pt; font-weight: 800; color: #1A4D8F; background: #fff; }
+  .do-mealsum .ms-total .ms-rowh { color: #1A2540; background: #fff; font-size: 18pt; }
   @media print {
     html, body { background: #fff; }
     .do-toolbar { display: none; }
@@ -6611,7 +6603,10 @@ function printBoardingList(){
     cars.forEach((car,ci)=>{
       const carPax=car.reduce((s,g)=>s+g.pax,0);
       const rows=car.map(g=>{ const oj=g.oc&&g.dep&&g.oc!==g.dep; // 오픈조: 출발지≠귀국지
-        return `<tr><td class="g">${_blEsc(g.code)}</td><td class="nm">${_blEsc(g.rep)}</td><td class="pr">${g.pax}</td><td class="dp">${_blEsc(g.dep)}</td><td class="og"${oj?' style="color:#c0392b;font-weight:800"':''}>${_blEsc(g.oc)}${oj?' ▲':''}</td><td class="rm" style="color:${_blFlightColor(g.ret)}">${_blEsc(g.ret)}</td></tr>`; }).join('');
+        return `<tr><td class="g">${_blEsc(g.code)}</td><td class="nm">${_blEsc(g.rep)}</td><td class="pr">${g.pax}</td><td class="og"${oj?' style="color:#c0392b;font-weight:800"':''}>${_blEsc(g.oc)}${oj?' ▲':''}</td><td class="rm" style="color:${_blFlightColor(g.ret)}">${_blEsc(g.ret)}</td></tr>`; }).join('');
+      // 配車(車両·기사) — 송영 화면 입력값(tr_{date}_{귀국편})에서 끌어옴
+      const carFlights=[...new Set(car.map(g=>g.ret).filter(Boolean))];
+      const carDispatch=carFlights.map(fn=>{ const m=(typeof manualData!=='undefined'&&manualData['tr_'+date+'_'+fn])||{}; if(!m.vehicle&&!m.driver) return ''; return `<b>${_blEsc(fn)}</b> ${m.vehicle?'車両 '+_blEsc(m.vehicle):''}${m.vehicle&&m.driver?' / ':''}${m.driver?'기사 '+_blEsc(m.driver):''}`; }).filter(Boolean).join(' &nbsp;·&nbsp; ');
       pages+=`<div class="page">
         <div class="dir-banner dir-out">🛫 帰国(귀국) 송영 · 탑승명단</div>
         <div class="bl-hd">
@@ -6621,8 +6616,9 @@ function printBoardingList(){
         </div>
         <div class="bl-dep">공항행 호텔출발시간 <b>${_blEsc(deptime)}</b></div>
         <div class="bl-car"><b>${ci+1}호차</b>${capList.length>1?` <span style="font-size:14pt;color:#555">(${capList[Math.min(ci,capList.length-1)]}인승)</span>`:''}</div>
+        ${carDispatch?`<div class="bl-dispatch">🚍 配車 — ${carDispatch}</div>`:''}
         <div class="bl-cnt">이 호차 탑승 <b>${carPax}명</b>${capList.length>1?` / 정원 ${capList[Math.min(ci,capList.length-1)]}`:''} &nbsp;|&nbsp; <span class="bl-dest">${destSummary}</span></div>
-        <table class="bl"><thead><tr><th>그룹</th><th>대표자</th><th>인원</th><th>출발지</th><th>귀국지</th><th>귀국편</th></tr></thead><tbody>${rows}</tbody></table>
+        <table class="bl"><thead><tr><th>그룹</th><th>대표자</th><th>인원</th><th>귀국지</th><th>귀국편</th></tr></thead><tbody>${rows}</tbody></table>
       </div>`;
     });
   });
@@ -6643,6 +6639,7 @@ function printBoardingList(){
   .bl-ret{text-align:right;font-size:12pt}
   .bl-dep{text-align:center;font-size:15pt;margin-top:10px}.bl-dep b{color:#c0392b;font-size:20pt}
   .bl-car{text-align:center;font-size:34pt;font-weight:900;margin:6px 0}
+  .bl-dispatch{text-align:center;font-size:13pt;margin:2px 0 8px;color:#1a2540;border:1.5px solid #1a2540;border-radius:7px;padding:6px 10px;display:inline-block;width:100%}
   .bl-cnt{text-align:center;font-size:13pt;margin-bottom:10px}
   .bl-cnt .bl-dest{color:#1f5fb0;font-weight:800}
   table.bl{width:100%;border-collapse:collapse;font-size:15pt}
@@ -6722,10 +6719,14 @@ function printArrivalRoster(){
     const wd=WD[(new Date(date+'T00:00:00')).getDay()]||'';
     const retArr=[...retDates].sort()[0]||'';
     const rwd=retArr?WD[(new Date(retArr+'T00:00:00')).getDay()]||'':'';
+    // 配車(車両·ドライバー) — 송영 화면 입력값(tr_{date}_{入国便})에서 끌어옴
+    const depFlights=[...new Set(grps.map(g=>{ const m=pax.find(x=>String(x.eventSeq||'').trim()===g.seq); return m?m.depFlight:''; }).filter(Boolean))];
+    const arrDispatch=depFlights.map(fn=>{ const m=(typeof manualData!=='undefined'&&manualData['tr_'+date+'_'+fn])||{}; if(!m.vehicle&&!m.driver) return ''; return `<b>${_arEsc(fn)}</b> ${m.vehicle?'車両 '+_arEsc(m.vehicle):''}${m.vehicle&&m.driver?' / ':''}${m.driver?'ドライバー '+_arEsc(m.driver):''}`; }).filter(Boolean).join(' &nbsp;·&nbsp; ');
     pages+=`<div class="page">
       <div class="dir-banner dir-in">🛬 入国(입국) 송영 · 到着者名簿</div>
       <div class="ar-title">空港到着者名簿</div>
       <div class="ar-sub">${_arEsc(date.slice(5).replace('-','/'))} ${wd}曜日${retArr?` &nbsp;(帰国日 ${_arEsc(retArr.slice(5).replace('-','/'))} ${rwd}曜日)`:''}</div>
+      ${arrDispatch?`<div class="ar-dispatch">🚍 配車 — ${arrDispatch}</div>`:''}
       <table class="ar"><thead><tr>
         <th>No</th><th>入国便</th><th>到着時刻</th><th>出発地</th><th>記号</th><th>英文名</th><th>韓国名</th><th>性別</th><th>出国便</th><th>出発時刻</th><th>帰国地</th>
       </tr></thead><tbody>${body}</tbody></table>
@@ -6745,6 +6746,7 @@ function printArrivalRoster(){
   .dir-in{color:#c77f0a}
   .ar-title{text-align:center;font-size:22pt;font-weight:800;letter-spacing:.1em}
   .ar-sub{text-align:center;font-size:13pt;margin:4px 0 10px}
+  .ar-dispatch{text-align:center;font-size:12pt;margin:0 0 10px;color:#1a2540;border:1.5px solid #1a2540;border-radius:7px;padding:6px 12px}
   table.ar{width:100%;border-collapse:collapse;font-size:11pt}
   table.ar th{background:#eef1f5;border:1px solid #333;padding:5px 6px;font-size:10pt}
   table.ar td{border:1px solid #333;padding:4px 7px;vertical-align:middle}
