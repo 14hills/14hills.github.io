@@ -112,7 +112,7 @@ body{background:var(--bg);color:var(--text);font-family:var(--sans);min-height:1
 .cloud-btn{font-family:var(--mono);font-size:10px;font-weight:700;padding:4px 10px;border-radius:6px;border:1px solid var(--accent);background:var(--surface);color:var(--accent2);cursor:pointer;white-space:nowrap;transition:all .15s}
 .cloud-btn:hover:not(:disabled){background:var(--accent);color:#fff}
 .cloud-btn:disabled{opacity:.5;cursor:not-allowed}
-.cloud-item{display:grid;grid-template-columns:auto 1fr auto;gap:10px;align-items:center;padding:9px 11px;border:1px solid var(--border);border-radius:8px;margin-bottom:6px;cursor:pointer;transition:all .15s}
+.cloud-item{display:grid;grid-template-columns:auto 1fr auto auto;gap:10px;align-items:center;padding:9px 11px;border:1px solid var(--border);border-radius:8px;margin-bottom:6px;cursor:pointer;transition:all .15s}
 .cloud-item:hover{border-color:var(--accent);background:var(--accent-dim)}
 .cloud-item .ci-ym{font-family:var(--mono);font-weight:700;font-size:13px;color:var(--accent2)}
 .cloud-item .ci-meta{font-size:11px;color:var(--text2)}
@@ -1189,6 +1189,7 @@ async function cloudOpenPicker(){
       <div class="ci-ym">${E(r.ym)}${r.ym===currentSession?' <span style="font-size:9px;color:var(--accent2)">● 현재</span>':''}</div>
       <div class="ci-meta">${r.groups||0}팀 · ${r.pax||0}명</div>
       <div class="ci-by">${E(r.updated_email||'')}<br><span style="opacity:.7">${_cloudDt(r.updated_at)}</span></div>
+      <button onclick="event.stopPropagation(); cloudDeleteSession('${E(r.ym)}')" title="이 세션을 클라우드에서 삭제" style="background:none;border:none;color:var(--text3);font-size:15px;cursor:pointer;padding:2px 6px;line-height:1">🗑</button>
     </div>`).join('') : '<div style="color:var(--text3);font-size:12px;padding:18px;text-align:center">저장된 클라우드 세션이 없습니다.<br>분석 후 [☁ 저장]을 먼저 눌러주세요.</div>';
   bg.innerHTML = `<div class="dl-modal" style="max-width:460px">
     <div class="dl-modal-head">
@@ -1201,6 +1202,21 @@ async function cloudOpenPicker(){
     </div></div>`;
   bg.addEventListener('click', e=>{ if(e.target===bg) bg.remove(); });
   document.body.appendChild(bg);
+}
+
+// 클라우드 세션 삭제 — sessions 테이블에서 해당 ym 행 제거(다른 PC에서도 사라짐)
+async function cloudDeleteSession(ym){
+  if(!_sbReady()){ _cloudToast('클라우드 연결이 없습니다. 로그인을 확인하세요.', true); return; }
+  if(!confirm(`클라우드에서 '${ym}' 세션을 삭제할까요?\n\n· 다른 PC에서도 사라집니다.\n· 되돌릴 수 없습니다.\n(현재 화면의 분석 데이터·로컬 수기입력은 그대로 남습니다)`)) return;
+  const c = SB14.client();
+  const { error } = await c.from('sessions').delete().eq('ym', ym);
+  if(error){ _cloudToast('삭제 실패: '+error.message, true); return; }
+  if(window.SB14&&SB14.log) SB14.log('cloud_delete',{ym});
+  _cloudToast(`☁ '${ym}' 세션을 클라우드에서 삭제했습니다.`);
+  try{ renderCloudDataBar(); }catch(e){}
+  // 목록 새로고침(모달 다시 열기)
+  const bg=document.getElementById('cloud-modal-bg'); if(bg) bg.remove();
+  try{ await cloudOpenPicker(); }catch(e){}
 }
 
 // 홈 상단 '등록된 데이터' 바 — 클라우드 sessions 목록을 칩으로 표시(클릭 시 불러오기)
