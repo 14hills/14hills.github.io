@@ -6725,12 +6725,12 @@ function printArrivalRoster(){
         const _ret=_blOriginCode(p.dest||p.origin);                    // 帰国地(원본 '도착지' → 출발지 폴백)
         body+=`<tr>
           <td class="c">${no}</td>
-          ${first?`<td class="c"${span}>${_arEsc(p.depFlight||'')}</td><td class="c"${span}>${_arEsc(_arTime(g.seq,'arr'))}</td>`:''}
+          ${first?`<td class="c"${span}>${_arEsc(p.depFlight||'')}</td><td class="c"${span}>${_arEsc(_arTime(g.seq,'arr'))}</td><td class="hg"${span}></td>`:''}
           <td class="rg">${_arEsc(tagCode)}</td>
           <td class="en">${_arEsc(p.engFull||'')}</td>
           <td class="kr">${_arEsc(p.name||'')}</td>
           <td class="c">${_arGender(p.gender)}</td>
-          ${first?`<td class="c"${span}>${_arEsc(p.retFlight||'')}</td><td class="c"${span}>${_arEsc(_arTime(g.seq,'ret'))}</td><td class="c"${span}${(_ret&&_dep&&_ret!==_dep)?' style="color:#c0392b;font-weight:800"':''}>${_arEsc(_ret)}${(_ret&&_dep&&_ret!==_dep)?' ▲':''}</td>`:''}
+          ${first?`<td class="c"${span}>${_arEsc(p.retFlight||'')}</td><td class="c"${span}>${_arEsc(_arTime(g.seq,'ret'))}</td><td class="c"${span}${(_ret&&_dep&&_ret!==_dep)?' style="color:#c0392b;font-weight:800"':''}>${_arEsc(_ret)}${(_ret&&_dep&&_ret!==_dep)?' ▲':''}</td><td class="hg"${span}></td>`:''}
         </tr>`;
       });
     });
@@ -6746,7 +6746,7 @@ function printArrivalRoster(){
       <div class="ar-sub">${_arEsc(date.slice(5).replace('-','/'))} ${wd}曜日${retArr?` &nbsp;(帰国日 ${_arEsc(retArr.slice(5).replace('-','/'))} ${rwd}曜日)`:''}</div>
       ${arrDispatch?`<div class="ar-dispatch">🚍 配車 — ${arrDispatch}</div>`:''}
       <table class="ar"><thead><tr>
-        <th>No</th><th>入国便</th><th>到着時刻</th><th>タグコード</th><th>英文名</th><th>韓国名</th><th>性別</th><th>出国便</th><th>出発時刻</th><th>帰国地</th>
+        <th>No</th><th>入国便</th><th>到着時刻</th><th class="hgh">入国<br>号車</th><th>タグコード</th><th class="enh">英文名</th><th>韓国名</th><th>性別</th><th>出国便</th><th>出発時刻</th><th>帰国地</th><th class="hgh">帰国<br>号車</th>
       </tr></thead><tbody>${body}</tbody></table>
       <div class="ar-meal">🍱 到着日 軽食(サンドイッチ) : <b>${totalPax}名</b> &nbsp;<span>※ 入国日 中食は仁川・釜山とも 簡便食(サンドイッチ)</span></div>
     </div>`;
@@ -6771,8 +6771,11 @@ function printArrivalRoster(){
   table.ar td.c{text-align:center}
   table.ar td.g{text-align:center;font-weight:800;font-size:13pt;letter-spacing:.05em}
   table.ar td.rg{text-align:center;font-family:Consolas,monospace;color:#475569}
-  table.ar td.en{font-family:Consolas,monospace}
+  table.ar td.en{font-family:Consolas,monospace;font-size:9pt;letter-spacing:-.2px}
+  table.ar th.enh{width:15%}
   table.ar td.kr{font-weight:700}
+  table.ar th.hgh{width:30px;font-size:9pt;line-height:1.15;color:#c77f0a}
+  table.ar td.hg{width:30px;background:#fffaf0}   /* 호차 손글씨 칸(팀별) */
   .ar-meal{margin-top:12px;font-size:13pt;border:2px solid #c0392b;border-radius:8px;padding:9px 14px;display:inline-block}
   .ar-meal b{color:#c0392b;font-size:16pt} .ar-meal span{font-size:10.5pt;color:#555}
   @media print{.toolbar{display:none}.page{margin:0;box-shadow:none}body{background:#fff}}
