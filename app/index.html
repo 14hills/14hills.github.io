@@ -6393,6 +6393,9 @@ function _blOrigin(fn){ fn=(fn||'').toUpperCase(); return fn.startsWith('OZ')?'�
 // 출발지(한국어) → 공항코드 / 정렬순(인천 먼저 → 부산)
 function _blOriginCode(ko){ ko=String(ko||''); if(ko.includes('인천')) return 'ICN'; if(ko.includes('부산')||ko.includes('김해')) return 'PUS'; if(ko.includes('청주')) return 'CJJ'; if(ko.includes('대구')) return 'TAE'; return ''; }
 function _blOriginKo(code){ return ({ICN:'인천',PUS:'부산',CJJ:'청주',TAE:'대구'})[code] || code || ''; }
+// 한국어 조사 으로/로 (받침 없거나 ㄹ받침 → '로', 그 외 → '으로')
+function _blRo(word){ word=String(word||''); if(!word) return ''; const ch=word.charCodeAt(word.length-1);
+  if(ch<0xAC00||ch>0xD7A3) return word+'로'; const jong=(ch-0xAC00)%28; return word+((jong===0||jong===8)?'로':'으로'); }
 function _blOriginRank(code){ return ({ICN:0,PUS:1,CJJ:2,TAE:3})[code]!==undefined ? ({ICN:0,PUS:1,CJJ:2,TAE:3})[code] : 9; }
 // 그룹 출발지: 대표승객 origin 우선 → 귀국편 추정 → 예약 raw 출발지
 function _blGroupOrigin(r){
@@ -6432,10 +6435,12 @@ function printBoardingList(){
     const airlines=[...new Set(flights.map(_blAirline).filter(Boolean))].join('/');
     const oCodes=[...new Set(groups.map(g=>g.oc).filter(Boolean))].sort((a,b)=>_blOriginRank(a)-_blOriginRank(b));
     const origins=oCodes.map(_blOriginKo).join('/');
+    // 귀국지별 인원 요약(당일 전체): "인천으로 X명 · 부산으로 Y명 · 총 Z명 귀국"
+    const destParts=oCodes.map(c=>`${_blRo(_blOriginKo(c))} ${groups.filter(g=>g.oc===c).reduce((s,g)=>s+g.pax,0)}명`);
+    const destSummary=(destParts.length?destParts.join(' · ')+' · ':'')+`총 ${totalPax}명 귀국`;
     const wd=['日','月','火','水','木','金','土'][(new Date(date+'T00:00:00')).getDay()]||'';
     cars.forEach((car,ci)=>{
       const carPax=car.reduce((s,g)=>s+g.pax,0);
-      const carDest=[...new Set(car.map(g=>g.oc).filter(Boolean))].sort((a,b)=>_blOriginRank(a)-_blOriginRank(b)).map(_blOriginKo).join('·');
       const rows=car.map(g=>`<tr><td class="g">${_blEsc(g.code)}</td><td class="nm">${_blEsc(g.rep)}</td><td class="pr">${g.pax}</td><td class="og">${_blEsc(g.oc)}</td><td class="rm" style="color:${_blFlightColor(g.ret)}">${_blEsc(g.ret)}</td></tr>`).join('');
       pages+=`<div class="page">
         <div class="bl-hd">
@@ -6445,7 +6450,7 @@ function printBoardingList(){
         </div>
         <div class="bl-dep">공항행 호텔출발시간 <b>${_blEsc(deptime)}</b></div>
         <div class="bl-car"><b>${ci+1}호차</b></div>
-        <div class="bl-cnt">탑승명단 <b>${carPax}명</b>${carDest?` <span class="bl-dest">→ ${_blEsc(carDest)} 귀국</span>`:''} <span>(귀국일 총 ${totalPax}명)</span></div>
+        <div class="bl-cnt">이 호차 탑승 <b>${carPax}명</b> &nbsp;|&nbsp; <span class="bl-dest">${destSummary}</span></div>
         <table class="bl"><thead><tr><th>그룹</th><th>대표자</th><th>인원</th><th>귀국지</th><th>귀국편</th></tr></thead><tbody>${rows}</tbody></table>
       </div>`;
     });
