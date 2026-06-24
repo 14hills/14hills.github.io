@@ -5413,7 +5413,7 @@ function generateAndPrintDinnerOrder(selectedDates, selectedAccoms){
           <th style="width:5%">出発地</th>
           <th style="width:8%">名前</th>
           <th style="width:16%">英文名</th>
-          <th style="width:9%">Group</th>
+          <th style="width:9%">タグコード</th>
           <th style="width:8%">場所</th>
           <th style="width:5%">人数</th>
           <th style="width:6%">日次</th>
@@ -6620,7 +6620,7 @@ function printBoardingList(){
         <div class="bl-car"><b>${ci+1}호차</b>${capList.length>1?` <span style="font-size:14pt;color:#555">(${capList[Math.min(ci,capList.length-1)]}인승)</span>`:''}</div>
         ${carDispatch?`<div class="bl-dispatch">🚍 配車 — ${carDispatch}</div>`:''}
         <div class="bl-cnt">이 호차 탑승 <b>${carPax}명</b>${capList.length>1?` / 정원 ${capList[Math.min(ci,capList.length-1)]}`:''} &nbsp;|&nbsp; <span class="bl-dest">${destSummary}</span></div>
-        <table class="bl"><thead><tr><th>그룹</th><th>대표자</th><th>인원</th><th>귀국지</th><th>귀국편</th></tr></thead><tbody>${rows}</tbody></table>
+        <table class="bl"><thead><tr><th>태그코드</th><th>대표자</th><th>인원</th><th>귀국지</th><th>귀국편</th></tr></thead><tbody>${rows}</tbody></table>
       </div>`;
     });
   });
@@ -6664,7 +6664,7 @@ ${pages}</body></html>`;
 
 <!-- ── 송영 空港到着者名簿 A3 인쇄 (도착자 명부) ──────────────── -->
 <script>
-// 입국(도착)일별 개인 → 記号(그룹코드)별 묶음 → A3 인쇄
+// 입국(도착)일별 개인 → タグコード별 묶음 → A3 인쇄
 function _arEsc(s){return String(s==null?'':s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));}
 function _arGender(g){ g=String(g||'').trim().toUpperCase(); if(g==='남'||g==='M'||g==='남자') return '男'; if(g==='여'||g==='F'||g==='여자') return '女'; return _arEsc(g); }
 // 현지도착(arr)·현지출발(ret) 시각: 일행별예약(passengers)의 現地到着/現地出発 우선 → 없으면 현지도착 파일(arrivalMap)
@@ -6730,7 +6730,7 @@ function printArrivalRoster(){
       <div class="ar-sub">${_arEsc(date.slice(5).replace('-','/'))} ${wd}曜日${retArr?` &nbsp;(帰国日 ${_arEsc(retArr.slice(5).replace('-','/'))} ${rwd}曜日)`:''}</div>
       ${arrDispatch?`<div class="ar-dispatch">🚍 配車 — ${arrDispatch}</div>`:''}
       <table class="ar"><thead><tr>
-        <th>No</th><th>入国便</th><th>到着時刻</th><th>出発地</th><th>記号</th><th>英文名</th><th>韓国名</th><th>性別</th><th>出国便</th><th>出発時刻</th><th>帰国地</th>
+        <th>No</th><th>入国便</th><th>到着時刻</th><th>出発地</th><th>タグコード</th><th>英文名</th><th>韓国名</th><th>性別</th><th>出国便</th><th>出発時刻</th><th>帰国地</th>
       </tr></thead><tbody>${body}</tbody></table>
       <div class="ar-meal">🍱 到着日 軽食(サンドイッチ) : <b>${totalPax}名</b> &nbsp;<span>※ 入国日 中食は仁川・釜山とも 簡便食(サンドイッチ)</span></div>
     </div>`;
