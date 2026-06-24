@@ -6390,6 +6390,17 @@ function _blEsc(s){return String(s==null?'':s).replace(/[&<>"]/g,c=>({'&':'&amp;
 function _blFlightColor(fn){ fn=(fn||'').toUpperCase(); return fn.startsWith('LJ')?'#2f7d34':fn.startsWith('OZ')?'#1f5fb0':fn.startsWith('KE')?'#b0432e':'#333'; }
 function _blAirline(fn){ fn=(fn||'').toUpperCase(); return fn.startsWith('LJ')?'진에어':fn.startsWith('OZ')?'아시아나':fn.startsWith('KE')?'대한항공':''; }
 function _blOrigin(fn){ fn=(fn||'').toUpperCase(); return fn.startsWith('OZ')?'인천':(fn.startsWith('LJ')||fn.startsWith('KE'))?'부산':''; }
+// 출발지(한국어) → 공항코드 / 정렬순(인천 먼저 → 부산)
+function _blOriginCode(ko){ ko=String(ko||''); if(ko.includes('인천')) return 'ICN'; if(ko.includes('부산')||ko.includes('김해')) return 'PUS'; if(ko.includes('청주')) return 'CJJ'; if(ko.includes('대구')) return 'TAE'; return ''; }
+function _blOriginKo(code){ return ({ICN:'인천',PUS:'부산',CJJ:'청주',TAE:'대구'})[code] || code || ''; }
+function _blOriginRank(code){ return ({ICN:0,PUS:1,CJJ:2,TAE:3})[code]!==undefined ? ({ICN:0,PUS:1,CJJ:2,TAE:3})[code] : 9; }
+// 그룹 출발지: 대표승객 origin 우선 → 귀국편 추정 → 예약 raw 출발지
+function _blGroupOrigin(r){
+  const seq=String(r.eventSeq||'').trim();
+  const px=(typeof passengers!=='undefined'?passengers:[]);
+  const rep=px.find(x=>String(x.eventSeq||'').trim()===seq && x.isRep) || px.find(x=>String(x.eventSeq||'').trim()===seq);
+  return (rep&&rep.origin) || _blOrigin(_blRet(r)) || String((r.raw&&r.raw['출발지'])||'').trim() || '';
+}
 function _blRet(r){
   const seq=String(r.eventSeq||'').trim();
   const p=(typeof passengers!=='undefined'?passengers:[]).find(x=>String(x.eventSeq||'').trim()===seq);
@@ -6408,9 +6419,10 @@ function printBoardingList(){
     let groups=processed.filter(r=>r.accom&&r.arr===date)
       .map(r=>{ const seq=String(r.eventSeq||'').trim(); const tc=tagMap[seq]||{};
         const tagBase=makeTagCodeSafe(tc.teamIdx||0,0,tc.accomPfx,tc.memberCode,tc.manualCode,tc.pendingMember,tc.eventSeq,tc.year).replace(/-\d+$/,'');
-        return {code:tagBase||(r.group||'-'),rep:r.repName||'',pax:Number(r.pax)||0,ret:_blRet(r)}; })
+        const oc=_blOriginCode(_blGroupOrigin(r));
+        return {code:tagBase||(r.group||'-'),rep:r.repName||'',pax:Number(r.pax)||0,ret:_blRet(r),oc}; })
       .filter(g=>g.pax>0)
-      .sort((a,b)=>(a.ret||'').localeCompare(b.ret||'')||(a.code||'').localeCompare(b.code||''));
+      .sort((a,b)=>_blOriginRank(a.oc)-_blOriginRank(b.oc) || (a.ret||'').localeCompare(b.ret||'') || (a.code||'').localeCompare(b.code||''));
     if(!groups.length) return;
     const cars=[]; let cur=[],sum=0;
     groups.forEach(g=>{ if(sum+g.pax>cap && cur.length){ cars.push(cur); cur=[]; sum=0; } cur.push(g); sum+=g.pax; });
@@ -6418,21 +6430,23 @@ function printBoardingList(){
     const flights=[...new Set(groups.map(g=>g.ret).filter(Boolean))];
     const totalPax=groups.reduce((s,g)=>s+g.pax,0);
     const airlines=[...new Set(flights.map(_blAirline).filter(Boolean))].join('/');
-    const origins=[...new Set(flights.map(_blOrigin).filter(Boolean))].join('/');
+    const oCodes=[...new Set(groups.map(g=>g.oc).filter(Boolean))].sort((a,b)=>_blOriginRank(a)-_blOriginRank(b));
+    const origins=oCodes.map(_blOriginKo).join('/');
     const wd=['日','月','火','水','木','金','土'][(new Date(date+'T00:00:00')).getDay()]||'';
     cars.forEach((car,ci)=>{
       const carPax=car.reduce((s,g)=>s+g.pax,0);
-      const rows=car.map(g=>`<tr><td class="g">${_blEsc(g.code)}</td><td class="nm">${_blEsc(g.rep)}</td><td class="pr">${g.pax}</td><td class="rm" style="color:${_blFlightColor(g.ret)}">${_blEsc(g.ret)}</td></tr>`).join('');
+      const carDest=[...new Set(car.map(g=>g.oc).filter(Boolean))].sort((a,b)=>_blOriginRank(a)-_blOriginRank(b)).map(_blOriginKo).join('·');
+      const rows=car.map(g=>`<tr><td class="g">${_blEsc(g.code)}</td><td class="nm">${_blEsc(g.rep)}</td><td class="pr">${g.pax}</td><td class="og">${_blEsc(g.oc)}</td><td class="rm" style="color:${_blFlightColor(g.ret)}">${_blEsc(g.ret)}</td></tr>`).join('');
       pages+=`<div class="page">
         <div class="bl-hd">
           <div class="bl-air">${_blEsc(airlines)}</div>
-          <div class="bl-mid"><div class="bl-org">${_blEsc(origins)}</div><div class="bl-fl">이용편명<br><b>${_blEsc(flights.join('/'))}</b></div></div>
+          <div class="bl-mid"><div class="bl-org">${_blEsc(origins)}</div></div>
           <div class="bl-ret">귀국안내<br>귀국일 <b>${_blEsc(date.slice(5).replace('-','/'))}(${wd})</b></div>
         </div>
         <div class="bl-dep">공항행 호텔출발시간 <b>${_blEsc(deptime)}</b></div>
         <div class="bl-car"><b>${ci+1}호차</b></div>
-        <div class="bl-cnt">탑승명단 <b>${carPax}명</b> <span>(귀국일 총 ${totalPax}명)</span></div>
-        <table class="bl"><thead><tr><th>GROUP</th><th>NAME</th><th>PER</th><th>REMARK</th></tr></thead><tbody>${rows}</tbody></table>
+        <div class="bl-cnt">탑승명단 <b>${carPax}명</b>${carDest?` <span class="bl-dest">→ ${_blEsc(carDest)} 귀국</span>`:''} <span>(귀국일 총 ${totalPax}명)</span></div>
+        <table class="bl"><thead><tr><th>그룹</th><th>대표자</th><th>인원</th><th>귀국지</th><th>귀국편</th></tr></thead><tbody>${rows}</tbody></table>
       </div>`;
     });
   });
@@ -6452,12 +6466,14 @@ function printBoardingList(){
   .bl-dep{text-align:center;font-size:15pt;margin-top:10px}.bl-dep b{color:#c0392b;font-size:20pt}
   .bl-car{text-align:center;font-size:34pt;font-weight:900;margin:6px 0}
   .bl-cnt{text-align:center;font-size:13pt;margin-bottom:10px}
+  .bl-cnt .bl-dest{color:#1f5fb0;font-weight:800}
   table.bl{width:100%;border-collapse:collapse;font-size:15pt}
   table.bl th{background:#eef1f5;border:1.5px solid #111;padding:8px;font-size:12pt}
   table.bl td{border:1.5px solid #111;padding:9px 8px;text-align:center}
   table.bl td.g{font-weight:800;letter-spacing:.04em}
   table.bl td.nm{font-size:18pt;font-weight:800}
   table.bl td.pr{font-weight:800}
+  table.bl td.og{font-weight:800;letter-spacing:.03em}
   table.bl td.rm{font-weight:800}
   @media print{.toolbar{display:none}.page{margin:0;box-shadow:none}body{background:#fff}}
 </style></head><body>
