@@ -511,8 +511,8 @@ tr.draggable-row td:first-child::before{content:'⠿';color:var(--text3);margin-
     <div class="card-title">Transfer Assignment Sheet — 送迎配車表</div>
     <div class="btn-row" style="margin-top:0;margin-bottom:.75rem;align-items:center;gap:8px;flex-wrap:wrap">      <label style="font-size:11px;color:var(--text2);display:inline-flex;align-items:center;gap:4px">정원 <input id="bus-cap" type="number" value="45" min="1" style="width:52px;padding:4px 6px;border:1px solid var(--border);border-radius:5px;text-align:center;font-size:12px"></label>
       <label style="font-size:11px;color:var(--text2);display:inline-flex;align-items:center;gap:4px">출발시간 <input id="bus-deptime" type="text" value="07:00" style="width:58px;padding:4px 6px;border:1px solid var(--border);border-radius:5px;text-align:center;font-size:12px"></label>
-      <button class="btn-dl" onclick="printBoardingList()" style="background:var(--green-dim);color:var(--green2);border-color:var(--green)">🖨 탑승명단 A3 인쇄</button>
-      <button class="btn-dl" onclick="printArrivalRoster()" style="background:var(--amber-dim);color:var(--amber2);border-color:var(--amber)">🖨 空港到着者名簿 A3</button>
+      <button class="btn-dl" onclick="printArrivalRoster()" style="background:var(--amber-dim);color:var(--amber2);border-color:var(--amber)">🛬 입국팀 도착명단 A3 <span style="font-weight:500;opacity:.75">(到着者名簿)</span></button>
+      <button class="btn-dl" onclick="printBoardingList()" style="background:var(--green-dim);color:var(--green2);border-color:var(--green)">🛫 귀국팀 탑승명단 A3</button>
       <button class="btn-undo" id="undo-btn-transfer-top" onclick="undoTransfer()" title="되돌릴 내용 없음">↩ 되돌리기</button>
     </div>
     <div id="transfer-date-filter" class="date-filter"></div>
@@ -6443,6 +6443,7 @@ function printBoardingList(){
       const carPax=car.reduce((s,g)=>s+g.pax,0);
       const rows=car.map(g=>`<tr><td class="g">${_blEsc(g.code)}</td><td class="nm">${_blEsc(g.rep)}</td><td class="pr">${g.pax}</td><td class="og">${_blEsc(g.oc)}</td><td class="rm" style="color:${_blFlightColor(g.ret)}">${_blEsc(g.ret)}</td></tr>`).join('');
       pages+=`<div class="page">
+        <div class="dir-banner dir-out">🛫 帰国(귀국) 송영 · 탑승명단</div>
         <div class="bl-hd">
           <div class="bl-air">${_blEsc(airlines)}</div>
           <div class="bl-mid"><div class="bl-org">${_blEsc(origins)}</div></div>
@@ -6464,6 +6465,8 @@ function printBoardingList(){
   .toolbar{position:sticky;top:0;background:#475569;color:#fff;padding:10px 16px;display:flex;gap:12px;align-items:center;z-index:9}
   .toolbar button{background:#fff;color:#475569;border:0;border-radius:6px;padding:7px 16px;font-weight:700;cursor:pointer}
   .page{width:297mm;min-height:420mm;background:#fff;margin:14px auto;padding:16mm;box-shadow:0 2px 10px rgba(0,0,0,.18);page-break-after:always}
+  .dir-banner{text-align:center;font-size:15pt;font-weight:800;color:#fff;border-radius:7px;padding:6px 0;margin-bottom:12px;letter-spacing:.08em}
+  .dir-out{background:#2f7d34}
   .bl-hd{display:flex;justify-content:space-between;align-items:flex-start;border-bottom:3px solid #111;padding-bottom:8px}
   .bl-air{font-size:18pt;font-weight:800}
   .bl-mid{text-align:center}.bl-org{font-size:30pt;font-weight:900;line-height:1}.bl-fl{font-size:12pt;margin-top:4px}
@@ -6482,7 +6485,7 @@ function printBoardingList(){
   table.bl td.rm{font-weight:800}
   @media print{.toolbar{display:none}.page{margin:0;box-shadow:none}body{background:#fff}}
 </style></head><body>
-<div class="toolbar"><b>🚌 탑승명단 (A3)</b><button onclick="window.print()">🖨 인쇄</button><button onclick="window.close()">닫기</button><span style="font-size:12px;opacity:.85">정원 ${cap}명 기준 호차 분할</span></div>
+<div class="toolbar"><b>🛫 귀국팀 · 탑승명단 (A3)</b><button onclick="window.print()">🖨 인쇄</button><button onclick="window.close()">닫기</button><span style="font-size:12px;opacity:.85">정원 ${cap}명 기준 호차 분할</span></div>
 ${pages}</body></html>`;
   const w=window.open('','_blank'); if(!w){ alert('팝업이 차단되었습니다. 허용 후 다시 시도하세요.'); return; }
   w.document.write(html); w.document.close();
@@ -6547,6 +6550,7 @@ function printArrivalRoster(){
     const retArr=[...retDates].sort()[0]||'';
     const rwd=retArr?WD[(new Date(retArr+'T00:00:00')).getDay()]||'':'';
     pages+=`<div class="page">
+      <div class="dir-banner dir-in">🛬 入国(입국) 송영 · 到着者名簿</div>
       <div class="ar-title">空港到着者名簿</div>
       <div class="ar-sub">${_arEsc(date.slice(5).replace('-','/'))} ${wd}曜日${retArr?` &nbsp;(帰国日 ${_arEsc(retArr.slice(5).replace('-','/'))} ${rwd}曜日)`:''}</div>
       <table class="ar"><thead><tr>
@@ -6564,6 +6568,8 @@ function printArrivalRoster(){
   .toolbar{position:sticky;top:0;background:#475569;color:#fff;padding:10px 16px;display:flex;gap:12px;align-items:center;z-index:9}
   .toolbar button{background:#fff;color:#475569;border:0;border-radius:6px;padding:7px 16px;font-weight:700;cursor:pointer}
   .page{width:420mm;min-height:297mm;background:#fff;margin:14px auto;padding:12mm;box-shadow:0 2px 10px rgba(0,0,0,.18);page-break-after:always}
+  .dir-banner{text-align:center;font-size:14pt;font-weight:800;color:#fff;border-radius:7px;padding:5px 0;margin-bottom:8px;letter-spacing:.08em}
+  .dir-in{background:#c77f0a}
   .ar-title{text-align:center;font-size:22pt;font-weight:800;letter-spacing:.1em}
   .ar-sub{text-align:center;font-size:13pt;margin:4px 0 10px}
   table.ar{width:100%;border-collapse:collapse;font-size:11pt}
@@ -6578,7 +6584,7 @@ function printArrivalRoster(){
   .ar-meal b{color:#c0392b;font-size:16pt} .ar-meal span{font-size:10.5pt;color:#555}
   @media print{.toolbar{display:none}.page{margin:0;box-shadow:none}body{background:#fff}}
 </style></head><body>
-<div class="toolbar"><b>🛬 空港到着者名簿 (A3)</b><button onclick="window.print()">🖨 인쇄</button><button onclick="window.close()">닫기</button></div>
+<div class="toolbar"><b>🛬 입국팀 · 到着者名簿 (A3)</b><button onclick="window.print()">🖨 인쇄</button><button onclick="window.close()">닫기</button></div>
 ${pages}</body></html>`;
   const w=window.open('','_blank'); if(!w){ alert('팝업이 차단되었습니다. 허용 후 다시 시도하세요.'); return; }
   w.document.write(html); w.document.close();
