@@ -1712,6 +1712,18 @@ function buildArrivalMap(){
 }
 
 
+// 한국공항 표기 표준화 → 인천/부산/청주/대구 (그 외·일본공항·빈값 → '')
+//  출발지/도착지 등 다양한 표기('김해','PUS','BUS','ICN'…)를 한 형태로 통일
+function _stdKorAirport(raw){
+  raw = String(raw||'').trim(); if(!raw) return '';
+  const u = raw.toUpperCase();
+  if(raw.includes('부산')||raw.includes('김해')||u==='PUS'||u==='BUS'||u==='PNS') return '부산';
+  if(raw.includes('인천')||u==='ICN'||u==='INC') return '인천';
+  if(raw.includes('청주')||u==='CJJ'||u==='CJU') return '청주';
+  if(raw.includes('대구')||u==='TAE'||u==='DGU') return '대구';
+  return '';
+}
+
 // ── 핵심 분석 ─────────────────────────────────────────────────
 function analyze(){
   // 팀 색상 맵 초기화
@@ -1889,20 +1901,11 @@ function analyze(){
     // → 다양한 표기('김해', 'PUS', 'BUS' 등)를 '부산'/'인천'으로 표준화
     const depFlight = String(r['출발편']||'').trim();
     const retFlight = String(r['귀국편']||'').trim();
-    let originRaw = String(r['출발지']||'').trim() || originMap[seq] || '';
-    if(originRaw){
-      const u = originRaw.toUpperCase();
-      if(originRaw.includes('부산')||originRaw.includes('김해')||u==='PUS'||u==='BUS'||u==='PNS'){
-        originRaw = '부산';
-      } else if(originRaw.includes('인천')||u==='ICN'||u==='INC'){
-        originRaw = '인천';
-      } else if(originRaw.includes('청주')||u==='CJJ'||u==='CJU'){
-        originRaw = '청주';
-      } else if(originRaw.includes('대구')||u==='TAE'||u==='DGU'){
-        originRaw = '대구';
-      }
-    }
-    const origin = originRaw || (depFlight.startsWith('ZE') ? '부산' : depFlight.startsWith('TW') ? '인천' : '');
+    const originRaw = String(r['출발지']||'').trim() || originMap[seq] || '';
+    const origin = _stdKorAirport(originRaw) || originRaw
+      || (depFlight.startsWith('ZE') ? '부산' : depFlight.startsWith('TW') ? '인천' : '');
+    // 귀국 도착공항: 원본 '도착지' 컬럼을 표준화(한국공항만) → 비었으면 출발지로 폴백(왕복 동일)
+    const destStd = _stdKorAirport(String(r['도착지']||'').trim()) || _stdKorAirport(origin);
 
     return {
       eventSeq: seq,
@@ -1914,7 +1917,7 @@ function analyze(){
       depFlight, retFlight,
       airline: String(r['항공사']||'').trim(),
       pnr:     String(r['PNR']||'').trim(),
-      dest:    String(r['도착지']||'').trim(),
+      dest:    destStd,   // 귀국 도착 한국공항(표준화) — 비면 출발지와 동일(왕복)
       depTime:    fmtTime(r['한국출발']),   // 往路 한국 출발 시각
       locArrTime: fmtTime(r['현지도착']),   // 往路 현지(나고야) 도착 시각
       retDepTime: fmtTime(r['현지출발']),   // 復路 현지(나고야) 출발 시각
@@ -6563,6 +6566,13 @@ function _blRet(r){
   const p=(typeof passengers!=='undefined'?passengers:[]).find(x=>String(x.eventSeq||'').trim()===seq);
   return (p&&p.retFlight)||String((r.raw&&(r.raw['귀국편']||r.raw['출발편']))||'').trim()||'';
 }
+// 그룹 귀국지: 대표승객 dest(원본 '도착지' 표준화) 우선 → 없으면 출발지(왕복 동일)
+function _blGroupDest(r){
+  const seq=String(r.eventSeq||'').trim();
+  const px=(typeof passengers!=='undefined'?passengers:[]);
+  const rep=px.find(x=>String(x.eventSeq||'').trim()===seq && x.isRep) || px.find(x=>String(x.eventSeq||'').trim()===seq);
+  return (rep&&rep.dest) || _blGroupOrigin(r);
+}
 function printBoardingList(){
   if(typeof processed==='undefined' || !processed.length){ alert('데이터가 없습니다. 먼저 파일을 분석해주세요.'); return; }
   // 차량 정원: 한 대면 숫자 하나(45), 여러 대면 콤마(예 25,25,20) → 대별 정원 배열
@@ -6580,8 +6590,8 @@ function printBoardingList(){
     let groups=processed.filter(r=>r.accom&&r.arr===date)
       .map(r=>{ const seq=String(r.eventSeq||'').trim(); const tc=tagMap[seq]||{};
         const tagBase=makeTagCodeSafe(tc.teamIdx||0,0,tc.accomPfx,tc.memberCode,tc.manualCode,tc.pendingMember,tc.eventSeq,tc.year).replace(/-\d+$/,'');
-        const dep=_blOriginCode(_blGroupOrigin(r));                        // 출발지(왔던 곳)
-        const oc=_blOriginCode(_blOrigin(_blRet(r))||_blGroupOrigin(r));    // 귀국지(귀국편 도착지)
+        const dep=_blOriginCode(_blGroupOrigin(r));    // 출발지(들어온 곳)
+        const oc=_blOriginCode(_blGroupDest(r));       // 귀국지(원본 '도착지' 컬럼 → 출발지 폴백)
         return {code:tagBase||(r.group||'-'),rep:r.repName||'',pax:Number(r.pax)||0,ret:_blRet(r),oc,dep}; })
       .filter(g=>g.pax>0)
       .sort((a,b)=>_blOriginRank(a.oc)-_blOriginRank(b.oc) || (a.ret||'').localeCompare(b.ret||'') || (a.code||'').localeCompare(b.code||''));
@@ -6600,7 +6610,8 @@ function printBoardingList(){
     const wd=['日','月','火','水','木','金','土'][(new Date(date+'T00:00:00')).getDay()]||'';
     cars.forEach((car,ci)=>{
       const carPax=car.reduce((s,g)=>s+g.pax,0);
-      const rows=car.map(g=>`<tr><td class="g">${_blEsc(g.code)}</td><td class="nm">${_blEsc(g.rep)}</td><td class="pr">${g.pax}</td><td class="dp">${_blEsc(g.dep)}</td><td class="og">${_blEsc(g.oc)}</td><td class="rm" style="color:${_blFlightColor(g.ret)}">${_blEsc(g.ret)}</td></tr>`).join('');
+      const rows=car.map(g=>{ const oj=g.oc&&g.dep&&g.oc!==g.dep; // 오픈조: 출발지≠귀국지
+        return `<tr><td class="g">${_blEsc(g.code)}</td><td class="nm">${_blEsc(g.rep)}</td><td class="pr">${g.pax}</td><td class="dp">${_blEsc(g.dep)}</td><td class="og"${oj?' style="color:#c0392b;font-weight:800"':''}>${_blEsc(g.oc)}${oj?' ▲':''}</td><td class="rm" style="color:${_blFlightColor(g.ret)}">${_blEsc(g.ret)}</td></tr>`; }).join('');
       pages+=`<div class="page">
         <div class="dir-banner dir-out">🛫 帰国(귀국) 송영 · 탑승명단</div>
         <div class="bl-hd">
@@ -6695,8 +6706,8 @@ function printArrivalRoster(){
         const first=(i===0);
         const _tc=tagMap[g.seq]||{};
         const tagCode=makeTagCodeSafe(_tc.teamIdx||0, i, _tc.accomPfx, _tc.memberCode, _tc.manualCode, _tc.pendingMember, _tc.eventSeq, _tc.year);
-        const _dep=_blOriginCode(p.origin||_blOrigin(p.depFlight));     // 출발지
-        const _ret=_blOriginCode(_blOrigin(p.retFlight)||p.origin);     // 귀국지
+        const _dep=_blOriginCode(p.origin||_blOrigin(p.depFlight));     // 出発地(들어온 곳)
+        const _ret=_blOriginCode(p.dest||p.origin);                    // 帰国地(원본 '도착지' → 출발지 폴백)
         body+=`<tr>
           <td class="c">${no}</td>
           ${first?`<td class="c"${span}>${_arEsc(p.depFlight||'')}</td><td class="c"${span}>${_arEsc(_arTime(g.seq,'arr'))}</td><td class="c"${span}>${_arEsc(_dep)}</td>`:''}
@@ -6704,7 +6715,7 @@ function printArrivalRoster(){
           <td class="en">${_arEsc(p.engFull||'')}</td>
           <td class="kr">${_arEsc(p.name||'')}</td>
           <td class="c">${_arGender(p.gender)}</td>
-          ${first?`<td class="c"${span}>${_arEsc(p.retFlight||'')}</td><td class="c"${span}>${_arEsc(_arTime(g.seq,'ret'))}</td><td class="c"${span}>${_arEsc(_ret)}</td>`:''}
+          ${first?`<td class="c"${span}>${_arEsc(p.retFlight||'')}</td><td class="c"${span}>${_arEsc(_arTime(g.seq,'ret'))}</td><td class="c"${span}${(_ret&&_dep&&_ret!==_dep)?' style="color:#c0392b;font-weight:800"':''}>${_arEsc(_ret)}${(_ret&&_dep&&_ret!==_dep)?' ▲':''}</td>`:''}
         </tr>`;
       });
     });
