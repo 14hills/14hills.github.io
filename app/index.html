@@ -6709,7 +6709,7 @@ function printArrivalRoster(){
         const _ret=_blOriginCode(p.dest||p.origin);                    // 帰国地(원본 '도착지' → 출발지 폴백)
         body+=`<tr>
           <td class="c">${no}</td>
-          ${first?`<td class="c"${span}>${_arEsc(p.depFlight||'')}</td><td class="c"${span}>${_arEsc(_arTime(g.seq,'arr'))}</td><td class="c"${span}>${_arEsc(_dep)}</td>`:''}
+          ${first?`<td class="c"${span}>${_arEsc(p.depFlight||'')}</td><td class="c"${span}>${_arEsc(_arTime(g.seq,'arr'))}</td>`:''}
           <td class="rg">${_arEsc(tagCode)}</td>
           <td class="en">${_arEsc(p.engFull||'')}</td>
           <td class="kr">${_arEsc(p.name||'')}</td>
@@ -6730,7 +6730,7 @@ function printArrivalRoster(){
       <div class="ar-sub">${_arEsc(date.slice(5).replace('-','/'))} ${wd}曜日${retArr?` &nbsp;(帰国日 ${_arEsc(retArr.slice(5).replace('-','/'))} ${rwd}曜日)`:''}</div>
       ${arrDispatch?`<div class="ar-dispatch">🚍 配車 — ${arrDispatch}</div>`:''}
       <table class="ar"><thead><tr>
-        <th>No</th><th>入国便</th><th>到着時刻</th><th>出発地</th><th>タグコード</th><th>英文名</th><th>韓国名</th><th>性別</th><th>出国便</th><th>出発時刻</th><th>帰国地</th>
+        <th>No</th><th>入国便</th><th>到着時刻</th><th>タグコード</th><th>英文名</th><th>韓国名</th><th>性別</th><th>出国便</th><th>出発時刻</th><th>帰国地</th>
       </tr></thead><tbody>${body}</tbody></table>
       <div class="ar-meal">🍱 到着日 軽食(サンドイッチ) : <b>${totalPax}名</b> &nbsp;<span>※ 入国日 中食は仁川・釜山とも 簡便食(サンドイッチ)</span></div>
     </div>`;
