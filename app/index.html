@@ -1270,6 +1270,20 @@ function parseProduct(name){
   return { accom, roomType, course, nights, rate };
 }
 
+// 현장 객실 변경 선택지 (메리트 예약과 다르게 현장에서 실제 배정한 객실)
+//  value = 'accom|roomType' 형식
+const ROOM_CHANGE_OPTS = [
+  { v:'호텔|트윈',    ko:'호텔 트윈',    jp:'ツイン' },
+  { v:'호텔|패밀리룸', ko:'호텔 패밀리룸', jp:'ファミリールーム' },
+  { v:'호텔|스위트',  ko:'호텔 스위트',  jp:'スイート' },
+  { v:'카라반|카라반', ko:'카라반',      jp:'カラバン' },
+];
+function roomChangeLabel(accom, roomType, lang){
+  const o = ROOM_CHANGE_OPTS.find(x=>x.v===(accom+'|'+roomType));
+  if(o) return lang==='jp' ? o.jp : o.ko;
+  return roomType || accom || '';
+}
+
 // ── 드래그앤드롭 ──────────────────────────────────────────────
 function onDrag(e,id){ e.preventDefault(); document.getElementById(id).classList.add('drag'); }
 function offDrag(id){ document.getElementById(id).classList.remove('drag'); }
@@ -5610,10 +5624,14 @@ function collectDispatchData(){
       tee: ((dman.teeoff && dman.teeoff[g.date]) || ((manualData['golf_'+g.date+'_'+seq]||{}).teeoff) || '').trim()
     }));
     const memo = String(dman.memo||'').trim();
+    // 현장 객실 변경: dman.roomChange = 'accom|roomType' (예약과 다른 실제 배정)
+    let roomChange = null;
+    const _rc = String(dman.roomChange||'').trim();
+    if(_rc){ const [ca, crt] = _rc.split('|'); if(!(ca===rec.accom && crt===rec.roomType)) roomChange = { accom:ca||rec.accom, roomType:crt||'' }; }
     const hasManual = !!((dman.teeoff && Object.values(dman.teeoff).some(v=>String(v||'').trim()))
-      || (dman.roomCnt && String(dman.roomCnt).trim()) || memo);
+      || (dman.roomCnt && String(dman.roomCnt).trim()) || memo || roomChange);
     return {
-      rec, seq, no: i+1, paxList, tagCode,
+      rec, seq, no: i+1, paxList, tagCode, roomChange,
       depFlight, retFlight,
       depTime:    rep.depTime    || av.depTime    || '',
       locArrTime: rep.locArrTime || av.locArrTime || '',
@@ -5685,8 +5703,8 @@ function buildDispatch(){
       <td style="text-align:center;font-family:var(--mono)">${d.rec.arr||''}</td>
       <td style="text-align:center">${d.rec.nights}泊</td>
       <td style="text-align:center">${d.rec.pax}名</td>
-      <td style="text-align:center">${accomEngName(d.rec.accom)}</td>
-      <td>${d.rec.roomType||''}</td>
+      <td style="text-align:center">${d.roomChange && d.roomChange.accom!==d.rec.accom ? `<s style="color:var(--text3)">${accomEngName(d.rec.accom)}</s> ${accomEngName(d.roomChange.accom)}` : accomEngName(d.rec.accom)}</td>
+      <td>${d.roomChange ? `<s style="color:var(--text3)">${d.rec.roomType||'-'}</s> → <b style="color:var(--accent2)">${roomChangeLabel(d.roomChange.accom,d.roomChange.roomType,'ko')}</b> <span style="font-size:9px;background:var(--amber-dim);color:var(--amber2);border-radius:3px;padding:1px 4px;white-space:nowrap">現地変更</span>` : (d.rec.roomType||'')}</td>
       <td style="text-align:center">${d.rec.memberType||'-'}</td>
       <td style="text-align:center;white-space:nowrap">
         <button class="btn-dl" style="font-size:10px;padding:3px 8px" onclick="openDispatchInputModal('${d.seq}')">📝 입력</button>
@@ -5714,6 +5732,12 @@ function openDispatchInputModal(seq){
         <button onclick="document.getElementById('dispatch-input-modal-bg').remove()" style="background:none;border:none;color:var(--text3);font-size:18px;cursor:pointer;line-height:1;padding:2px 6px">✕</button>
       </div>
       <div class="dl-modal-body">
+        <div style="font-size:11px;font-weight:600;color:var(--text2);margin-bottom:6px">🏨 実際の客室 (현장 변경) <span style="font-size:10px;font-weight:400;color:var(--text3)">— 메리트 예약(<b>${accomEngName(d.rec.accom)} ${d.rec.roomType||'-'}</b>)과 다르게 현장 배정 시 선택</span></div>
+        <select id="dispatch-roomchange-inp" style="width:100%;background:var(--surface2);border:1px solid var(--border);border-radius:5px;padding:6px 9px;font-size:11px;color:var(--text);outline:none;margin-bottom:14px;font-family:var(--sans)">
+          <option value="">予約どおり (변경 없음)</option>
+          ${ROOM_CHANGE_OPTS.map(o=>`<option value="${o.v}"${(man.roomChange===o.v)?' selected':''}>${o.ko} · ${o.jp}</option>`).join('')}
+        </select>
+
         <div style="font-size:11px;font-weight:600;color:var(--text2);margin-bottom:6px">📝 現地メモ (참고사항 추가) <span style="font-size:10px;font-weight:400;color:var(--text3)">— 現地メモ 칸에 함께 인쇄됩니다</span></div>
         <textarea id="dispatch-memo-inp" rows="4" placeholder="例: レイトチェックアウト希望 / アレルギー: えび"
           style="width:100%;background:var(--surface2);border:1px solid var(--border);border-radius:5px;padding:6px 9px;font-size:11px;color:var(--text);outline:none;resize:vertical;font-family:var(--sans)">${(man.memo||'')}</textarea>
@@ -5733,12 +5757,13 @@ function saveDispatchInput(seq){
   const bg = document.getElementById('dispatch-input-modal-bg');
   if(!bg) return;
   const memo = String((bg.querySelector('#dispatch-memo-inp')||{}).value||'').trim();
+  const roomChange = String((bg.querySelector('#dispatch-roomchange-inp')||{}).value||'').trim();
   const key = 'dispatch_' + String(seq||'').trim();
   const prev = manualData[key] || {};
   const teeoff = prev.teeoff || {};           // 기존 티오프 보존 (모달 입력 제거됨)
   const roomCnt = prev.roomCnt || '';         // 방수 입력 메뉴 제거 → 기존값만 보존(신규 입력 없음)
-  if(Object.keys(teeoff).length || roomCnt || memo){
-    manualData[key] = { teeoff, roomCnt, memo };
+  if(Object.keys(teeoff).length || roomCnt || memo || roomChange){
+    manualData[key] = { teeoff, roomCnt, memo, roomChange };
   } else {
     delete manualData[key];
   }
@@ -5802,7 +5827,7 @@ function dispatchFrontHTML(d, masked){
     <div class="hp-sec">🏨 宿泊情報</div>
     <table class="hp-t">
       <tr><th style="width:26%">施設</th><th style="width:18%">部屋タイプ</th><th style="width:14%">チェックイン</th><th style="width:15%">チェックアウト</th><th style="width:10%">泊数</th><th>部屋数</th></tr>
-      <tr><td class="c"><b>${d.accomJp}</b></td><td class="c">${dispatchRoomTypeJp(r.roomType)}</td><td class="c mono">${r.dep||''}</td><td class="c mono">${r.arr||''}</td><td class="c">${r.nights}泊</td><td class="c">${d.roomCnt}</td></tr>
+      <tr><td class="c">${d.roomChange && d.roomChange.accom!==r.accom ? `<s style="color:#999">${d.accomJp}</s> <b>${dispatchAccomJp(d.roomChange.accom)}</b>` : `<b>${d.accomJp}</b>`}</td><td class="c">${d.roomChange ? `<s style="color:#999">${dispatchRoomTypeJp(r.roomType)}</s> → <b style="color:#c0392b">${roomChangeLabel(d.roomChange.accom,d.roomChange.roomType,'jp')}</b> <span style="font-size:7.5pt;border:1px solid #c0392b;color:#c0392b;border-radius:3px;padding:0 3px;white-space:nowrap">現地変更</span>` : dispatchRoomTypeJp(r.roomType)}</td><td class="c mono">${r.dep||''}</td><td class="c mono">${r.arr||''}</td><td class="c">${r.nights}泊</td><td class="c">${d.roomCnt}</td></tr>
     </table>
 
     <div class="hp-sec">👤 顧客情報${masked ? ' <span class="hp-mask">🔒 個人情報保護 — 生年月日まで表記</span>' : ''}</div>
