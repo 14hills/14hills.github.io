@@ -17,34 +17,32 @@
 -- ============================================================================
 
 
--- (1) 기본 — 모든 로그인 사용자 전체 접근(삭제 포함). 이미 있으면 동일하게 재생성.
 alter table sessions enable row level security;
-drop policy if exists sessions_all on sessions;
-create policy sessions_all on sessions
-  for all to authenticated using (true) with check (true);
+
+-- (1) [참고] 과거 sql/05 의 sessions_all(모든 로그인 사용자 삭제 가능)은 아래 (2)로 대체됨.
+--     남아 있을 수 있어 (2) 가 먼저 drop 한다.
 
 
 -- ============================================================================
--- (2) [옵션] 삭제는 관리자(admin)만 — 공유 세션의 실수 삭제 방지
+-- (2) ✅ 활성 — 삭제는 관리자(admin)만. 공유 세션의 실수 삭제 방지.
 -- ----------------------------------------------------------------------------
 --  읽기·저장·수정은 모든 로그인 사용자에게 두고, DELETE 만 is_admin() 으로 제한.
---  쓰려면 아래 블록의 주석(--)을 모두 풀고 실행한다.
 --  (admin 또는 manager 까지 허용하려면 is_admin() → is_staff_up() 으로 교체)
 -- ----------------------------------------------------------------------------
--- drop policy if exists sessions_all    on sessions;
--- drop policy if exists sessions_select on sessions;
--- drop policy if exists sessions_insert on sessions;
--- drop policy if exists sessions_update on sessions;
--- drop policy if exists sessions_delete on sessions;
---
--- create policy sessions_select on sessions
---   for select to authenticated using (true);
--- create policy sessions_insert on sessions
---   for insert to authenticated with check (true);
--- create policy sessions_update on sessions
---   for update to authenticated using (true) with check (true);
--- create policy sessions_delete on sessions
---   for delete to authenticated using (public.is_admin());
+drop policy if exists sessions_all    on sessions;
+drop policy if exists sessions_select on sessions;
+drop policy if exists sessions_insert on sessions;
+drop policy if exists sessions_update on sessions;
+drop policy if exists sessions_delete on sessions;
+
+create policy sessions_select on sessions
+  for select to authenticated using (true);
+create policy sessions_insert on sessions
+  for insert to authenticated with check (true);
+create policy sessions_update on sessions
+  for update to authenticated using (true) with check (true);
+create policy sessions_delete on sessions
+  for delete to authenticated using (public.is_admin());
 -- ============================================================================
 --  적용 후 확인: Supabase 대시보드 → Database → Policies → sessions 에서
 --  정책 목록을 볼 수 있다. 삭제 동작은 활동 로그(activity_log)에 cloud_delete 로
