@@ -318,7 +318,7 @@ function boot(){
   SB14.guard({area:'admin', title:'14hills 운영 관리', home:'../app/'}).then(acc=>{
     if(!acc || acc.role!=='admin'){ $('#me-pill').textContent=acc?('역할: '+(ROLE_LABEL[acc.role]||acc.role)):'로그인 필요'; $('#me-pill').className='pill err'; return; }
     supa=SB14.client();
-    $('#me-pill').textContent='☁ '+(acc.name||acc.email)+' · 마스터'; $('#me-pill').className='pill ok';
+    $('#me-pill').textContent=''+(acc.name||acc.email)+' · 마스터'; $('#me-pill').className='pill ok';
     const lo=$('#btn-logout'); lo.style.display=''; lo.addEventListener('click',()=>SB14.signOut());
     initLogControls();
     load(); loadRequests(); loadLogs();
