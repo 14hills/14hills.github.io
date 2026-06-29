@@ -711,7 +711,7 @@ tr.draggable-row td:first-child::before{content:'⠿';color:var(--text3);margin-
     </div>
   </details>
   <div class="rule-box" data-i18n="rb_dispatch_batch">
-    <strong>現地手配書 일괄 생성:</strong> 엠클릭에서 행사별 수배서를 건건이 열어 다운로드할 필요 없이, 현재 월 세션의 <strong>전체 행사 수배서</strong>를 한 번에 생성합니다. <strong>1행사 = 2페이지 고정</strong> — 앞면은 手配書(행사·항공·숙박·고객·라운딩 정보), 뒷면은 <strong>現地発生分 記入表</strong>입니다. 프린터에서 <strong>양면 인쇄(긴 가장자리 제본)</strong>를 선택하면 앞·뒤가 자동으로 맞춰집니다. 현지에서 발생한 추가 항목은 뒷면에 기입 후 ⑤ 現地精算表에 반영하세요.
+    <strong>現地手配書 일괄 생성:</strong> 엠클릭에서 행사별 수배서를 건건이 열어 다운로드할 필요 없이, 현재 월 세션의 <strong>전체 행사 수배서</strong>를 한 번에 생성합니다. <strong>1행사 = 기본 2페이지(명단 많으면 별지 추가)</strong> — 앞면은 手配書(행사·항공·숙박·고객·라운딩 정보), 뒷면은 <strong>現地発生分 記入表</strong>입니다. 프린터에서 <strong>양면 인쇄(긴 가장자리 제본)</strong>를 선택하면 앞·뒤가 자동으로 맞춰집니다. 현지에서 발생한 추가 항목은 뒷면에 기입 후 ⑤ 現地精算表에 반영하세요.
   </div>
   <div class="card">
     <div class="card-title">現地手配書 — Field Dispatch Sheet <span id="dispatch-count" style="font-size:11px;color:var(--text3);font-weight:400;margin-left:6px"></span></div>
@@ -5940,20 +5940,33 @@ function saveDispatchInput(seq){
 }
 
 // ── 인쇄용 HTML 빌더 ──────────────────────────────────────────
-function dispatchFrontHTML(d, masked){
+// 顧客 명단 헤더/행 — 앞면·별지(続き) 공용
+function dispatchGuestHead(masked){
+  const privHead = masked ? '' : '<th style="width:12%">旅券番号</th><th style="width:12%">電話番号</th>';
+  const colCount = masked ? 8 : 10;
+  const head = `<tr><th style="width:5%">No</th><th style="width:7%">区分</th><th>氏名</th><th>英文姓</th><th>英文名</th><th style="width:6%">性別</th><th style="width:11%">生年月日</th>${privHead}<th>備考</th></tr>`;
+  return { head, colCount };
+}
+function dispatchGuestRowsHTML(list, masked, startIdx){
+  return list.map((p,i) => {
+    const g = (p.gender==='M'||p.gender==='남') ? '男' : (p.gender==='F'||p.gender==='여') ? '女' : (p.gender||'');
+    const priv = masked ? '' : `<td class="c mono">${p.passport||''}</td><td class="c mono">${p.phone||''}</td>`;
+    return `<tr><td class="c">${startIdx+i+1}</td><td class="c">${p.isRep?'<b>代表</b>':''}</td><td><b>${p.name||''}</b></td><td>${p.engSur||''}</td><td>${p.engGiven||''}</td><td class="c">${g}</td><td class="c mono">${p.bday||''}</td>${priv}<td></td></tr>`;
+  }).join('');
+}
+
+function dispatchFrontHTML(d, masked, opts){
   const r = d.rec;
   const periodStr = `${r.nights}泊${Number(r.nights)+1}日`;
 
-  // 고객 명단
-  const privHead = masked ? '' : '<th style="width:12%">旅券番号</th><th style="width:12%">電話番号</th>';
-  const colCount = masked ? 8 : 10;
-  const guestHead = `<tr><th style="width:5%">No</th><th style="width:7%">区分</th><th>氏名</th><th>英文姓</th><th>英文名</th><th style="width:6%">性別</th><th style="width:11%">生年月日</th>${privHead}<th>備考</th></tr>`;
-  const guestRows = d.paxList.length ? d.paxList.map((p,i) => {
-    const g = (p.gender==='M'||p.gender==='남') ? '男' : (p.gender==='F'||p.gender==='여') ? '女' : (p.gender||'');
-    const priv = masked ? '' : `<td class="c mono">${p.passport||''}</td><td class="c mono">${p.phone||''}</td>`;
-    return `<tr><td class="c">${i+1}</td><td class="c">${p.isRep?'<b>代表</b>':''}</td><td><b>${p.name||''}</b></td><td>${p.engSur||''}</td><td>${p.engGiven||''}</td><td class="c">${g}</td><td class="c mono">${p.bday||''}</td>${priv}<td></td></tr>`;
-  }).join('') : `<tr><td colspan="${colCount}" class="c" style="color:#777">名簿未登録 — 代表: ${r.repName||'-'} 計${r.pax}名</td></tr>`;
-  const guestSizeCls = d.paxList.length > 16 ? ' g-xs' : d.paxList.length > 10 ? ' g-sm' : '';
+  // 고객 명단 (opts.subset 지정 시 그 부분만 — 대규모 명단 분할용)
+  const { head:guestHead, colCount } = dispatchGuestHead(masked);
+  const list = (opts && opts.subset) || d.paxList;
+  const guestRows = list.length ? dispatchGuestRowsHTML(list, masked, 0)
+    : `<tr><td colspan="${colCount}" class="c" style="color:#777">名簿未登録 — 代表: ${r.repName||'-'} 計${r.pax}名</td></tr>`;
+  const guestSizeCls = list.length > 16 ? ' g-xs' : list.length > 10 ? ' g-sm' : '';
+  const contNote = (opts && opts.subset && opts.subset.length < opts.total)
+    ? `<div style="font-size:8pt;color:#c0392b;margin-top:1.2mm;font-weight:700">※ 顧客名簿は別紙「顧客名簿（続き）」に続きます — 残り ${opts.total - opts.subset.length}名（全${opts.total}名）</div>` : '';
 
   // 골프 코스 요약 (일자별 라운드 테이블 → 코스명만; 상세 일정은 향후 별도 골프 수배서)
   const courseStr = dispatchCourseSummary(d);
@@ -5998,7 +6011,7 @@ function dispatchFrontHTML(d, masked){
     </table>
 
     <div class="hp-sec">顧客情報${masked ? ' <span class="hp-mask">個人情報保護 — 生年月日まで表記</span>' : ''}</div>
-    <table class="hp-t${guestSizeCls}">${guestHead}${guestRows}</table>
+    <table class="hp-t${guestSizeCls}">${guestHead}${guestRows}</table>${contNote}
 
     <div class="hp-sec">ゴルフ情報</div>
     <table class="hp-t">
@@ -6044,6 +6057,50 @@ function dispatchBackHTML(d){
   </div>`;
 }
 
+// 顧客名簿(続き) 별지 — 명단이 앞면을 넘칠 때
+function dispatchGuestContHTML(d, masked, chunk, startNo, total){
+  const r = d.rec;
+  const { head:guestHead } = dispatchGuestHead(masked);
+  const rows = dispatchGuestRowsHTML(chunk, masked, startNo - 1);   // No = startNo..
+  const endNo = startNo + chunk.length - 1;
+  return `<div class="hp-page">
+    <div class="hp-head">
+      <div>
+        <div class="hp-title" style="font-size:15pt">顧客名簿（続き）</div>
+        <div class="hp-sub mono">イベント番号 ${r.eventNo||'-'} ・ ${d.prodName}</div>
+      </div>
+      <div style="text-align:right">
+        <div class="hp-tag" style="font-size:13pt">${d.tagCode}</div>
+        <div class="hp-sub" style="margin-top:1.5mm">代表 <b>${r.repName||'-'}</b> ・ ${startNo}〜${endNo} / 全${total}名</div>
+      </div>
+    </div>
+    <div class="hp-sec">顧客情報${masked ? ' <span class="hp-mask">個人情報保護 — 生年月日まで表記</span>' : ''}（${startNo}〜${endNo} / 全${total}名）</div>
+    <table class="hp-t g-xs">${guestHead}${rows}</table>
+  </div>`;
+}
+// 양면 짝 맞춤용 여백 페이지
+function dispatchBlankHTML(){
+  return `<div class="hp-page" style="display:flex;align-items:center;justify-content:center"><div style="color:#bbb;font-size:9pt">（余白 — 両面印刷の裏面）</div></div>`;
+}
+// 행사 1건 → 페이지 배열. 양면(앞=手配書/뒤=記入表) 정렬 유지: 별지는 [명단·여백] 짝으로 추가.
+function dispatchPagesFor(d, masked){
+  const all = d.paxList || [];
+  const SPLIT_OVER = 20;   // 이하: 종전대로 한 장(글자 자동축소)
+  const MAIN_CAP   = 16;   // 분할 시 앞면에 싣는 인원(잘림 없는 안전선)
+  const CONT_CAP   = 30;   // 별지 1장당 인원
+  if(all.length <= SPLIT_OVER){
+    return [ dispatchFrontHTML(d, masked), dispatchBackHTML(d) ];
+  }
+  const first = all.slice(0, MAIN_CAP);
+  const pages = [ dispatchFrontHTML(d, masked, { subset:first, total:all.length }), dispatchBackHTML(d) ];
+  for(let i = MAIN_CAP; i < all.length; i += CONT_CAP){
+    const chunk = all.slice(i, i + CONT_CAP);
+    pages.push(dispatchGuestContHTML(d, masked, chunk, i + 1, all.length));
+    pages.push(dispatchBlankHTML());   // 별지 뒷면 여백(양면 짝)
+  }
+  return pages;
+}
+
 // 인쇄 실행 — seq 지정 시 단건, 미지정 시 월 세션 전체 일괄
 function printDispatch(seq){
   if(!processed.length || !processed.some(r => r.accom)){
@@ -6056,7 +6113,10 @@ function printDispatch(seq){
   if(window.SB14&&SB14.log) SB14.log('print',{kind:'dispatch', count:data.length, single:!!seq});
 
   const masked = dispatchMaskOn;
-  const pages = data.map(d => dispatchFrontHTML(d, masked) + dispatchBackHTML(d)).join('');
+  const allPages = [];
+  data.forEach(d => { dispatchPagesFor(d, masked).forEach(p => allPages.push(p)); });
+  const pages = allPages.join('');
+  const totalPages = allPages.length;
 
   const fullHTML = `<!DOCTYPE html><html lang="ja"><head><meta charset="utf-8"><title>現地手配書_${today()}</title>
 <style>
@@ -6096,7 +6156,7 @@ function printDispatch(seq){
 </style></head><body>
   <div class="hp-toolbar">
     <h1>現地手配書 미리보기</h1>
-    <div class="meta">A4 세로 · ${data.length}행사 × 양면 2페이지 = 총 ${data.length*2}페이지 · ${masked?'마스킹 ON (생년월일까지)':'마스킹 OFF (전체 표기)'} · ${today()}<br>※ 인쇄 설정에서 <b>양면 인쇄 (긴 가장자리 제본)</b>을 선택하세요 — 앞면 手配書 / 뒷면 記入表가 자동으로 맞춰집니다.</div>
+    <div class="meta">A4 세로 · ${data.length}행사 · 총 ${totalPages}페이지 (행사별 앞면 手配書 / 뒷면 記入表 · 명단 많으면 별지 추가) · ${masked?'마스킹 ON (생년월일까지)':'마스킹 OFF (전체 표기)'} · ${today()}<br>※ 인쇄 설정에서 <b>양면 인쇄 (긴 가장자리 제본)</b>을 선택하세요 — 앞면 手配書 / 뒷면 記入表가 자동으로 맞춰집니다.</div>
     <div style="flex:1"></div>
     <button onclick="window.print()">인쇄</button>
     <button class="hp-close" onclick="window.close()">✕ 닫기</button>
@@ -6447,7 +6507,7 @@ function resetApp(){
       rb_dinner_upgrade: '<strong>アップグレードメニュー</strong> — 基本の曜日メニューは提供されず、<span style="color:var(--amber2)">全員同一メニューの申込が必須</span> · バーベキューは4人以上<br>会席料理 · すき焼き · 牛しゃぶしゃぶ · バーベキュー — 各 +¥3,000/人',
       rb_dinner_add: '<strong>追加メニュー</strong> — 基本メニュー提供後に追加申込<br>鯛の姿造り・刺身 船盛(刺身盛り合わせ) ¥15,000 &nbsp;·&nbsp; 和牛ステーキ(1人前) ¥4,000<br><span style="color:var(--amber2)">※ アップグレード・追加メニューの申込: メリットツアー出発3日前まで(02-365-9800)、または食事2日前の午後2時までリゾートフロント · 申込2名以上(バーベキューは4名以上)</span>',
       rb_nametag_info: '<strong>ネームタグの案内:</strong> APIS登録の搭乗客を基準に自動生成 · 未登録の顧客は <span style="color:var(--text3)">(未登録)</span> と表示 &nbsp;·&nbsp; 入国日の日付チップで日別に確認 · 「ネームタグ印刷」でA-one 28466 ラベルシート(18面・53.3×42.3mm)に合わせてプレビュー→印刷',
-      rb_dispatch_batch: '<strong>現地手配書の一括生成:</strong> エムクリックで行事別の手配書を1件ずつ開いてダウンロードする必要なく、当月セッションの <strong>全行事の手配書</strong>を一度に生成します。<strong>1行事 = 2ページ固定</strong> — 表面は手配書(行事・航空・宿泊・顧客・ラウンド情報)、裏面は <strong>現地発生分 記入表</strong>です。プリンターで <strong>両面印刷(長辺とじ)</strong>を選ぶと表・裏が自動で揃います。現地で発生した追加項目は裏面に記入後、⑤ 現地精算表に反映してください。',
+      rb_dispatch_batch: '<strong>現地手配書の一括生成:</strong> エムクリックで行事別の手配書を1件ずつ開いてダウンロードする必要なく、当月セッションの <strong>全行事の手配書</strong>を一度に生成します。<strong>1行事 = 基本2ページ(名簿が多い場合は別紙追加)</strong> — 表面は手配書(行事・航空・宿泊・顧客・ラウンド情報)、裏面は <strong>現地発生分 記入表</strong>です。プリンターで <strong>両面印刷(長辺とじ)</strong>を選ぶと表・裏が自動で揃います。現地で発生した追加項目は裏面に記入後、⑤ 現地精算表に反映してください。',
       app_logoSub: 'フォーティーンヒルズ 運営統合システム',
       app_reset: '初期化',
       nav_upload: 'ファイルアップロード',
@@ -6491,7 +6551,7 @@ function resetApp(){
       rb_dinner_upgrade: '<strong>Up-Grade Menu</strong> — 기본 요일 메뉴 미제공, <span style="color:var(--amber2)">전원 동일 메뉴 신청 필수</span> · 바비큐 4인 이상<br>会席料理(카이세키) · すき焼き(스키야키) · 牛しゃぶしゃぶ(소고기 샤브샤브) · バーベキュー(바비큐) — 各 +¥3,000/인',
       rb_dinner_add: '<strong>追加 Menu</strong> — 기본 메뉴 제공 후 추가 신청<br>도미 스가타츠쿠리 (회·모듬, 鯛の姿造り·刺身 船盛) ¥15,000 &nbsp;·&nbsp; 와규 스테이크 (和牛ステーキ·1인분) ¥4,000<br><span style="color:var(--amber2)">※ Up-Grade·추가메뉴 신청: 메리트투어 출발 3일 전까지(02-365-9800) 또는 식사 2일 전 오후 2시까지 리조트 프런트 · 신청 2명 이상(바비큐 4명 이상)</span>',
       rb_nametag_info: '<strong>네임택 안내:</strong> APIS 등록 탑승객 기준으로 자동 생성 · 미등록 고객은 <span style="color:var(--text3)">(미등록)</span> 표시 &nbsp;·&nbsp; 입국일 날짜 칩으로 일자별 확인 · 「ネームタグ 인쇄」로 A-one 28466 라벨시트(18면·53.3×42.3mm)에 맞춰 미리보기→인쇄',
-      rb_dispatch_batch: '<strong>現地手配書 일괄 생성:</strong> 엠클릭에서 행사별 수배서를 건건이 열어 다운로드할 필요 없이, 현재 월 세션의 <strong>전체 행사 수배서</strong>를 한 번에 생성합니다. <strong>1행사 = 2페이지 고정</strong> — 앞면은 手配書(행사·항공·숙박·고객·라운딩 정보), 뒷면은 <strong>現地発生分 記入表</strong>입니다. 프린터에서 <strong>양면 인쇄(긴 가장자리 제본)</strong>를 선택하면 앞·뒤가 자동으로 맞춰집니다. 현지에서 발생한 추가 항목은 뒷면에 기입 후 ⑤ 現地精算表에 반영하세요.',
+      rb_dispatch_batch: '<strong>現地手配書 일괄 생성:</strong> 엠클릭에서 행사별 수배서를 건건이 열어 다운로드할 필요 없이, 현재 월 세션의 <strong>전체 행사 수배서</strong>를 한 번에 생성합니다. <strong>1행사 = 기본 2페이지(명단 많으면 별지 추가)</strong> — 앞면은 手配書(행사·항공·숙박·고객·라운딩 정보), 뒷면은 <strong>現地発生分 記入表</strong>입니다. 프린터에서 <strong>양면 인쇄(긴 가장자리 제본)</strong>를 선택하면 앞·뒤가 자동으로 맞춰집니다. 현지에서 발생한 추가 항목은 뒷면에 기입 후 ⑤ 現地精算表에 반영하세요.',
       app_logoSub: '포틴힐즈 운영 통합 시스템',
       app_reset: '초기화',
       nav_upload: '파일 업로드',
