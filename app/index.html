@@ -426,8 +426,8 @@ tr.draggable-row td:first-child::before{content:'⠿';color:var(--text3);margin-
 <div class="section active" id="sec-upload">
   <div id="cloud-data-bar" class="cloud-data-bar" style="display:none"></div>
   <details class="help-box">
-    <summary>시작 가이드 — 데이터 등록 · 월별 세션 · 클라우드</summary>
-    <div class="help-body">
+    <summary data-i18n="sm_start">시작 가이드 — 데이터 등록 · 월별 세션 · 클라우드</summary>
+    <div class="help-body" data-i18n="hb_start">
       <h4>흐름</h4>
       엠클릭 엑셀 2종(<b>예약 리스트</b> + <b>일행별 예약</b>) 업로드 → <b>데이터 분석 시작</b> → 5개 모듈(네임택·송영·수배서·저녁·정산)에서 인쇄.
       <h4>월별 세션</h4>
@@ -480,8 +480,8 @@ tr.draggable-row td:first-child::before{content:'⠿';color:var(--text3);margin-
 <!-- ── ⑦ 現地精算表 ───────────────────────────────────── -->
 <div class="section" id="sec-settle">
   <details class="help-box">
-    <summary>현지 정산표 설명 — B2B 정산은 어떻게 계산?</summary>
-    <div class="help-body">
+    <summary data-i18n="sm_settle">현지 정산표 설명 — B2B 정산은 어떻게 계산?</summary>
+    <div class="help-body" data-i18n="hb_settle">
       <h4>무엇</h4>
       현지 거래처 <b>B2B 정산</b> (메리트투어 → 14hills). 내부 정산과 별개.
       <h4>요율 (통화 JPY)</h4>
@@ -511,7 +511,7 @@ tr.draggable-row td:first-child::before{content:'⠿';color:var(--text3);margin-
   <!-- 쿠폰/선납/차감 관리 섹션 -->
   <div class="card" id="deduction-card">
     <div class="card-title">사전 지불 · 쿠폰 · 포인트 차감 관리</div>
-    <div class="rule-box" style="margin-bottom:.75rem">
+    <div class="rule-box" data-i18n="rb_settle_deduct" style="margin-bottom:.75rem">
       <strong>차감 항목 안내:</strong> 싱글차지 등 추가요금을 메리트투어에 선납한 경우, 또는 쿠폰·적립금·포인트를 메리트투어에서 차감 처리한 경우 아래에 입력하세요. 실정산액(총액 − 차감합계)이 자동 계산됩니다.
     </div>
     <div style="display:flex;align-items:center;gap:8px;margin-bottom:.75rem">
@@ -556,8 +556,8 @@ tr.draggable-row td:first-child::before{content:'⠿';color:var(--text3);margin-
 <!-- ── ③ 送迎配車表 ────────────────────────────────────── -->
 <div class="section" id="sec-transfer">
   <details class="help-box">
-    <summary>송영 설명 — 입국팀 / 귀국팀 두 가지 명단</summary>
-    <div class="help-body">
+    <summary data-i18n="sm_transfer">송영 설명 — 입국팀 / 귀국팀 두 가지 명단</summary>
+    <div class="help-body" data-i18n="hb_transfer">
       <h4>무엇</h4>
       공항(中部国際空港 NGO·나고야) ↔ 14hills 송영. <b>입국팀</b>과 <b>귀국팀</b> 두 종류를 따로 인쇄합니다.
       <h4>입국팀 — 到着者名簿 (amber)</h4>
@@ -577,7 +577,7 @@ tr.draggable-row td:first-child::before{content:'⠿';color:var(--text3);margin-
       왕복 송영비 <b>¥12,000/인</b> (숙박 포함 건) · 이동 약 2시간(휴게소 1회).
     </div>
   </details>
-  <div class="rule-box">
+  <div class="rule-box" data-i18n="rb_transfer_info">
     <strong>송영 운영 안내:</strong> 中部国際空港セントレア(NGO·나고야) ↔ 14hills &nbsp;·&nbsp;
     이동 <strong>약 2시간</strong>(휴게소 1회 경유) &nbsp;·&nbsp;
     왕복 송영비 <strong>¥12,000/인</strong> (숙박 예약 포함 건에만 적용) &nbsp;·&nbsp;
@@ -601,8 +601,8 @@ tr.draggable-row td:first-child::before{content:'⠿';color:var(--text3);margin-
 <!-- ── ⑤ 夕食名前版 ────────────────────────────────────── -->
 <div class="section" id="sec-dinner">
   <details class="help-box">
-    <summary>저녁 명단표 설명 — 식수 집계는 어떻게?</summary>
-    <div class="help-body">
+    <summary data-i18n="sm_dinner">저녁 명단표 설명 — 식수 집계는 어떻게?</summary>
+    <div class="help-body" data-i18n="hb_dinner">
       <h4>무엇</h4>
       일자별 체류 인원을 팀/테이블 단위로 배치. レストラン名札 · 夕食オーダー A3 인쇄.
       <h4>식수 집계 로직 (날짜별)</h4>
@@ -618,20 +618,20 @@ tr.draggable-row td:first-child::before{content:'⠿';color:var(--text3);margin-
       요일별 기본·업그레이드·추가 메뉴는 아래 안내 박스 참조.
     </div>
   </details>
-  <div class="rule-box">
+  <div class="rule-box" data-i18n="rb_dinner_menu">
     <strong>저녁 메뉴 (요일별 제공 · 夕食メニュー)</strong><br>
     일요일 삼겹살 · 월요일 포틴힐즈 정식요리(会席料理) · 화요일 해물전골 · 수요일 닭고기 완자전골 · 목요일 돼지샤브샤브 · 금요일 불고기 · 토요일 해물 순두부찌개<br>
     <span style="color:var(--text3)">사이드 추가 — 상추 ¥500 · 마늘 ¥200 · 추가야채(전골용) ¥1,000 · 추가고기(삼겹살/불고기) ¥1,300</span>
   </div>
-  <div class="rule-box">
+  <div class="rule-box" data-i18n="rb_dinner_otsumami">
     <strong>안주 (おつまみ)</strong><br>
     오징어다리튀김 · 닭고기튀김 · 감자튀김 · 우엉튀김 — 各 ¥800 &nbsp;·&nbsp; 삶은 완두콩(枝豆) ¥400 &nbsp;·&nbsp; 김치(キムチ) ¥500
   </div>
-  <div class="rule-box">
+  <div class="rule-box" data-i18n="rb_dinner_upgrade">
     <strong>Up-Grade Menu</strong> — 기본 요일 메뉴 미제공, <span style="color:var(--amber2)">전원 동일 메뉴 신청 필수</span> · 바비큐 4인 이상<br>
     会席料理(카이세키) · すき焼き(스키야키) · 牛しゃぶしゃぶ(소고기 샤브샤브) · バーベキュー(바비큐) — 各 +¥3,000/인
   </div>
-  <div class="rule-box">
+  <div class="rule-box" data-i18n="rb_dinner_add">
     <strong>追加 Menu</strong> — 기본 메뉴 제공 후 추가 신청<br>
     도미 스가타츠쿠리 (회·모듬, 鯛の姿造り·刺身 船盛) ¥15,000 &nbsp;·&nbsp; 와규 스테이크 (和牛ステーキ·1인분) ¥4,000<br>
     <span style="color:var(--amber2)">※ Up-Grade·추가메뉴 신청: 메리트투어 출발 3일 전까지(02-365-9800) 또는 식사 2일 전 오후 2시까지 리조트 프런트 · 신청 2명 이상(바비큐 4명 이상)</span>
@@ -654,8 +654,8 @@ tr.draggable-row td:first-child::before{content:'⠿';color:var(--text3);margin-
 <!-- ── ① ネームタグ ─────────────────────────────────────────── -->
 <div class="section" id="sec-nametag">
   <details class="help-box">
-    <summary>네임택 설명 — 태그코드는 어떻게 읽나요?</summary>
-    <div class="help-body">
+    <summary data-i18n="sm_nametag">네임택 설명 — 태그코드는 어떻게 읽나요?</summary>
+    <div class="help-body" data-i18n="hb_nametag">
       <h4>무엇</h4>
       고객 1인 = 라벨 1장. <b>A-one 28466</b> 라벨시트(18면·53.3×42.3mm)에 맞춰 인쇄합니다(시작 칸 지정 가능).
       <h4>태그코드 — <span class="kc">MI-A-01</span> 읽는 법</h4>
@@ -673,7 +673,7 @@ tr.draggable-row td:first-child::before{content:'⠿';color:var(--text3);margin-
       </ul>
     </div>
   </details>
-  <div class="rule-box">
+  <div class="rule-box" data-i18n="rb_nametag_info">
     <strong>네임택 안내:</strong> APIS 등록 탑승객 기준으로 자동 생성 · 미등록 고객은 <span style="color:var(--text3)">(미등록)</span> 표시 &nbsp;·&nbsp;
     입국일 날짜 칩으로 일자별 확인 · 「ネームタグ 인쇄」로 A-one 28466 라벨시트(18면·53.3×42.3mm)에 맞춰 미리보기→인쇄
   </div>
@@ -693,8 +693,8 @@ tr.draggable-row td:first-child::before{content:'⠿';color:var(--text3);margin-
 <!-- ── ③ 現地手配書 ───────────────────────────────────── -->
 <div class="section" id="sec-dispatch">
   <details class="help-box">
-    <summary>현지 수배서 설명 — 앞면·뒷면, 객실 변경</summary>
-    <div class="help-body">
+    <summary data-i18n="sm_dispatch">현지 수배서 설명 — 앞면·뒷면, 객실 변경</summary>
+    <div class="help-body" data-i18n="hb_dispatch">
       <h4>무엇</h4>
       행사 1건 = <b>양면 1장</b>(현지 호텔·거래처·스태프용). 「미리보기」로 A4 양면 인쇄.
       <h4>앞면</h4>
@@ -710,7 +710,7 @@ tr.draggable-row td:first-child::before{content:'⠿';color:var(--text3);margin-
       개인정보(여권·전화번호) 숨김 토글 — 기본 ON(생년월일까지만 표기).
     </div>
   </details>
-  <div class="rule-box">
+  <div class="rule-box" data-i18n="rb_dispatch_batch">
     <strong>現地手配書 일괄 생성:</strong> 엠클릭에서 행사별 수배서를 건건이 열어 다운로드할 필요 없이, 현재 월 세션의 <strong>전체 행사 수배서</strong>를 한 번에 생성합니다. <strong>1행사 = 2페이지 고정</strong> — 앞면은 手配書(행사·항공·숙박·고객·라운딩 정보), 뒷면은 <strong>現地発生分 記入表</strong>입니다. 프린터에서 <strong>양면 인쇄(긴 가장자리 제본)</strong>를 선택하면 앞·뒤가 자동으로 맞춰집니다. 현지에서 발생한 추가 항목은 뒷면에 기입 후 ⑤ 現地精算表에 반영하세요.
   </div>
   <div class="card">
@@ -6428,6 +6428,26 @@ function resetApp(){
 (function(){
   var APP_I18N = {
     ja: {
+      sm_start: 'スタートガイド — データ登録・月別セッション・クラウド',
+      hb_start: '<h4>流れ</h4>エムクリックのエクセル2種(<b>予約リスト</b> + <b>同行者別予約</b>)をアップロード → <b>データ分析開始</b> → 5モジュール(ネームタグ・送迎・手配書・夕食・精算)で印刷。<h4>月別セッション</h4><ul><li>複数月(例 6〜9月)を一度にアップロードしても <b>出発月別に自動分割・登録</b>されます。</li><li>上部の「登録済みデータ」チップまたはセッションバーで <b>月切り替え</b>(再アップロード不要)。</li></ul><h4>クラウド・ログイン</h4><ul><li>分析が完了すると <b>自動でクラウド保存</b> → 他のPCからアクセス時に <b>最新セッションを自動ロード</b>。</li><li><b>ログイン必須</b> — アカウントはログイン画面から発行申請 → 管理者承認。</li></ul><h4>タグコード</h4>すべての成果物の識別コード <span class="kc">MI-A-01</span> = 曜日(火K/木M/日N) + 出発地(仁川I/釜山P) − チーム(A・B…) − 個人番号。詳細は <b>ネームタグ</b> 説明を参照。',
+      sm_settle: '現地精算表の説明 — B2B精算はどう計算?',
+      hb_settle: '<h4>概要</h4>現地取引先との <b>B2B精算</b>(メリットツアー → 14hills)。社内精算とは別。<h4>料率(通貨 JPY)</h4><ul><li>滞在費 <b>¥15,000</b> / 泊・人</li><li>往復送迎費 <b>¥12,000</b> / 人</li><li>※ グリーンフィー・カート・食事は <b>現地精算の項目ではない</b></li></ul><h4>計算</h4><ul><li>宿泊費 = 人数 × 泊数 × 15,000</li><li>送迎費 = 人数 × 12,000</li><li>合計 = 宿泊費 + 送迎費</li><li><b>実精算額 = 総額 − 控除</b>(シングルチャージ前払い・クーポン・ポイント等)</li></ul><h4>御請求書</h4>請求書を出力/PDFで発行。',
+      sm_transfer: '送迎の説明 — 入国チーム / 帰国チームの2種類の名簿',
+      hb_transfer: '<h4>概要</h4>空港(中部国際空港 NGO・名古屋) ↔ 14hills の送迎。<b>入国チーム</b>と <b>帰国チーム</b>の2種類を別々に印刷します。<h4>入国チーム — 到着者名簿 (amber)</h4><ul><li>日本 <b>入国(到着)日</b> = 韓国出国日が基準</li><li><b>現地到着時刻順</b>に整列(同行者別予約の現地到着時刻)</li><li>入国便・到着時刻・タグコード・性別を表記</li></ul><h4>帰国チーム — 搭乗名簿 (green)</h4><ul><li><b>帰国日</b>基準 · <b>仁川 → 釜山の順</b>に整列</li><li>グループ・代表者・人数・<b>帰国地(ICN/PUS)</b>・帰国便</li><li><b>車両定員</b>で <b>号車を自動分割</b> — 1台なら数字1つ(<span class="kc">45</span>)、複数台ならカンマ(<span class="kc">25,25,20</span> = 3台)</li><li>サマリー: 「仁川へX名・釜山へY名・計Z名が帰国」</li></ul><h4>料金</h4>往復送迎費 <b>¥12,000/人</b>(宿泊込みの場合)・移動 約2時間(休憩1回)。',
+      sm_dinner: '夕食名前版の説明 — 食数集計はどうやって?',
+      hb_dinner: '<h4>概要</h4>日別の滞在人数をチーム/テーブル単位で配置。レストラン名札・夕食オーダー A3を印刷。<h4>食数集計ロジック(日別)</h4><ul><li><b>朝食</b> = 前日泊まった人数(入国日 &lt; その日 ≤ 帰国日)</li><li><b>昼食</b>: 中間滞在日 ○(厨房の昼食) / 入国日 — ソウル(ICN)は <b>サンドイッチ(簡便食)</b> → 「入国サンド」として別表記(昼食合計に不算入)・釜山(PUS) ✕ / 帰国日 — 釜山 ○(食べてから出発)・ソウル ✕</li><li><b>夕食</b> = その日の滞在者全員</li><li>「日本」行 = 日本客(ビジター)の手入力食数 → 合計に加算</li></ul><h4>表記</h4>タグコード・滞在日次(N/総日目)・テーブルNo・<b>チームバッジ</b>(チーム名があれば印刷に含む)・参考事項(予約/現地備考)。<h4>メニュー</h4>曜日別の基本・アップグレード・追加メニューは下の案内ボックスを参照。',
+      sm_nametag: 'ネームタグの説明 — タグコードの読み方',
+      hb_nametag: '<h4>概要</h4>顧客1人 = ラベル1枚。<b>A-one 28466</b> ラベルシート(18面・53.3×42.3mm)に合わせて印刷します(開始マス指定可)。<h4>タグコード — <span class="kc">MI-A-01</span> の読み方</h4><ul><li><b>① 曜日</b> = 入国送迎の曜日(日本入国 = 韓国出国日): 火 <span class="kc">K</span> · 木 <span class="kc">M</span> · 日 <span class="kc">N</span></li><li><b>② 出発地</b>: 仁川 <span class="kc">I</span> · 釜山 <span class="kc">P</span> · 清州 <span class="kc">C</span> · 大邱 <span class="kc">T</span></li><li><b>③ チーム</b>: 同じ曜日+出発地のまとまりで A・B・C…(出/帰国サイクルごとにリセット → コード再利用)</li><li><b>④ 個人番号</b>: 01・02… 同行者の順番</li></ul>例) <span class="kc">MI-A-01</span> = 木・仁川 Aチーム1番 &nbsp;·&nbsp; <span class="kc">KP-B-02</span> = 火・釜山 Bチーム2番<h4>ラベル表記</h4><ul><li>性別 <b>M/F</b> · <b>同行 N名</b>(そのチームの総員)</li><li>タグコード <b>文字色 = 出発地別</b>: 仁川 青 · 釜山 青緑 · 清州 琥珀 · 大邱 紫</li></ul>',
+      sm_dispatch: '現地手配書の説明 — 表面・裏面、客室変更',
+      hb_dispatch: '<h4>概要</h4>行事1件 = <b>両面1枚</b>(現地ホテル・取引先・スタッフ用)。「プレビュー」でA4両面印刷。<h4>表面</h4>行事・航空・宿泊・顧客名簿・ゴルフ場 + <b>参考事項</b>(エムクリック予約備考・現地備考) / <b>現地メモ</b>(現場記入)。<h4>裏面 — 現地発生分 記入表</h4>現場で発生した追加分を手書きで記入。区分: ① ラウンド追加 ② 飲食 ③ 宿泊(連泊・客室変更) ④ 送迎 ⑤ ルームチャージ(定員未満の追加料金) ⑥ その他。<h4>客室変更(予約と異なる現場割当)</h4><ul><li>「入力」 → <b>実際の客室</b> を選択(例: キャラバン予約 → ファミリールーム/ツイン)</li><li>表・印刷に <b>予約客室に取り消し線 → 変更客室 + 現地変更</b> と表示(メリット予約の原本は保存)</li></ul><h4>マスキング</h4>個人情報(旅券・電話番号)の非表示トグル — 既定ON(生年月日までのみ表記)。',
+      rb_settle_deduct: '<strong>控除項目の案内:</strong> シングルチャージ等の追加料金をメリットツアーへ前払いした場合、またはクーポン・積立金・ポイントをメリットツアーで控除処理した場合は下に入力してください。実精算額(総額 − 控除合計)が自動計算されます。',
+      rb_transfer_info: '<strong>送迎運営の案内:</strong> 中部国際空港セントレア(NGO・名古屋) ↔ 14hills &nbsp;·&nbsp; 移動 <strong>約2時間</strong>(休憩1回経由) &nbsp;·&nbsp; 往復送迎費 <strong>¥12,000/人</strong>(宿泊予約込みの場合のみ適用) &nbsp;·&nbsp; ミーティング: 到着ロビー出口で「フォーティーンヒルズ」のピケットを持った現地スタッフが待機 · バス座席の余裕分の確認は必須',
+      rb_dinner_menu: '<strong>夕食メニュー(曜日別提供)</strong><br>日曜 サムギョプサル · 月曜 フォーティーンヒルズ定食(会席料理) · 火曜 海鮮鍋 · 水曜 鶏団子鍋 · 木曜 豚しゃぶしゃぶ · 金曜 プルコギ · 土曜 海鮮スンドゥブチゲ<br><span style="color:var(--text3)">サイド追加 — サンチュ ¥500 · ニンニク ¥200 · 追加野菜(鍋用) ¥1,000 · 追加肉(サムギョプサル/プルコギ) ¥1,300</span>',
+      rb_dinner_otsumami: '<strong>おつまみ</strong><br>イカ下足の唐揚げ · 鶏の唐揚げ · フライドポテト · ごぼうの唐揚げ — 各 ¥800 &nbsp;·&nbsp; 枝豆 ¥400 &nbsp;·&nbsp; キムチ ¥500',
+      rb_dinner_upgrade: '<strong>アップグレードメニュー</strong> — 基本の曜日メニューは提供されず、<span style="color:var(--amber2)">全員同一メニューの申込が必須</span> · バーベキューは4人以上<br>会席料理 · すき焼き · 牛しゃぶしゃぶ · バーベキュー — 各 +¥3,000/人',
+      rb_dinner_add: '<strong>追加メニュー</strong> — 基本メニュー提供後に追加申込<br>鯛の姿造り・刺身 船盛(刺身盛り合わせ) ¥15,000 &nbsp;·&nbsp; 和牛ステーキ(1人前) ¥4,000<br><span style="color:var(--amber2)">※ アップグレード・追加メニューの申込: メリットツアー出発3日前まで(02-365-9800)、または食事2日前の午後2時までリゾートフロント · 申込2名以上(バーベキューは4名以上)</span>',
+      rb_nametag_info: '<strong>ネームタグの案内:</strong> APIS登録の搭乗客を基準に自動生成 · 未登録の顧客は <span style="color:var(--text3)">(未登録)</span> と表示 &nbsp;·&nbsp; 入国日の日付チップで日別に確認 · 「ネームタグ印刷」でA-one 28466 ラベルシート(18面・53.3×42.3mm)に合わせてプレビュー→印刷',
+      rb_dispatch_batch: '<strong>現地手配書の一括生成:</strong> エムクリックで行事別の手配書を1件ずつ開いてダウンロードする必要なく、当月セッションの <strong>全行事の手配書</strong>を一度に生成します。<strong>1行事 = 2ページ固定</strong> — 表面は手配書(行事・航空・宿泊・顧客・ラウンド情報)、裏面は <strong>現地発生分 記入表</strong>です。プリンターで <strong>両面印刷(長辺とじ)</strong>を選ぶと表・裏が自動で揃います。現地で発生した追加項目は裏面に記入後、⑤ 現地精算表に反映してください。',
       app_logoSub: 'フォーティーンヒルズ 運営統合システム',
       app_reset: '初期化',
       nav_upload: 'ファイルアップロード',
@@ -6452,6 +6472,26 @@ function resetApp(){
       shz_preview: 'プレビュー — 予約表'
     },
     ko: {
+      sm_start: '시작 가이드 — 데이터 등록 · 월별 세션 · 클라우드',
+      hb_start: '<h4>흐름</h4>엠클릭 엑셀 2종(<b>예약 리스트</b> + <b>일행별 예약</b>) 업로드 → <b>데이터 분석 시작</b> → 5개 모듈(네임택·송영·수배서·저녁·정산)에서 인쇄.<h4>월별 세션</h4><ul><li>여러 달(예 6~9월)을 한 번에 올려도 <b>출발월별로 자동 분리·등록</b>됩니다.</li><li>상단 「등록된 데이터」 칩 또는 세션바에서 <b>월 전환</b>(재업로드 불필요).</li></ul><h4>클라우드 · 로그인</h4><ul><li>분석을 마치면 <b>자동 클라우드 저장</b> → 다른 PC에서 접속 시 <b>최신 세션 자동 로드</b>.</li><li><b>로그인 필수</b> — 계정은 로그인 화면에서 발급 요청 → 관리자 승인.</li></ul><h4>태그코드</h4>모든 산출물의 식별코드 <span class="kc">MI-A-01</span> = 요일(火K/木M/日N) + 출발지(인천I/부산P) − 팀(A·B…) − 개인번호. 자세한 건 <b>네임택</b> 설명 참조.',
+      sm_settle: '현지 정산표 설명 — B2B 정산은 어떻게 계산?',
+      hb_settle: '<h4>무엇</h4>현지 거래처 <b>B2B 정산</b> (메리트투어 → 14hills). 내부 정산과 별개.<h4>요율 (통화 JPY)</h4><ul><li>체재비 <b>¥15,000</b> / 박·인</li><li>왕복 송영비 <b>¥12,000</b> / 인</li><li>※ 그린피·카트·식사는 <b>현지정산 항목 아님</b></li></ul><h4>계산</h4><ul><li>숙박비 = 인원 × 박수 × 15,000</li><li>송영비 = 인원 × 12,000</li><li>합계 = 숙박비 + 송영비</li><li><b>실정산액 = 총액 − 차감</b> (싱글차지 선납·쿠폰·포인트 등)</li></ul><h4>御請求書</h4>청구서 출력/PDF로 발행.',
+      sm_transfer: '송영 설명 — 입국팀 / 귀국팀 두 가지 명단',
+      hb_transfer: '<h4>무엇</h4>공항(中部国際空港 NGO·나고야) ↔ 14hills 송영. <b>입국팀</b>과 <b>귀국팀</b> 두 종류를 따로 인쇄합니다.<h4>입국팀 — 到着者名簿 (amber)</h4><ul><li>일본 <b>입국(도착)일</b> = 한국 출국일 기준</li><li><b>현지도착 시각 순</b>으로 정렬 (일행별예약의 現地到着 시각)</li><li>入国便 · 到着時刻 · 태그코드 · 性別 표기</li></ul><h4>귀국팀 — 탑승명단 (green)</h4><ul><li><b>귀국일</b> 기준 · <b>인천 → 부산 순</b> 정렬</li><li>그룹 · 대표자 · 인원 · <b>귀국지(ICN/PUS)</b> · 귀국편</li><li><b>차량 정원</b>으로 <b>호차 자동분할</b> — 한 대면 숫자 하나(<span class="kc">45</span>), 여러 대면 콤마(<span class="kc">25,25,20</span> = 3대)</li><li>요약: "인천으로 X명 · 부산으로 Y명 · 총 Z명 귀국"</li></ul><h4>요금</h4>왕복 송영비 <b>¥12,000/인</b> (숙박 포함 건) · 이동 약 2시간(휴게소 1회).',
+      sm_dinner: '저녁 명단표 설명 — 식수 집계는 어떻게?',
+      hb_dinner: '<h4>무엇</h4>일자별 체류 인원을 팀/테이블 단위로 배치. レストラン名札 · 夕食オーダー A3 인쇄.<h4>식수 집계 로직 (날짜별)</h4><ul><li><b>조식(朝食)</b> = 전날 묵은 인원 (입국일 &lt; 그날 ≤ 귀국일)</li><li><b>중식(昼食)</b>: 중간 체류일 ○(주방 점심) / 입국일 — 서울(ICN)은 <b>샌드위치(간편식)</b> → 「入国サンド」로 별도 표기(점심 합계 미가산)·부산(PUS) ✕ / 귀국일 — 부산 ○(먹고 출발)·서울 ✕</li><li><b>석식(夕食)</b> = 그날 체류 전원</li><li>「日本」행 = 일본 고객(비지터) 수기 식수 → 합계에 가산</li></ul><h4>표기</h4>태그코드 · 滞在日次(N/총 日目) · 테이블No · <b>팀뱃지</b>(팀명 있으면 인쇄 포함) · 참고사항(예약/현지 비고).<h4>메뉴</h4>요일별 기본·업그레이드·추가 메뉴는 아래 안내 박스 참조.',
+      sm_nametag: '네임택 설명 — 태그코드는 어떻게 읽나요?',
+      hb_nametag: '<h4>무엇</h4>고객 1인 = 라벨 1장. <b>A-one 28466</b> 라벨시트(18면·53.3×42.3mm)에 맞춰 인쇄합니다(시작 칸 지정 가능).<h4>태그코드 — <span class="kc">MI-A-01</span> 읽는 법</h4><ul><li><b>① 요일</b> = 입국 송영 요일(일본 입국 = 한국 출국일): 火 <span class="kc">K</span> · 木 <span class="kc">M</span> · 日 <span class="kc">N</span></li><li><b>② 출발지</b>: 인천 <span class="kc">I</span> · 부산 <span class="kc">P</span> · 청주 <span class="kc">C</span> · 대구 <span class="kc">T</span></li><li><b>③ 팀</b>: 같은 요일+출발지 묶음에서 A·B·C… (출/귀국 사이클마다 리셋 → 코드 재사용)</li><li><b>④ 개인번호</b>: 01·02… 일행 순번</li></ul>예) <span class="kc">MI-A-01</span> = 목·인천 A팀 1번 &nbsp;·&nbsp; <span class="kc">KP-B-02</span> = 화·부산 B팀 2번<h4>라벨 표기</h4><ul><li>성별 <b>M/F</b> · <b>同行 N名</b>(그 팀 총원)</li><li>태그코드 <b>글자색 = 출발지별</b>: 인천 파랑 · 부산 청록 · 청주 호박 · 대구 보라</li></ul>',
+      sm_dispatch: '현지 수배서 설명 — 앞면·뒷면, 객실 변경',
+      hb_dispatch: '<h4>무엇</h4>행사 1건 = <b>양면 1장</b>(현지 호텔·거래처·스태프용). 「미리보기」로 A4 양면 인쇄.<h4>앞면</h4>행사·항공·숙박·고객명단·골프장 + <b>参考事項</b>(엠클릭 예약 비고·현지비고) / <b>現地メモ</b>(현장 기입).<h4>뒷면 — 現地発生分 記入表</h4>현장에서 발생한 추가분을 손으로 기입. 区分: ① ラウンド追加 ② 飲食 ③ 宿泊(연박·객실변경) ④ 送迎 ⑤ ルームチャージ(정원미달 추가요금) ⑥ その他.<h4>객실 변경 (예약과 다르게 현장 배정)</h4><ul><li>「입력」 → <b>実際の客室</b> 선택 (예: 카라반 예약 → 패밀리룸/트윈)</li><li>표·인쇄에 <b>예약 객실 취소선 → 변경 객실 + 現地変更</b> 으로 표시(메리트 예약 원본은 보존)</li></ul><h4>마스킹</h4>개인정보(여권·전화번호) 숨김 토글 — 기본 ON(생년월일까지만 표기).',
+      rb_settle_deduct: '<strong>차감 항목 안내:</strong> 싱글차지 등 추가요금을 메리트투어에 선납한 경우, 또는 쿠폰·적립금·포인트를 메리트투어에서 차감 처리한 경우 아래에 입력하세요. 실정산액(총액 − 차감합계)이 자동 계산됩니다.',
+      rb_transfer_info: '<strong>송영 운영 안내:</strong> 中部国際空港セントレア(NGO·나고야) ↔ 14hills &nbsp;·&nbsp; 이동 <strong>약 2시간</strong>(휴게소 1회 경유) &nbsp;·&nbsp; 왕복 송영비 <strong>¥12,000/인</strong> (숙박 예약 포함 건에만 적용) &nbsp;·&nbsp; 미팅: 도착 로비 출구에서 「포틴힐즈」 피켓 현지 직원 대기 · 버스 좌석 여유분 확인 필수',
+      rb_dinner_menu: '<strong>저녁 메뉴 (요일별 제공 · 夕食メニュー)</strong><br>일요일 삼겹살 · 월요일 포틴힐즈 정식요리(会席料理) · 화요일 해물전골 · 수요일 닭고기 완자전골 · 목요일 돼지샤브샤브 · 금요일 불고기 · 토요일 해물 순두부찌개<br><span style="color:var(--text3)">사이드 추가 — 상추 ¥500 · 마늘 ¥200 · 추가야채(전골용) ¥1,000 · 추가고기(삼겹살/불고기) ¥1,300</span>',
+      rb_dinner_otsumami: '<strong>안주 (おつまみ)</strong><br>오징어다리튀김 · 닭고기튀김 · 감자튀김 · 우엉튀김 — 各 ¥800 &nbsp;·&nbsp; 삶은 완두콩(枝豆) ¥400 &nbsp;·&nbsp; 김치(キムチ) ¥500',
+      rb_dinner_upgrade: '<strong>Up-Grade Menu</strong> — 기본 요일 메뉴 미제공, <span style="color:var(--amber2)">전원 동일 메뉴 신청 필수</span> · 바비큐 4인 이상<br>会席料理(카이세키) · すき焼き(스키야키) · 牛しゃぶしゃぶ(소고기 샤브샤브) · バーベキュー(바비큐) — 各 +¥3,000/인',
+      rb_dinner_add: '<strong>追加 Menu</strong> — 기본 메뉴 제공 후 추가 신청<br>도미 스가타츠쿠리 (회·모듬, 鯛の姿造り·刺身 船盛) ¥15,000 &nbsp;·&nbsp; 와규 스테이크 (和牛ステーキ·1인분) ¥4,000<br><span style="color:var(--amber2)">※ Up-Grade·추가메뉴 신청: 메리트투어 출발 3일 전까지(02-365-9800) 또는 식사 2일 전 오후 2시까지 리조트 프런트 · 신청 2명 이상(바비큐 4명 이상)</span>',
+      rb_nametag_info: '<strong>네임택 안내:</strong> APIS 등록 탑승객 기준으로 자동 생성 · 미등록 고객은 <span style="color:var(--text3)">(미등록)</span> 표시 &nbsp;·&nbsp; 입국일 날짜 칩으로 일자별 확인 · 「ネームタグ 인쇄」로 A-one 28466 라벨시트(18면·53.3×42.3mm)에 맞춰 미리보기→인쇄',
+      rb_dispatch_batch: '<strong>現地手配書 일괄 생성:</strong> 엠클릭에서 행사별 수배서를 건건이 열어 다운로드할 필요 없이, 현재 월 세션의 <strong>전체 행사 수배서</strong>를 한 번에 생성합니다. <strong>1행사 = 2페이지 고정</strong> — 앞면은 手配書(행사·항공·숙박·고객·라운딩 정보), 뒷면은 <strong>現地発生分 記入表</strong>입니다. 프린터에서 <strong>양면 인쇄(긴 가장자리 제본)</strong>를 선택하면 앞·뒤가 자동으로 맞춰집니다. 현지에서 발생한 추가 항목은 뒷면에 기입 후 ⑤ 現地精算表에 반영하세요.',
       app_logoSub: '포틴힐즈 운영 통합 시스템',
       app_reset: '초기화',
       nav_upload: '파일 업로드',
