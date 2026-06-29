@@ -132,7 +132,7 @@ const DEPTS=[
   ['정산',     ['settle']],
 ];
 const ROLE_LABEL={admin:'마스터',manager:'관리담당',staff:'일반'};
-const PROF_DEPTS=[['ops','현지운영'],['fnb','식음'],['settle','정산'],['data','데이터'],['acct','회계']];
+const PROF_DEPTS=[['merit','Merit'],['ops','현지운영'],['fnb','식음'],['settle','정산'],['data','데이터'],['acct','회계']];
 const DEPT_LABEL=Object.fromEntries(PROF_DEPTS);
 function deptOpts(cur){ return '<option value="">(부서 없음)</option>'+PROF_DEPTS.map(([k,l])=>`<option value="${k}" ${k===cur?'selected':''}>${l}</option>`).join(''); }
 const esc=(window.SB14&&SB14.esc)||(s=>String(s==null?'':s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c])));
