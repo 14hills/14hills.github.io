@@ -6483,7 +6483,8 @@ function resetApp(){
 <script>
 /* ── /app/ 화면 UI i18n (정적 골격: 日本語 / 한국어 / English) ──
    · 인쇄 산출물은 일본어 유지 — 화면 chrome(헤더·nav·업로드·WIP)만 토글
-   · localStorage 'saizen_lang' 공유(/ops/ 와 언어 선택 연동) · 기본 일본어
+   · localStorage '14h_lang' (14hills 전용 키 · SaiZen와 분리) · 기본 한국어(처음 방문)
+     사용자가 토글하면 그 값 유지 — 로그인/재방문해도 기본값으로 리셋되지 않음
    · t() 미존재 키는 ja 폴백 → 각 언어 키 전부 채움 */
 (function(){
   var APP_I18N = {
@@ -6600,7 +6601,7 @@ function resetApp(){
       shz_preview: 'Preview — Booking sheet'
     }
   };
-  var LANG = localStorage.getItem('saizen_lang') || 'ja';
+  var LANG = localStorage.getItem('14h_lang') || 'ko';   // 처음 방문 기본=한국어, 이후 사용자 선택값 유지
   function appT(k){ var d = APP_I18N[LANG] || APP_I18N.ja; return (d[k] !== undefined) ? d[k] : (APP_I18N.ja[k] !== undefined ? APP_I18N.ja[k] : k); }
   function applyAppLang(){
     document.documentElement.lang = LANG;
@@ -6608,7 +6609,7 @@ function resetApp(){
     document.querySelectorAll('[data-i18n-title]').forEach(function(el){ el.setAttribute('title', appT(el.getAttribute('data-i18n-title'))); });
     ['ja','ko','en'].forEach(function(l){ var b = document.getElementById('app-lang-' + l); if(b) b.classList.toggle('active', LANG === l); });
   }
-  window.setAppLang = function(l){ LANG = l; try{ localStorage.setItem('saizen_lang', l); }catch(e){} applyAppLang(); };
+  window.setAppLang = function(l){ LANG = l; try{ localStorage.setItem('14h_lang', l); }catch(e){} applyAppLang(); };
   if(document.readyState === 'loading') document.addEventListener('DOMContentLoaded', applyAppLang);
   else applyAppLang();
 })();
